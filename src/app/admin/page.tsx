@@ -1,24 +1,20 @@
 import Link from "next/link";
+import Image from "next/image";
 import { DollarSign, ShoppingCart, Users, Package } from "lucide-react";
 import { createCaller } from "@/lib/trpc/server";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { StatsCard } from "@/components/admin/stats-card";
-import { Badge } from "@/components/ui/badge";
-
-const statusMap: Record<string, { label: string; className: string }> = {
-  PENDING: { label: "Chờ xác nhận", className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-  CONFIRMED: { label: "Đã xác nhận", className: "bg-blue-100 text-blue-800 border-blue-200" },
-  PROCESSING: { label: "Đang xử lý", className: "bg-purple-100 text-purple-800 border-purple-200" },
-  SHIPPING: { label: "Đang giao", className: "bg-orange-100 text-orange-800 border-orange-200" },
-  DELIVERED: { label: "Đã giao", className: "bg-green-100 text-green-800 border-green-200" },
-  CANCELLED: { label: "Đã hủy", className: "bg-red-100 text-red-800 border-red-200" },
-};
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "@/components/admin/order-status-badge";
 
 export default async function AdminDashboard() {
   const trpc = await createCaller();
-  const [stats, recentOrders] = await Promise.all([
+  const [stats, recentOrders, topProducts] = await Promise.all([
     trpc.admin.getDashboardStats(),
     trpc.admin.getRecentOrders(),
+    trpc.admin.getTopProducts(),
   ]);
 
   return (
@@ -49,55 +45,65 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      <div className="mt-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Đơn hàng gần đây</h2>
-          <Link
-            href="/admin/orders"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Xem tất cả
-          </Link>
-        </div>
+      <div className="mt-8 grid gap-8 lg:grid-cols-3">
+        {/* Recent Orders — 2/3 width */}
+        <div className="lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">Đơn hàng gần đây</h2>
+            <Link
+              href="/admin/orders"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Xem tất cả
+            </Link>
+          </div>
 
-        <div className="mt-4 overflow-x-auto rounded-lg border bg-white">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50 text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">Mã đơn</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Khách hàng</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Tổng tiền</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Trạng thái</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">Ngày đặt</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.map((order) => {
-                const status = statusMap[order.status] ?? {
-                  label: order.status,
-                  className: "bg-neutral-100 text-neutral-800",
-                };
-                return (
+          <div className="mt-4 overflow-x-auto rounded-lg border bg-white">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50 text-left">
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Mã đơn</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Khách hàng</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">SP</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Tổng tiền</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">TT</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Trạng thái</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Ngày</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map((order) => (
                   <tr key={order.id} className="border-b last:border-0">
-                    <td className="px-4 py-3 font-mono text-xs font-medium">
-                      {order.orderNumber}
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="font-mono text-xs font-medium text-primary hover:underline"
+                      >
+                        {order.orderNumber}
+                      </Link>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium">{order.user?.name ?? order.shippingName}</p>
+                      <p className="font-medium text-xs">
+                        {order.user?.name ?? order.shippingName}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {order.user?.email ?? order.shippingEmail}
+                        {order.shippingPhone}
                       </p>
                     </td>
-                    <td className="px-4 py-3 font-medium">
+                    <td className="px-4 py-3 text-center text-xs">
+                      {order.items.length}
+                    </td>
+                    <td className="px-4 py-3 text-xs font-medium">
                       {formatPrice(order.total)}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge className={`border text-xs ${status.className}`}>
-                        {status.label}
-                      </Badge>
+                      <PaymentStatusBadge status={order.paymentStatus} />
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3">
+                      <OrderStatusBadge status={order.status} />
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                       {formatDate(new Date(order.createdAt))}
                     </td>
                     <td className="px-4 py-3">
@@ -105,21 +111,60 @@ export default async function AdminDashboard() {
                         href={`/admin/orders/${order.id}`}
                         className="text-xs font-medium text-primary hover:underline"
                       >
-                        Chi tiết
+                        Xem
                       </Link>
                     </td>
                   </tr>
-                );
-              })}
-              {recentOrders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    Chưa có đơn hàng nào
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+                {recentOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                      Chưa có đơn hàng nào
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Products — 1/3 width */}
+        <div>
+          <h2 className="text-lg font-bold">Sản phẩm bán chạy</h2>
+          <div className="mt-4 rounded-lg border bg-white">
+            {topProducts.length === 0 ? (
+              <p className="p-6 text-center text-sm text-muted-foreground">
+                Chưa có dữ liệu
+              </p>
+            ) : (
+              <div className="divide-y">
+                {topProducts.map((p, i) => (
+                  <div key={p.id} className="flex items-center gap-3 px-4 py-3">
+                    <span className="w-5 text-center text-xs font-bold text-muted-foreground">
+                      {i + 1}
+                    </span>
+                    <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded bg-neutral-100">
+                      {p.image && (
+                        <Image
+                          src={p.image}
+                          alt={p.name}
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {p.totalSold} đã bán · {formatPrice(p.revenue)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

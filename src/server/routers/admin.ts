@@ -86,4 +86,30 @@ export const adminRouter = router({
       },
     });
   }),
+
+  getTopProducts: adminProcedure.query(async ({ ctx }) => {
+    const items = await ctx.db.orderItem.groupBy({
+      by: ['productId'],
+      _sum: { quantity: true, price: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 5,
+    });
+
+    const productIds = items.map((i) => i.productId);
+    const products = await ctx.db.product.findMany({
+      where: { id: { in: productIds } },
+      include: { images: { take: 1, orderBy: { position: 'asc' } } },
+    });
+
+    return items.map((item) => {
+      const product = products.find((p) => p.id === item.productId);
+      return {
+        id: item.productId,
+        name: product?.name ?? 'Sản phẩm đã xóa',
+        image: product?.images[0]?.url ?? '',
+        totalSold: item._sum.quantity ?? 0,
+        revenue: (item._sum.price ?? 0) * (item._sum.quantity ?? 0),
+      };
+    });
+  }),
 });

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '@/server/trpc/trpc';
 import { shippingSchema } from '@/lib/validators';
 import { generateOrderNumber } from '@/lib/utils';
@@ -167,15 +168,83 @@ export const orderRouter = router({
     });
   }),
 
-  getAll: adminProcedure.query(async ({ ctx }) => {
-    return ctx.db.order.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        items: true,
-        user: { select: { id: true, name: true, email: true } },
-      },
-    });
-  }),
+  getAll: adminProcedure
+    .input(
+      z
+        .object({
+          page: z.number().int().positive().default(1),
+          limit: z.number().int().positive().max(100).default(20),
+          status: z
+            .enum([
+              'PENDING',
+              'CONFIRMED',
+              'PROCESSING',
+              'SHIPPING',
+              'DELIVERED',
+              'CANCELLED',
+            ])
+            .optional(),
+        })
+        .default({ page: 1, limit: 20 })
+    )
+    .query(async ({ ctx, input }) => {
+      const skip = (input.page - 1) * input.limit;
+      const where: Prisma.OrderWhereInput | undefined = input.status
+        ? { status: input.status }
+        : undefined;
+
+      const [items, total] = await Promise.all([
+        ctx.db.order.findMany({
+          where,
+          skip,
+          take: input.limit,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            items: true,
+            user: { select: { id: true, name: true, email: true } },
+          },
+        }),
+        ctx.db.order.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(total / input.limit) || 1;
+
+      return {
+        items,
+        total,
+        page: input.page,
+        totalPages,
+        hasNext: input.page < totalPages,
+        hasPrev: input.page > 1,
+      };
+    }),
+
+  /** Chi tiết đơn theo id (admin) */
+  getDetail: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const order = await ctx.db.order.findUnique({
+        where: { id: input.id },
+        include: {
+          items: {
+            include: {
+              product: {
+                select: { id: true, slug: true, name: true },
+              },
+            },
+          },
+          user: {
+            select: { id: true, name: true, email: true, phone: true },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy đơn hàng' });
+      }
+
+      return order;
+    }),
 
   updateStatus: adminProcedure
     .input(

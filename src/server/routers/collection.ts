@@ -13,6 +13,42 @@ export const collectionRouter = router({
     });
   }),
 
+  /** Admin: tất cả danh mục (kể cả ẩn) — có đếm SP */
+  getAllForAdmin: adminProcedure.query(async ({ ctx }) => {
+    return ctx.db.collection.findMany({
+      orderBy: { position: 'asc' },
+      include: {
+        _count: { select: { products: true } },
+      },
+    });
+  }),
+
+  getById: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const collection = await ctx.db.collection.findUnique({
+        where: { id: input.id },
+        include: {
+          products: {
+            orderBy: { position: 'asc' },
+            include: {
+              product: {
+                include: {
+                  images: { take: 1, orderBy: { position: 'asc' } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!collection) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy bộ sưu tập' });
+      }
+
+      return collection;
+    }),
+
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -59,11 +95,52 @@ export const collectionRouter = router({
         isVisible: z.boolean().optional(),
         seoTitle: z.string().optional(),
         seoDescription: z.string().optional(),
+        /** Thay toàn bộ sản phẩm trong collection (theo thứ tự) */
+        productIds: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
-      return ctx.db.collection.update({ where: { id }, data });
+      const { id, productIds, ...data } = input;
+
+      return ctx.db.$transaction(async (tx) => {
+        const updated = await tx.collection.update({
+          where: { id },
+          data,
+        });
+
+        if (productIds !== undefined) {
+          await tx.productCollection.deleteMany({ where: { collectionId: id } });
+          if (productIds.length > 0) {
+            await tx.productCollection.createMany({
+              data: productIds.map((productId, index) => ({
+                collectionId: id,
+                productId,
+                position: index,
+              })),
+            });
+          }
+        }
+
+        const full = await tx.collection.findUnique({
+          where: { id },
+          include: {
+            products: {
+              orderBy: { position: 'asc' },
+              include: {
+                product: {
+                  include: {
+                    images: { take: 1, orderBy: { position: 'asc' } },
+                  },
+                },
+              },
+            },
+          },
+        });
+        if (!full) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Danh mục không tồn tại' });
+        }
+        return full;
+      });
     }),
 
   delete: adminProcedure

@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 import { paginationSchema, sortSchema } from '@/lib/validators';
-import type { Prisma } from '@prisma/client';
 
 const specificationsSchema = z.array(z.object({ key: z.string(), value: z.string() }));
 
@@ -42,20 +42,27 @@ const listInclude = {
 export const productRouter = router({
   getAll: publicProcedure
     .input(
-      paginationSchema.extend({ sort: sortSchema }).default({ page: 1, limit: 24, sort: 'featured' })
+      paginationSchema
+        .extend({ sort: sortSchema, q: z.string().optional() })
+        .default({ page: 1, limit: 24, sort: 'featured' })
     )
     .query(async ({ ctx, input }) => {
-      const { page, limit, sort } = input;
+      const { page, limit, sort, q } = input;
       const skip = (page - 1) * limit;
+      const term = q?.trim();
+      const where: Prisma.ProductWhereInput | undefined = term
+        ? { name: { contains: term, mode: 'insensitive' } }
+        : undefined;
 
       const [items, total] = await Promise.all([
         ctx.db.product.findMany({
+          where,
           skip,
           take: limit,
           orderBy: buildOrderBy(sort),
           include: listInclude,
         }),
-        ctx.db.product.count(),
+        ctx.db.product.count({ where }),
       ]);
 
       const totalPages = Math.ceil(total / limit);
@@ -75,6 +82,21 @@ export const productRouter = router({
     .query(async ({ ctx, input }) => {
       const product = await ctx.db.product.findUnique({
         where: { slug: input.slug },
+        include: productInclude,
+      });
+
+      if (!product) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' });
+      }
+
+      return product;
+    }),
+
+  getById: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.id },
         include: productInclude,
       });
 
@@ -205,7 +227,7 @@ export const productRouter = router({
         seoDescription: z.string().default(''),
         images: z.array(
           z.object({
-            url: z.string().url(),
+            url: z.string().min(1),
             alt: z.string().default(''),
             position: z.number().int().default(0),
           })
@@ -228,50 +250,171 @@ export const productRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { images, variants, collectionIds, ...productData } = input;
 
-      return ctx.db.product.create({
-        data: {
-          ...productData,
-          images: { create: images },
-          variants: { create: variants },
-          collections: {
-            create: collectionIds.map((collectionId, index) => ({
-              collectionId,
-              position: index,
-            })),
-          },
-        },
-        include: productInclude,
-      });
+      try {
+        return await ctx.db.$transaction(async (tx) => {
+          return tx.product.create({
+            data: {
+              ...productData,
+              images: { create: images },
+              variants: { create: variants },
+              collections: {
+                create: collectionIds.map((collectionId, index) => ({
+                  collectionId,
+                  position: index,
+                })),
+              },
+            },
+            include: productInclude,
+          });
+        });
+      } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Slug hoặc SKU đã tồn tại',
+          });
+        }
+        throw e;
+      }
     }),
 
   update: adminProcedure
     .input(
       z.object({
         id: z.string(),
-        slug: z.string().optional(),
-        name: z.string().optional(),
-        shortDescription: z.string().optional(),
+        slug: z.string().min(1).optional(),
+        name: z.string().min(1).optional(),
+        shortDescription: z.string().max(200).optional(),
         description: z.string().optional(),
-        price: z.number().int().optional(),
-        compareAtPrice: z.number().int().nullable().optional(),
-        sku: z.string().optional(),
+        price: z.number().int().positive().optional(),
+        compareAtPrice: z.number().int().positive().nullable().optional(),
+        sku: z.string().min(1).optional(),
         inStock: z.boolean().optional(),
-        stockQuantity: z.number().int().optional(),
+        stockQuantity: z.number().int().min(0).optional(),
         isFeatured: z.boolean().optional(),
         badge: z.enum(['bestseller', 'new']).nullable().optional(),
         position: z.number().int().optional(),
         specifications: specificationsSchema.optional(),
         seoTitle: z.string().optional(),
         seoDescription: z.string().optional(),
+        images: z
+          .array(
+            z.object({
+              url: z.string().min(1),
+              alt: z.string().default(''),
+              position: z.number().int().default(0),
+            })
+          )
+          .optional(),
+        variants: z
+          .array(
+            z.object({
+              name: z.string().min(1),
+              colorHex: z.string().default(''),
+              price: z.number().int().positive(),
+              compareAtPrice: z.number().int().positive().nullable().default(null),
+              sku: z.string().min(1),
+              inStock: z.boolean().default(true),
+              image: z.string().nullable().default(null),
+              position: z.number().int().default(0),
+            })
+          )
+          .optional(),
+        collectionIds: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
-      return ctx.db.product.update({
-        where: { id },
-        data,
-        include: productInclude,
-      });
+      const { id, images, variants, collectionIds, ...scalar } = input;
+
+      const existing = await ctx.db.product.findUnique({ where: { id } });
+      if (!existing) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' });
+      }
+
+      const data: Prisma.ProductUpdateInput = {
+        ...(scalar.slug !== undefined && { slug: scalar.slug }),
+        ...(scalar.name !== undefined && { name: scalar.name }),
+        ...(scalar.shortDescription !== undefined && { shortDescription: scalar.shortDescription }),
+        ...(scalar.description !== undefined && { description: scalar.description }),
+        ...(scalar.price !== undefined && { price: scalar.price }),
+        ...(scalar.compareAtPrice !== undefined && { compareAtPrice: scalar.compareAtPrice }),
+        ...(scalar.sku !== undefined && { sku: scalar.sku }),
+        ...(scalar.inStock !== undefined && { inStock: scalar.inStock }),
+        ...(scalar.stockQuantity !== undefined && { stockQuantity: scalar.stockQuantity }),
+        ...(scalar.isFeatured !== undefined && { isFeatured: scalar.isFeatured }),
+        ...(scalar.badge !== undefined && { badge: scalar.badge }),
+        ...(scalar.position !== undefined && { position: scalar.position }),
+        ...(scalar.specifications !== undefined && { specifications: scalar.specifications }),
+        ...(scalar.seoTitle !== undefined && { seoTitle: scalar.seoTitle }),
+        ...(scalar.seoDescription !== undefined && { seoDescription: scalar.seoDescription }),
+      };
+
+      try {
+        return await ctx.db.$transaction(async (tx) => {
+          if (Object.keys(data).length > 0) {
+            await tx.product.update({ where: { id }, data });
+          }
+
+          if (images) {
+            await tx.productImage.deleteMany({ where: { productId: id } });
+            if (images.length > 0) {
+              await tx.productImage.createMany({
+                data: images.map((img, i) => ({
+                  url: img.url,
+                  alt: img.alt,
+                  position: i,
+                  productId: id,
+                })),
+              });
+            }
+          }
+
+          if (variants) {
+            await tx.productVariant.deleteMany({ where: { productId: id } });
+            if (variants.length > 0) {
+              await tx.productVariant.createMany({
+                data: variants.map((v, i) => ({
+                  name: v.name,
+                  colorHex: v.colorHex,
+                  price: v.price,
+                  compareAtPrice: v.compareAtPrice,
+                  sku: v.sku,
+                  inStock: v.inStock,
+                  image: v.image,
+                  position: i,
+                  productId: id,
+                })),
+              });
+            }
+          }
+
+          if (collectionIds) {
+            await tx.productCollection.deleteMany({ where: { productId: id } });
+            if (collectionIds.length > 0) {
+              await tx.productCollection.createMany({
+                data: collectionIds.map((collectionId, index) => ({
+                  productId: id,
+                  collectionId,
+                  position: index,
+                })),
+              });
+            }
+          }
+
+          return tx.product.findUnique({
+            where: { id },
+            include: productInclude,
+          });
+        });
+      } catch (e) {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Slug hoặc SKU đã tồn tại',
+          });
+        }
+        throw e;
+      }
     }),
 
   getFlashSale: publicProcedure.query(async ({ ctx }) => {

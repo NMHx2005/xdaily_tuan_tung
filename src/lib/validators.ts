@@ -13,7 +13,7 @@ export const sortSchema = z.enum([
 export const productCreateSchema = z.object({
   name: z.string().min(1, "Tên sản phẩm không được trống"),
   slug: z.string().min(1),
-  shortDescription: z.string().default(""),
+  shortDescription: z.string().max(200, "Tối đa 200 ký tự").default(""),
   description: z.string().default(""),
   price: z.number().int().positive("Giá phải lớn hơn 0"),
   compareAtPrice: z.number().int().positive().nullable().default(null),
@@ -27,7 +27,7 @@ export const productCreateSchema = z.object({
   seoTitle: z.string().default(""),
   seoDescription: z.string().default(""),
   images: z.array(z.object({
-    url: z.string().url(),
+    url: z.string().min(1, "Ảnh không hợp lệ"),
     alt: z.string().default(""),
     position: z.number().int().default(0),
   })).default([]),
@@ -43,6 +43,35 @@ export const productCreateSchema = z.object({
   })).default([]),
   collectionIds: z.array(z.string()).default([]),
 });
+
+/** Form UI: badge "none" → map sang null trước khi gọi API */
+export const adminProductFormSchema = productCreateSchema
+  .omit({ badge: true })
+  .extend({
+    badge: z.enum(["none", "bestseller", "new"]).default("none"),
+  });
+
+/** Chỉ field form (không gồm ảnh/biến thể/collections) — dùng với react-hook-form */
+export const adminProductScalarSchema = productCreateSchema
+  .pick({
+    name: true,
+    slug: true,
+    shortDescription: true,
+    description: true,
+    price: true,
+    compareAtPrice: true,
+    sku: true,
+    inStock: true,
+    stockQuantity: true,
+    isFeatured: true,
+    position: true,
+    specifications: true,
+    seoTitle: true,
+    seoDescription: true,
+  })
+  .extend({
+    badge: z.enum(["none", "bestseller", "new"]).default("none"),
+  });
 
 export const shippingSchema = z.object({
   fullName: z.string().min(2, "Họ tên tối thiểu 2 ký tự"),
