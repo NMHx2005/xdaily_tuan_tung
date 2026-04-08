@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
+import { SITE_URL } from "@/lib/constants";
 import { HeroBanner } from "@/components/storefront/home/hero-banner";
 import { FlashSaleSection } from "@/components/storefront/home/flash-sale-section";
 import { ProductSection } from "@/components/storefront/home/product-section";
@@ -83,8 +84,8 @@ export default async function HomePage() {
       {
         "@type": "Organization",
         name: "XDAILY",
-        url: "https://xdaily.vn",
-        logo: "https://xdaily.vn/logo.png",
+        url: SITE_URL,
+        logo: `${SITE_URL}/logo.png`,
         sameAs: [
           "https://www.facebook.com/xdaily.vn",
           "https://www.instagram.com/xdaily.vn",
@@ -93,10 +94,10 @@ export default async function HomePage() {
       {
         "@type": "WebSite",
         name: "XDAILY - Nhà máy nội thất cao cấp",
-        url: "https://xdaily.vn",
+        url: SITE_URL,
         potentialAction: {
           "@type": "SearchAction",
-          target: "https://xdaily.vn/search?q={search_term_string}",
+          target: `${SITE_URL}/search?q={search_term_string}`,
           "query-input": "required name=search_term_string",
         },
       },

@@ -36,7 +36,7 @@ export const useCartStore = create<CartState>()(
       addItem: (item) =>
         set((state) => {
           const id = makeId(item.productId, item.variantId);
-          const qty = item.quantity ?? 1;
+          const qty = Math.max(1, item.quantity ?? 1);
           const existing = state.items.find((i) => i.id === id);
 
           if (existing) {

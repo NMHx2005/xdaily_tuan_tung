@@ -56,7 +56,7 @@ export const blogRouter = router({
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ ctx, input }) => {
-      const post = await ctx.db.blogPost.findUnique({
+      const post = await ctx.db.blogPost.findFirst({
         where: { slug: input.slug, isPublished: true },
       });
 

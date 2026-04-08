@@ -8,10 +8,14 @@ interface VnpayPaymentParams {
 }
 
 export function createVnpayPaymentUrl(params: VnpayPaymentParams): string {
-  const tmnCode = process.env.VNPAY_TMN_CODE!;
-  const hashSecret = process.env.VNPAY_HASH_SECRET!;
-  const vnpUrl = process.env.VNPAY_URL!;
-  const returnUrl = process.env.VNPAY_RETURN_URL!;
+  const tmnCode = process.env.VNPAY_TMN_CODE;
+  const hashSecret = process.env.VNPAY_HASH_SECRET;
+  const vnpUrl = process.env.VNPAY_URL;
+  const returnUrl = process.env.VNPAY_RETURN_URL;
+
+  if (!tmnCode || !hashSecret || !vnpUrl || !returnUrl) {
+    throw new Error('VNPay environment variables are not configured');
+  }
 
   const date = new Date();
   const createDate = formatVnpDate(date);
@@ -50,7 +54,8 @@ export function createVnpayPaymentUrl(params: VnpayPaymentParams): string {
 }
 
 export function verifyVnpayReturn(query: Record<string, string>): boolean {
-  const hashSecret = process.env.VNPAY_HASH_SECRET!;
+  const hashSecret = process.env.VNPAY_HASH_SECRET;
+  if (!hashSecret) return false;
   const secureHash = query['vnp_SecureHash'];
 
   if (!secureHash) return false;

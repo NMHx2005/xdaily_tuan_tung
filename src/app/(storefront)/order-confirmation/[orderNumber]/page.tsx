@@ -23,20 +23,28 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
     const trpc = await createCaller();
     order = await trpc.order.getById({ orderNumber });
   } catch {
-    // Order not found or unauthorized
+    // Order not found or unauthorized — show minimal confirmation
   }
+
+  const isFound = !!order;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="text-center">
         <div className="flex justify-center">
-          <CheckCircle className="h-20 w-20 text-green-500" />
+          {isFound ? (
+            <CheckCircle className="h-20 w-20 text-green-500" />
+          ) : (
+            <CheckCircle className="h-20 w-20 text-neutral-300" />
+          )}
         </div>
         <h1 className="mt-6 font-heading text-3xl font-bold">
-          Đặt hàng thành công!
+          {isFound ? "Đặt hàng thành công!" : "Thông tin đơn hàng"}
         </h1>
         <p className="mt-2 text-neutral-600">
-          Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đang được xử lý.
+          {isFound
+            ? "Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đang được xử lý."
+            : "Không thể tải chi tiết đơn hàng. Vui lòng đăng nhập để xem."}
         </p>
       </div>
 

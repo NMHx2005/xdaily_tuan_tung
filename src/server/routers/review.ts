@@ -23,6 +23,13 @@ export const reviewRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const product = await ctx.db.product.findUnique({
+        where: { id: input.productId },
+        select: { id: true },
+      });
+      if (!product) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Sản phẩm không tồn tại' });
+      }
       return ctx.db.review.create({ data: input });
     }),
 

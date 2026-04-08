@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -24,10 +24,18 @@ export function ProductGallery({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZooming, setIsZooming] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const prevVariantImage = useRef(activeVariantImage);
 
   const allImages = activeVariantImage
     ? [{ id: "variant", url: activeVariantImage, alt: productName }, ...images]
     : images;
+
+  useEffect(() => {
+    if (activeVariantImage !== prevVariantImage.current) {
+      setSelectedIndex(0);
+      prevVariantImage.current = activeVariantImage;
+    }
+  }, [activeVariantImage]);
 
   const mainImage = allImages[selectedIndex] ?? allImages[0];
 

@@ -24,16 +24,16 @@ export const orderRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { shipping, paymentMethod, items } = input;
 
-      const productIds = items.map((i) => i.productId);
+      const uniqueProductIds = [...new Set(items.map((i) => i.productId))];
       const products = await ctx.db.product.findMany({
-        where: { id: { in: productIds } },
+        where: { id: { in: uniqueProductIds } },
         include: {
           images: { take: 1, orderBy: { position: 'asc' } },
           variants: true,
         },
       });
 
-      if (products.length !== productIds.length) {
+      if (products.length !== uniqueProductIds.length) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Một số sản phẩm không tồn tại' });
       }
 
@@ -73,6 +73,13 @@ export const orderRouter = router({
           variantName = variant.name;
         }
 
+        if (product.stockQuantity > 0 && item.quantity > product.stockQuantity) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `${product.name} chỉ còn ${product.stockQuantity} sản phẩm`,
+          });
+        }
+
         subtotal += itemPrice * item.quantity;
         orderItems.push({
           productId: product.id,
@@ -95,7 +102,7 @@ export const orderRouter = router({
           userId: ctx.session?.user?.id ?? null,
           status: 'PENDING',
           paymentMethod,
-          paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PENDING',
+          paymentStatus: 'PENDING',
           shippingName: shipping.fullName,
           shippingPhone: shipping.phone,
           shippingEmail: shipping.email,
@@ -143,7 +150,9 @@ export const orderRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy đơn hàng' });
       }
 
-      if (order.userId && order.userId !== ctx.session.user.id && ctx.session.user.role !== 'ADMIN') {
+      const isOwner = order.userId && order.userId === ctx.session.user.id;
+      const isAdmin = ctx.session.user.role === 'ADMIN';
+      if (!isOwner && !isAdmin) {
         throw new TRPCError({ code: 'FORBIDDEN', message: 'Không có quyền xem đơn hàng này' });
       }
 

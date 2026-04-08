@@ -55,7 +55,7 @@ export const searchRouter = router({
           variantColors: p.variants
             .filter((v) => v.colorHex)
             .map((v) => v.colorHex),
-          badge: p.badge as 'bestseller' | 'new' | null,
+          badge: (p.badge === 'bestseller' || p.badge === 'new') ? p.badge : null as 'bestseller' | 'new' | null,
         })),
         blogs: blogs.map((b) => ({
           id: b.id,
