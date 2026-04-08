@@ -3,6 +3,7 @@
 import { createTRPCReact } from '@trpc/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SessionProvider } from 'next-auth/react';
 import React, { useState, type ReactNode } from 'react';
 import superjson from 'superjson';
 import type { AppRouter } from '@/server/trpc';
@@ -40,7 +41,11 @@ export function TRPCProvider({ children }: { children: ReactNode }) {
   );
 
   return React.createElement(
-    trpc.Provider,
-    { client: trpcClient, queryClient, children: React.createElement(QueryClientProvider, { client: queryClient }, children) },
+    SessionProvider,
+    null,
+    React.createElement(
+      trpc.Provider,
+      { client: trpcClient, queryClient, children: React.createElement(QueryClientProvider, { client: queryClient }, children) },
+    ),
   );
 }
