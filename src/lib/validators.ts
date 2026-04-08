@@ -52,7 +52,7 @@ export const shippingSchema = z.object({
   city: z.string().min(1, "Vui lòng chọn tỉnh/thành phố"),
   district: z.string().min(1, "Vui lòng chọn quận/huyện"),
   ward: z.string().min(1, "Vui lòng chọn phường/xã"),
-  note: z.string().nullable().default(null),
+  note: z.string().default(""),
 });
 
 export const reviewSchema = z.object({
