@@ -1,27 +1,31 @@
 import { create } from 'zustand';
 
 interface UIState {
+  isCartDrawerOpen: boolean;
   isMobileMenuOpen: boolean;
-  isCartOpen: boolean;
   isSearchOpen: boolean;
+  openCartDrawer: () => void;
+  closeCartDrawer: () => void;
+  toggleCartDrawer: () => void;
   openMobileMenu: () => void;
   closeMobileMenu: () => void;
-  toggleCart: () => void;
-  openCart: () => void;
-  closeCart: () => void;
+  toggleMobileMenu: () => void;
   openSearch: () => void;
   closeSearch: () => void;
+  toggleSearch: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
+  isCartDrawerOpen: false,
   isMobileMenuOpen: false,
-  isCartOpen: false,
   isSearchOpen: false,
+  openCartDrawer: () => set({ isCartDrawerOpen: true }),
+  closeCartDrawer: () => set({ isCartDrawerOpen: false }),
+  toggleCartDrawer: () => set((s) => ({ isCartDrawerOpen: !s.isCartDrawerOpen })),
   openMobileMenu: () => set({ isMobileMenuOpen: true }),
   closeMobileMenu: () => set({ isMobileMenuOpen: false }),
-  toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
-  openCart: () => set({ isCartOpen: true }),
-  closeCart: () => set({ isCartOpen: false }),
+  toggleMobileMenu: () => set((s) => ({ isMobileMenuOpen: !s.isMobileMenuOpen })),
   openSearch: () => set({ isSearchOpen: true }),
   closeSearch: () => set({ isSearchOpen: false }),
+  toggleSearch: () => set((s) => ({ isSearchOpen: !s.isSearchOpen })),
 }));

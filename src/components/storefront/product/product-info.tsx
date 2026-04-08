@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { cn, formatPrice } from "@/lib/utils";
-import { useCartStore } from "@/stores/cart-store";
+import { useCart } from "@/hooks/use-cart";
+import { useUIStore } from "@/stores/ui-store";
 import { Button } from "@/components/ui/button";
 
 interface Variant {
@@ -45,7 +46,8 @@ export function ProductInfo({
   thumbnail,
   onVariantChange,
 }: ProductInfoProps) {
-  const addItem = useCartStore((s) => s.addItem);
+  const { addItem } = useCart();
+  const openCartDrawer = useUIStore((s) => s.openCartDrawer);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [quantity, setQuantity] = useState(1);
 
@@ -62,26 +64,25 @@ export function ProductInfo({
   }
 
   function handleAddToCart() {
-    addItem(
-      {
-        productId: id,
-        variantId: selectedVariant?.id,
-        name,
-        variantName: selectedVariant?.name,
-        price: activePrice,
-        image: selectedVariant?.image ?? thumbnail,
-        slug,
-      },
-      quantity
-    );
+    addItem({
+      productId: id,
+      variantId: selectedVariant?.id ?? null,
+      name,
+      variantName: selectedVariant?.name ?? null,
+      price: activePrice,
+      image: selectedVariant?.image ?? thumbnail,
+      slug,
+      maxStock: maxQty,
+      quantity,
+    });
     toast.success("Đã thêm vào giỏ hàng");
+    openCartDrawer();
   }
 
   return (
     <div>
       <h1 className="font-heading text-2xl font-bold lg:text-3xl">{name}</h1>
 
-      {/* Price */}
       <div className="mt-3 flex items-baseline gap-2">
         <span
           className={cn(
@@ -98,7 +99,6 @@ export function ProductInfo({
         )}
       </div>
 
-      {/* Variant selector */}
       {variants.length > 0 && (
         <div className="mt-5">
           <p className="text-sm font-medium text-neutral-700">
@@ -131,7 +131,6 @@ export function ProductInfo({
         </div>
       )}
 
-      {/* Quantity selector */}
       <div className="mt-5">
         <p className="text-sm font-medium text-neutral-700">Số lượng:</p>
         <div className="mt-2 flex items-center">
@@ -165,7 +164,6 @@ export function ProductInfo({
         </div>
       </div>
 
-      {/* Add to cart */}
       <Button
         onClick={handleAddToCart}
         disabled={!isAvailable}
@@ -176,7 +174,6 @@ export function ProductInfo({
         {isAvailable ? "Thêm vào giỏ" : "Hết hàng"}
       </Button>
 
-      {/* Short description */}
       {shortDescription && (
         <p className="mt-5 text-sm leading-relaxed text-neutral-600">
           {shortDescription}

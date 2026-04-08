@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 import type { ProductCardData } from "@/types";
 import { formatPrice } from "@/lib/utils";
-import { useCartStore } from "@/stores/cart-store";
+import { useCart } from "@/hooks/use-cart";
+import { useUIStore } from "@/stores/ui-store";
 
 export function ProductCard({
   id,
@@ -18,7 +20,8 @@ export function ProductCard({
   variantColors,
   badge,
 }: ProductCardData) {
-  const addItem = useCartStore((s) => s.addItem);
+  const { addItem } = useCart();
+  const openCartDrawer = useUIStore((s) => s.openCartDrawer);
 
   const isOnSale = compareAtPrice !== null && compareAtPrice > price;
 
@@ -27,16 +30,20 @@ export function ProductCard({
     e.stopPropagation();
     addItem({
       productId: id,
+      variantId: null,
       name,
+      variantName: null,
       price,
       image: thumbnail,
       slug,
+      maxStock: 99,
     });
+    toast.success("Đã thêm vào giỏ hàng");
+    openCartDrawer();
   }
 
   return (
     <Link href={`/products/${slug}`} className="group block cursor-pointer">
-      {/* Image */}
       <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-100">
         <Image
           src={thumbnail}
@@ -59,7 +66,6 @@ export function ProductCard({
           />
         )}
 
-        {/* Badge */}
         {badge && (
           <span
             className={`absolute left-2 top-2 rounded px-2 py-1 text-xs font-semibold text-white ${
@@ -70,7 +76,6 @@ export function ProductCard({
           </span>
         )}
 
-        {/* Add to cart — hidden on desktop until hover, always visible on mobile */}
         <div className="absolute inset-x-0 bottom-0 p-3 opacity-100 translate-y-0 lg:opacity-0 lg:translate-y-2 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-200">
           <button
             onClick={handleAddToCart}
@@ -81,12 +86,10 @@ export function ProductCard({
         </div>
       </div>
 
-      {/* Name */}
       <h3 className="mt-3 text-sm font-medium text-neutral-800 line-clamp-2">
         {name}
       </h3>
 
-      {/* Variant colors */}
       {variantCount > 0 && variantColors.length > 0 && (
         <div className="mt-1.5 flex items-center gap-1.5">
           {variantColors.slice(0, 4).map((color, i) => (
@@ -104,7 +107,6 @@ export function ProductCard({
         </div>
       )}
 
-      {/* Price */}
       <div className="mt-1.5 flex items-baseline gap-2">
         <span
           className={`text-base font-bold ${isOnSale ? "text-red-600" : "text-neutral-900"}`}

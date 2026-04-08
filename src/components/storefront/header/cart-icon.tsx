@@ -1,16 +1,16 @@
 "use client";
 
 import { ShoppingBag } from "lucide-react";
-import { useCartStore } from "@/stores/cart-store";
+import { useCart } from "@/hooks/use-cart";
 import { useUIStore } from "@/stores/ui-store";
 
 export function CartIcon() {
-  const itemCount = useCartStore((s) => s.itemCount);
-  const toggleCart = useUIStore((s) => s.toggleCart);
+  const { itemCount } = useCart();
+  const toggleCartDrawer = useUIStore((s) => s.toggleCartDrawer);
 
   return (
     <button
-      onClick={toggleCart}
+      onClick={toggleCartDrawer}
       className="relative p-2 transition-colors hover:text-gold"
       aria-label={`Giỏ hàng${itemCount > 0 ? `, ${itemCount} sản phẩm` : ""}`}
     >

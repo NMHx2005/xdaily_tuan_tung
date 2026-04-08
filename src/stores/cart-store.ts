@@ -1,83 +1,92 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export interface CartItemData {
+export interface CartItem {
+  id: string;
   productId: string;
-  variantId?: string;
+  variantId: string | null;
   name: string;
-  variantName?: string;
+  variantName: string | null;
   price: number;
-  image: string;
   quantity: number;
+  image: string;
   slug: string;
+  maxStock: number;
+}
+
+function makeId(productId: string, variantId: string | null): string {
+  return `${productId}-${variantId || 'default'}`;
 }
 
 interface CartState {
-  items: CartItemData[];
-  itemCount: number;
-  addItem: (item: Omit<CartItemData, 'quantity'>, quantity?: number) => void;
-  removeItem: (productId: string, variantId?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  items: CartItem[];
+  addItem: (item: Omit<CartItem, 'id' | 'quantity'> & { quantity?: number }) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-}
-
-function calcItemCount(items: CartItemData[]) {
-  return items.reduce((sum, item) => sum + item.quantity, 0);
+  getSubtotal: () => number;
+  getItemCount: () => number;
 }
 
 export const useCartStore = create<CartState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
-      itemCount: 0,
 
-      addItem: (item, quantity = 1) =>
+      addItem: (item) =>
         set((state) => {
-          const existing = state.items.find(
-            (i) => i.productId === item.productId && i.variantId === item.variantId
-          );
+          const id = makeId(item.productId, item.variantId);
+          const qty = item.quantity ?? 1;
+          const existing = state.items.find((i) => i.id === id);
 
-          let items: CartItemData[];
           if (existing) {
-            items = state.items.map((i) =>
-              i.productId === item.productId && i.variantId === item.variantId
-                ? { ...i, quantity: i.quantity + quantity }
-                : i
-            );
-          } else {
-            items = [...state.items, { ...item, quantity }];
+            return {
+              items: state.items.map((i) =>
+                i.id === id
+                  ? { ...i, quantity: Math.min(i.quantity + qty, i.maxStock) }
+                  : i
+              ),
+            };
           }
 
-          return { items, itemCount: calcItemCount(items) };
+          return {
+            items: [
+              ...state.items,
+              { ...item, id, quantity: Math.min(qty, item.maxStock) },
+            ],
+          };
         }),
 
-      removeItem: (productId, variantId) =>
-        set((state) => {
-          const items = state.items.filter(
-            (i) => !(i.productId === productId && i.variantId === variantId)
-          );
-          return { items, itemCount: calcItemCount(items) };
-        }),
+      removeItem: (id) =>
+        set((state) => ({
+          items: state.items.filter((i) => i.id !== id),
+        })),
 
-      updateQuantity: (productId, quantity, variantId) =>
+      updateQuantity: (id, quantity) =>
         set((state) => {
           if (quantity <= 0) {
-            const items = state.items.filter(
-              (i) => !(i.productId === productId && i.variantId === variantId)
-            );
-            return { items, itemCount: calcItemCount(items) };
+            return { items: state.items.filter((i) => i.id !== id) };
           }
-
-          const items = state.items.map((i) =>
-            i.productId === productId && i.variantId === variantId
-              ? { ...i, quantity }
-              : i
-          );
-          return { items, itemCount: calcItemCount(items) };
+          return {
+            items: state.items.map((i) =>
+              i.id === id
+                ? { ...i, quantity: Math.min(quantity, i.maxStock) }
+                : i
+            ),
+          };
         }),
 
-      clearCart: () => set({ items: [], itemCount: 0 }),
+      clearCart: () => set({ items: [] }),
+
+      getSubtotal: () =>
+        get().items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+
+      getItemCount: () =>
+        get().items.reduce((sum, item) => sum + item.quantity, 0),
     }),
-    { name: 'xdaily-cart' }
+    {
+      name: 'xdaily-cart',
+      partialize: (state) => ({ items: state.items }),
+    }
   )
 );

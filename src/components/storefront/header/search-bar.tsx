@@ -6,7 +6,8 @@ import { Search, X } from "lucide-react";
 import { useUIStore } from "@/stores/ui-store";
 
 export function SearchBar() {
-  const { isSearchOpen, closeSearch } = useUIStore();
+  const isSearchOpen = useUIStore((s) => s.isSearchOpen);
+  const closeSearch = useUIStore((s) => s.closeSearch);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();

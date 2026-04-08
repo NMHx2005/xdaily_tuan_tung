@@ -13,7 +13,8 @@ import { useUIStore } from "@/stores/ui-store";
 import { COLLECTIONS } from "@/lib/constants";
 
 export function MobileMenu() {
-  const { isMobileMenuOpen, closeMobileMenu } = useUIStore();
+  const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
+  const closeMobileMenu = useUIStore((s) => s.closeMobileMenu);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
 
   function handleNav() {
