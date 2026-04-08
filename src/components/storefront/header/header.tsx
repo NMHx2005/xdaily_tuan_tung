@@ -9,7 +9,8 @@ import { CartIcon } from "./cart-icon";
 import { MobileMenu } from "./mobile-menu";
 
 export function Header() {
-  const { openMobileMenu, openSearch } = useUIStore();
+  const openMobileMenu = useUIStore((s) => s.openMobileMenu);
+  const openSearch = useUIStore((s) => s.openSearch);
 
   return (
     <>

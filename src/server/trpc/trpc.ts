@@ -27,7 +27,7 @@ const isAdmin = middleware(async ({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Bạn cần đăng nhập' });
   }
-  if ((ctx.session.user as { role?: string }).role !== 'ADMIN') {
+  if (ctx.session.user.role !== 'ADMIN') {
     throw new TRPCError({ code: 'FORBIDDEN', message: 'Chỉ admin mới có quyền truy cập' });
   }
   return next({

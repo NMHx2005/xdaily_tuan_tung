@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 
 export const collectionRouter = router({
@@ -23,7 +24,7 @@ export const collectionRouter = router({
       });
 
       if (!collection) {
-        throw new Error('Collection not found');
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy danh mục' });
       }
 
       return collection;
@@ -32,8 +33,8 @@ export const collectionRouter = router({
   create: adminProcedure
     .input(
       z.object({
-        slug: z.string(),
-        name: z.string(),
+        slug: z.string().min(1),
+        name: z.string().min(1),
         description: z.string().optional(),
         image: z.string().optional(),
         position: z.number().int().default(0),
@@ -68,6 +69,10 @@ export const collectionRouter = router({
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.collection.delete({ where: { id: input.id } });
+      try {
+        return await ctx.db.collection.delete({ where: { id: input.id } });
+      } catch {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Danh mục không tồn tại' });
+      }
     }),
 });

@@ -1,18 +1,12 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
+import { paginationSchema, sortSchema } from '@/lib/validators';
 import type { Prisma } from '@prisma/client';
 
-const sortOptions = z.enum([
-  'featured',
-  'price-asc',
-  'price-desc',
-  'name-asc',
-  'name-desc',
-  'newest',
-  'bestselling',
-]);
+const specificationsSchema = z.array(z.object({ key: z.string(), value: z.string() }));
 
-function buildOrderBy(sort: z.infer<typeof sortOptions>): Prisma.ProductOrderByWithRelationInput {
+function buildOrderBy(sort: z.infer<typeof sortSchema>): Prisma.ProductOrderByWithRelationInput {
   switch (sort) {
     case 'price-asc':
       return { price: 'asc' };
@@ -40,14 +34,15 @@ const productInclude = {
   },
 };
 
+const listInclude = {
+  images: { orderBy: { position: 'asc' as const }, take: 1 },
+  variants: { orderBy: { position: 'asc' as const } },
+};
+
 export const productRouter = router({
   getAll: publicProcedure
     .input(
-      z.object({
-        page: z.number().int().positive().default(1),
-        limit: z.number().int().positive().max(100).default(24),
-        sort: sortOptions.default('featured'),
-      }).default({ page: 1, limit: 24, sort: 'featured' })
+      paginationSchema.extend({ sort: sortSchema }).default({ page: 1, limit: 24, sort: 'featured' })
     )
     .query(async ({ ctx, input }) => {
       const { page, limit, sort } = input;
@@ -58,10 +53,7 @@ export const productRouter = router({
           skip,
           take: limit,
           orderBy: buildOrderBy(sort),
-          include: {
-            images: { orderBy: { position: 'asc' }, take: 1 },
-            variants: { orderBy: { position: 'asc' } },
-          },
+          include: listInclude,
         }),
         ctx.db.product.count(),
       ]);
@@ -87,7 +79,7 @@ export const productRouter = router({
       });
 
       if (!product) {
-        throw new Error('Product not found');
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' });
       }
 
       return product;
@@ -95,12 +87,9 @@ export const productRouter = router({
 
   getByCollection: publicProcedure
     .input(
-      z.object({
-        collectionSlug: z.string(),
-        page: z.number().int().positive().default(1),
-        limit: z.number().int().positive().max(100).default(24),
-        sort: sortOptions.default('featured'),
-      })
+      z.object({ collectionSlug: z.string() })
+        .merge(paginationSchema)
+        .extend({ sort: sortSchema })
     )
     .query(async ({ ctx, input }) => {
       const { collectionSlug, page, limit, sort } = input;
@@ -111,7 +100,7 @@ export const productRouter = router({
       });
 
       if (!collection) {
-        throw new Error('Collection not found');
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy danh mục' });
       }
 
       const where: Prisma.ProductWhereInput = {
@@ -124,10 +113,7 @@ export const productRouter = router({
           skip,
           take: limit,
           orderBy: buildOrderBy(sort),
-          include: {
-            images: { orderBy: { position: 'asc' }, take: 1 },
-            variants: { orderBy: { position: 'asc' } },
-          },
+          include: listInclude,
         }),
         ctx.db.product.count({ where }),
       ]);
@@ -150,10 +136,7 @@ export const productRouter = router({
       where: { isFeatured: true },
       take: 8,
       orderBy: { position: 'asc' },
-      include: {
-        images: { orderBy: { position: 'asc' }, take: 1 },
-        variants: { orderBy: { position: 'asc' } },
-      },
+      include: listInclude,
     });
   }),
 
@@ -162,10 +145,7 @@ export const productRouter = router({
       where: { badge: 'bestseller' },
       take: 8,
       orderBy: { position: 'asc' },
-      include: {
-        images: { orderBy: { position: 'asc' }, take: 1 },
-        variants: { orderBy: { position: 'asc' } },
-      },
+      include: listInclude,
     });
   }),
 
@@ -173,10 +153,7 @@ export const productRouter = router({
     return ctx.db.product.findMany({
       take: 8,
       orderBy: { createdAt: 'desc' },
-      include: {
-        images: { orderBy: { position: 'asc' }, take: 1 },
-        variants: { orderBy: { position: 'asc' } },
-      },
+      include: listInclude,
     });
   }),
 
@@ -204,47 +181,44 @@ export const productRouter = router({
         },
         take: input.limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          images: { orderBy: { position: 'asc' }, take: 1 },
-          variants: { orderBy: { position: 'asc' } },
-        },
+        include: listInclude,
       });
     }),
 
   create: adminProcedure
     .input(
       z.object({
-        slug: z.string(),
-        name: z.string(),
+        slug: z.string().min(1),
+        name: z.string().min(1, 'Tên sản phẩm không được trống'),
         shortDescription: z.string().default(''),
         description: z.string().default(''),
-        price: z.number().int(),
-        compareAtPrice: z.number().int().optional(),
-        sku: z.string(),
+        price: z.number().int().positive('Giá phải lớn hơn 0'),
+        compareAtPrice: z.number().int().positive().nullable().default(null),
+        sku: z.string().min(1, 'SKU không được trống'),
         inStock: z.boolean().default(true),
-        stockQuantity: z.number().int().default(0),
+        stockQuantity: z.number().int().min(0).default(0),
         isFeatured: z.boolean().default(false),
-        badge: z.string().optional(),
+        badge: z.enum(['bestseller', 'new']).nullable().default(null),
         position: z.number().int().default(0),
-        specifications: z.any().default([]),
+        specifications: specificationsSchema.default([]),
         seoTitle: z.string().default(''),
         seoDescription: z.string().default(''),
         images: z.array(
           z.object({
-            url: z.string(),
+            url: z.string().url(),
             alt: z.string().default(''),
             position: z.number().int().default(0),
           })
         ).default([]),
         variants: z.array(
           z.object({
-            name: z.string(),
+            name: z.string().min(1),
             colorHex: z.string().default(''),
-            price: z.number().int(),
-            compareAtPrice: z.number().int().optional(),
-            sku: z.string(),
+            price: z.number().int().positive(),
+            compareAtPrice: z.number().int().positive().nullable().default(null),
+            sku: z.string().min(1),
             inStock: z.boolean().default(true),
-            image: z.string().optional(),
+            image: z.string().nullable().default(null),
             position: z.number().int().default(0),
           })
         ).default([]),
@@ -284,9 +258,9 @@ export const productRouter = router({
         inStock: z.boolean().optional(),
         stockQuantity: z.number().int().optional(),
         isFeatured: z.boolean().optional(),
-        badge: z.string().nullable().optional(),
+        badge: z.enum(['bestseller', 'new']).nullable().optional(),
         position: z.number().int().optional(),
-        specifications: z.any().optional(),
+        specifications: specificationsSchema.optional(),
         seoTitle: z.string().optional(),
         seoDescription: z.string().optional(),
       })
@@ -303,6 +277,10 @@ export const productRouter = router({
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.product.delete({ where: { id: input.id } });
+      try {
+        return await ctx.db.product.delete({ where: { id: input.id } });
+      } catch {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Sản phẩm không tồn tại' });
+      }
     }),
 });

@@ -46,7 +46,7 @@ export const productCreateSchema = z.object({
 
 export const shippingSchema = z.object({
   fullName: z.string().min(2, "Họ tên tối thiểu 2 ký tự"),
-  phone: z.string().regex(/^(0[3|5|7|8|9])+([0-9]{8})$/, "Số điện thoại không hợp lệ"),
+  phone: z.string().regex(/^(0[35789])\d{8}$/, "Số điện thoại không hợp lệ"),
   email: z.string().email("Email không hợp lệ"),
   address: z.string().min(5, "Địa chỉ tối thiểu 5 ký tự"),
   city: z.string().min(1, "Vui lòng chọn tỉnh/thành phố"),

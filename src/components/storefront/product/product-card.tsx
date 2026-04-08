@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
 
 export function ProductCard({
+  id,
   slug,
   name,
   price,
@@ -25,7 +26,7 @@ export function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     addItem({
-      productId: slug,
+      productId: id,
       name,
       price,
       image: thumbnail,
