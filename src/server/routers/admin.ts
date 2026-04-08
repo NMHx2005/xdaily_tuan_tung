@@ -55,21 +55,24 @@ export const adminRouter = router({
     }),
 
   getDashboardStats: adminProcedure.query(async ({ ctx }) => {
-    const [totalProducts, totalOrders, totalCustomers, revenueAgg] = await Promise.all([
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [productCount, monthlyOrders, customerCount, monthlyRevenue] = await Promise.all([
       ctx.db.product.count(),
-      ctx.db.order.count(),
+      ctx.db.order.count({ where: { createdAt: { gte: startOfMonth } } }),
       ctx.db.user.count({ where: { role: 'CUSTOMER' } }),
       ctx.db.order.aggregate({
         _sum: { total: true },
-        where: { paymentStatus: 'PAID' },
+        where: { status: 'DELIVERED', createdAt: { gte: startOfMonth } },
       }),
     ]);
 
     return {
-      totalProducts,
-      totalOrders,
-      totalRevenue: revenueAgg._sum.total ?? 0,
-      totalCustomers,
+      revenue: monthlyRevenue._sum.total ?? 0,
+      orderCount: monthlyOrders,
+      customerCount,
+      productCount,
     };
   }),
 
