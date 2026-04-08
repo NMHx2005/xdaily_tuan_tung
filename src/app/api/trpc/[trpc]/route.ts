@@ -1,8 +1,13 @@
-// TODO: implement tRPC HTTP handler
-export async function GET() {
-  return new Response("tRPC endpoint");
-}
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
+import { appRouter } from '@/server/trpc';
+import { createContext } from '@/server/trpc/context';
 
-export async function POST() {
-  return new Response("tRPC endpoint");
-}
+const handler = (req: Request) =>
+  fetchRequestHandler({
+    endpoint: '/api/trpc',
+    req,
+    router: appRouter,
+    createContext,
+  });
+
+export { handler as GET, handler as POST };

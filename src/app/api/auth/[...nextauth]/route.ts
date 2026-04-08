@@ -1,8 +1,3 @@
-// TODO: implement NextAuth handler
-export async function GET() {
-  return new Response("Auth endpoint");
-}
+import { handlers } from '@/lib/auth';
 
-export async function POST() {
-  return new Response("Auth endpoint");
-}
+export const { GET, POST } = handlers;
