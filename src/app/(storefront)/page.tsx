@@ -1,139 +1,158 @@
+import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
+import { createCaller } from "@/lib/trpc/server";
+import { HeroBanner } from "@/components/storefront/home/hero-banner";
+import { FlashSaleSection } from "@/components/storefront/home/flash-sale-section";
 import { ProductSection } from "@/components/storefront/home/product-section";
+import { BlogPreview } from "@/components/storefront/home/blog-preview";
+import { NewsletterForm } from "@/components/storefront/home/newsletter-form";
 
-const mockProducts: ProductCardData[] = [
-  {
-    id: "1",
-    slug: "granite-chair",
-    name: "Ghế ăn XDAILY - GRANITE CHAIR | Ghế ăn gỗ cao cấp",
-    price: 2100000,
-    compareAtPrice: 2800000,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=GRANITE",
-    hoverImage: null,
-    variantCount: 3,
-    variantColors: ["#000000", "#FFFFFF", "#8B4513"],
-    badge: "bestseller",
-  },
-  {
-    id: "2",
-    slug: "nordic-chair",
-    name: "Ghế ăn XDAILY - NORDIC CHAIR | Phong cách Bắc Âu",
-    price: 1850000,
-    compareAtPrice: null,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=NORDIC",
-    hoverImage: null,
-    variantCount: 2,
-    variantColors: ["#2C3E50", "#ECF0F1"],
-    badge: "new",
-  },
-  {
-    id: "3",
-    slug: "sofa-monaco",
-    name: "Sofa XDAILY - MONACO | Sofa da cao cấp 3 chỗ",
-    price: 15900000,
-    compareAtPrice: 19500000,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=MONACO",
-    hoverImage: null,
-    variantCount: 4,
-    variantColors: ["#1a1a1a", "#8B6914", "#4A4A4A", "#C0C0C0"],
-    badge: "bestseller",
-  },
-  {
-    id: "4",
-    slug: "bar-chair-oslo",
-    name: "Ghế bar XDAILY - OSLO | Chân thép sơn tĩnh điện",
-    price: 1450000,
-    compareAtPrice: null,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=OSLO",
-    hoverImage: null,
-    variantCount: 2,
-    variantColors: ["#000000", "#D4A574"],
-    badge: null,
-  },
-  {
-    id: "5",
-    slug: "dining-table-luna",
-    name: "Bàn ăn XDAILY - LUNA TABLE | Mặt đá sintered",
-    price: 8900000,
-    compareAtPrice: 11200000,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=LUNA",
-    hoverImage: null,
-    variantCount: 1,
-    variantColors: ["#333333"],
-    badge: null,
-  },
-  {
-    id: "6",
-    slug: "bed-aurora",
-    name: "Giường ngủ XDAILY - AURORA | Khung gỗ sồi tự nhiên",
-    price: 12500000,
-    compareAtPrice: null,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=AURORA",
-    hoverImage: null,
-    variantCount: 2,
-    variantColors: ["#DEB887", "#8B7355"],
-    badge: "new",
-  },
-  {
-    id: "7",
-    slug: "coffee-table-zen",
-    name: "Bàn trà XDAILY - ZEN TABLE | Phong cách Nhật Bản",
-    price: 3200000,
-    compareAtPrice: 4100000,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=ZEN",
-    hoverImage: null,
-    variantCount: 0,
-    variantColors: [],
-    badge: null,
-  },
-  {
-    id: "8",
-    slug: "office-chair-ergo",
-    name: "Ghế văn phòng XDAILY - ERGO PRO | Công thái học",
-    price: 4500000,
-    compareAtPrice: 5200000,
-    thumbnail: "https://via.placeholder.com/400x400/f5f5f5/333?text=ERGO",
-    hoverImage: null,
-    variantCount: 3,
-    variantColors: ["#1a1a1a", "#2C3E50", "#7F8C8D"],
-    badge: "bestseller",
-  },
-];
+export const revalidate = 60;
 
-export default function HomePage() {
+export const metadata: Metadata = {
+  title: "XDAILY - Nhà máy nội thất cao cấp",
+  description:
+    "XDAILY cung cấp ghế ăn, bàn trà, ghế bar, sofa, giường ngủ cao cấp. Thiết kế hiện đại, giá tốt nhất.",
+  openGraph: {
+    title: "XDAILY - Nhà máy nội thất cao cấp",
+    description:
+      "XDAILY cung cấp ghế ăn, bàn trà, ghế bar, sofa, giường ngủ cao cấp. Thiết kế hiện đại, giá tốt nhất.",
+    type: "website",
+    url: "https://xdaily.vn",
+  },
+};
+
+function toProductCard(
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    price: number;
+    compareAtPrice: number | null;
+    badge: string | null;
+    images: { url: string; alt: string }[];
+    variants: { colorHex: string }[];
+  },
+): ProductCardData {
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    thumbnail: product.images[0]?.url ?? "/placeholder.png",
+    hoverImage: product.images[1]?.url ?? null,
+    variantCount: product.variants.length,
+    variantColors: product.variants.map((v) => v.colorHex).filter(Boolean),
+    badge: (product.badge as ProductCardData["badge"]) ?? null,
+  };
+}
+
+export default async function HomePage() {
+  const trpc = await createCaller();
+
+  const [
+    banners,
+    flashSale,
+    newArrivals,
+    bestsellers,
+    chairsResult,
+    coffeeTablesResult,
+    barStoolsResult,
+    recentBlogs,
+  ] = await Promise.all([
+    trpc.admin.getBanners(),
+    trpc.product.getFlashSale(),
+    trpc.product.getNewArrivals(),
+    trpc.product.getBestsellers(),
+    trpc.product.getByCollection({ collectionSlug: "ghe-an", limit: 10, page: 1, sort: "featured" }).catch(() => null),
+    trpc.product.getByCollection({ collectionSlug: "ban-tra", limit: 10, page: 1, sort: "featured" }).catch(() => null),
+    trpc.product.getByCollection({ collectionSlug: "ghe-bar", limit: 10, page: 1, sort: "featured" }).catch(() => null),
+    trpc.blog.getRecent({ limit: 6 }),
+  ]);
+
+  const newArrivalCards = newArrivals.map(toProductCard);
+  const bestsellerCards = bestsellers.map(toProductCard);
+  const chairCards = chairsResult?.items.map(toProductCard) ?? [];
+  const coffeeTableCards = coffeeTablesResult?.items.map(toProductCard) ?? [];
+  const barStoolCards = barStoolsResult?.items.map(toProductCard) ?? [];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: "XDAILY",
+        url: "https://xdaily.vn",
+        logo: "https://xdaily.vn/logo.png",
+        sameAs: [
+          "https://www.facebook.com/xdaily.vn",
+          "https://www.instagram.com/xdaily.vn",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        name: "XDAILY - Nhà máy nội thất cao cấp",
+        url: "https://xdaily.vn",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: "https://xdaily.vn/search?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <>
-      {/* Hero placeholder */}
-      <section className="bg-neutral-100">
-        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <div className="text-center">
-            <h1 className="font-heading text-4xl font-bold lg:text-5xl">
-              Nội thất cao cấp
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Thiết kế hiện đại — Chất lượng quốc tế — Giá tốt nhất
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <ProductSection
-        title="Sản phẩm bán chạy"
-        viewAllLink="/collections/ghe-an"
-        products={mockProducts.filter((p) => p.badge === "bestseller")}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      <HeroBanner banners={banners} />
+
+      {flashSale && <FlashSaleSection flashSale={flashSale} />}
 
       <ProductSection
         title="Sản phẩm mới"
-        viewAllLink="/collections/ghe-an"
-        products={mockProducts.filter((p) => p.badge === "new")}
+        viewAllLink="/collections/san-pham-moi"
+        products={newArrivalCards}
       />
 
       <ProductSection
-        title="Tất cả sản phẩm"
-        viewAllLink="/search"
-        products={mockProducts}
+        title="Sản phẩm bán chạy"
+        viewAllLink="/collections/ban-chay"
+        products={bestsellerCards}
       />
+
+      {chairCards.length > 0 && (
+        <ProductSection
+          title="Ghế"
+          viewAllLink="/collections/ghe-an"
+          products={chairCards}
+        />
+      )}
+
+      {coffeeTableCards.length > 0 && (
+        <ProductSection
+          title="Bàn trà"
+          viewAllLink="/collections/ban-tra"
+          products={coffeeTableCards}
+        />
+      )}
+
+      {barStoolCards.length > 0 && (
+        <ProductSection
+          title="Ghế bar"
+          viewAllLink="/collections/ghe-bar"
+          products={barStoolCards}
+        />
+      )}
+
+      <BlogPreview posts={recentBlogs} />
+
+      <NewsletterForm />
     </>
   );
 }

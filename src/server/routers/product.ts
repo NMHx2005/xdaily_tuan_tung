@@ -274,6 +274,29 @@ export const productRouter = router({
       });
     }),
 
+  getFlashSale: publicProcedure.query(async ({ ctx }) => {
+    const now = new Date();
+    const flashSale = await ctx.db.flashSale.findFirst({
+      where: {
+        isActive: true,
+        startsAt: { lte: now },
+        endsAt: { gt: now },
+      },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+          include: {
+            product: {
+              include: listInclude,
+            },
+          },
+        },
+      },
+    });
+
+    return flashSale;
+  }),
+
   delete: adminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
