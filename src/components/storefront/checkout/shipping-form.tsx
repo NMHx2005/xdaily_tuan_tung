@@ -57,12 +57,17 @@ export function ShippingForm() {
           <Label htmlFor="fullName">Họ và tên *</Label>
           <Input
             id="fullName"
+            aria-required="true"
+            aria-invalid={!!errors.fullName}
+            aria-describedby={errors.fullName ? "fullName-error" : undefined}
             {...register("fullName")}
             placeholder="Nguyễn Văn A"
             className="mt-1"
           />
           {errors.fullName && (
-            <p className="mt-1 text-xs text-red-500">{errors.fullName.message}</p>
+            <p id="fullName-error" role="alert" className="mt-1 text-xs text-destructive">
+              {errors.fullName.message}
+            </p>
           )}
         </div>
 
@@ -70,12 +75,17 @@ export function ShippingForm() {
           <Label htmlFor="phone">Số điện thoại *</Label>
           <Input
             id="phone"
+            aria-required="true"
+            aria-invalid={!!errors.phone}
+            aria-describedby={errors.phone ? "phone-error" : undefined}
             {...register("phone")}
             placeholder="0912345678"
             className="mt-1"
           />
           {errors.phone && (
-            <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>
+            <p id="phone-error" role="alert" className="mt-1 text-xs text-destructive">
+              {errors.phone.message}
+            </p>
           )}
         </div>
       </div>
@@ -85,12 +95,17 @@ export function ShippingForm() {
         <Input
           id="email"
           type="email"
+          aria-required="true"
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "email-error" : undefined}
           {...register("email")}
           placeholder="email@example.com"
           className="mt-1"
         />
         {errors.email && (
-          <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
+          <p id="email-error" role="alert" className="mt-1 text-xs text-destructive">
+            {errors.email.message}
+          </p>
         )}
       </div>
 
@@ -98,20 +113,32 @@ export function ShippingForm() {
         <Label htmlFor="address">Địa chỉ (số nhà, đường) *</Label>
         <Input
           id="address"
+          aria-required="true"
+          aria-invalid={!!errors.address}
+          aria-describedby={errors.address ? "address-error" : undefined}
           {...register("address")}
           placeholder="123 Nguyễn Huệ"
           className="mt-1"
         />
         {errors.address && (
-          <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>
+          <p id="address-error" role="alert" className="mt-1 text-xs text-destructive">
+            {errors.address.message}
+          </p>
         )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <Label>Tỉnh/Thành phố *</Label>
+          <Label htmlFor="shipping-city">Tỉnh/Thành phố *</Label>
           <Select value={selectedCity || ""} onValueChange={(v) => v && setValue("city", v)}>
-            <SelectTrigger className="mt-1">
+            <SelectTrigger
+              id="shipping-city"
+              aria-required="true"
+              aria-invalid={!!errors.city}
+              aria-describedby={errors.city ? "city-error" : undefined}
+              aria-label="Tỉnh hoặc thành phố"
+              className="mt-1"
+            >
               <SelectValue placeholder="Chọn tỉnh/TP" />
             </SelectTrigger>
             <SelectContent>
@@ -123,18 +150,27 @@ export function ShippingForm() {
             </SelectContent>
           </Select>
           {errors.city && (
-            <p className="mt-1 text-xs text-red-500">{errors.city.message}</p>
+            <p id="city-error" role="alert" className="mt-1 text-xs text-destructive">
+              {errors.city.message}
+            </p>
           )}
         </div>
 
         <div>
-          <Label>Quận/Huyện *</Label>
+          <Label htmlFor="shipping-district">Quận/Huyện *</Label>
           <Select
             value={selectedDistrict || ""}
             onValueChange={(v) => v && setValue("district", v)}
             disabled={!province}
           >
-            <SelectTrigger className="mt-1">
+            <SelectTrigger
+              id="shipping-district"
+              aria-required="true"
+              aria-invalid={!!errors.district}
+              aria-describedby={errors.district ? "district-error" : undefined}
+              aria-label="Quận hoặc huyện"
+              className="mt-1"
+            >
               <SelectValue placeholder="Chọn quận/huyện" />
             </SelectTrigger>
             <SelectContent>
@@ -146,18 +182,27 @@ export function ShippingForm() {
             </SelectContent>
           </Select>
           {errors.district && (
-            <p className="mt-1 text-xs text-red-500">{errors.district.message}</p>
+            <p id="district-error" role="alert" className="mt-1 text-xs text-destructive">
+              {errors.district.message}
+            </p>
           )}
         </div>
 
         <div>
-          <Label>Phường/Xã *</Label>
+          <Label htmlFor="shipping-ward">Phường/Xã *</Label>
           <Select
             value={watch("ward") || ""}
             onValueChange={(v) => v && setValue("ward", v)}
             disabled={!district}
           >
-            <SelectTrigger className="mt-1">
+            <SelectTrigger
+              id="shipping-ward"
+              aria-required="true"
+              aria-invalid={!!errors.ward}
+              aria-describedby={errors.ward ? "ward-error" : undefined}
+              aria-label="Phường hoặc xã"
+              className="mt-1"
+            >
               <SelectValue placeholder="Chọn phường/xã" />
             </SelectTrigger>
             <SelectContent>
@@ -169,7 +214,9 @@ export function ShippingForm() {
             </SelectContent>
           </Select>
           {errors.ward && (
-            <p className="mt-1 text-xs text-red-500">{errors.ward.message}</p>
+            <p id="ward-error" role="alert" className="mt-1 text-xs text-destructive">
+              {errors.ward.message}
+            </p>
           )}
         </div>
       </div>

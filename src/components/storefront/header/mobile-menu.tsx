@@ -26,17 +26,26 @@ export function MobileMenu() {
 
   return (
     <Sheet open={isMobileMenuOpen} onOpenChange={(open) => !open && closeMobileMenu()}>
-      <SheetContent side="left" className="w-80 p-0">
+      <SheetContent
+        side="left"
+        showCloseButton={false}
+        className="w-80 p-0"
+      >
         <SheetHeader className="border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-heading text-xl font-bold">XDAILY</SheetTitle>
-            <button onClick={closeMobileMenu} className="p-1 hover:text-gold transition-colors">
-              <X className="h-5 w-5" />
+            <button
+              type="button"
+              onClick={closeMobileMenu}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-1 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Đóng menu"
+            >
+              <X className="h-5 w-5" aria-hidden />
             </button>
           </div>
         </SheetHeader>
 
-        <nav className="flex flex-col py-4">
+        <nav className="flex flex-col py-4" aria-label="Main navigation">
           <Link
             href="/"
             onClick={handleNav}
@@ -47,8 +56,10 @@ export function MobileMenu() {
 
           <div>
             <button
+              type="button"
+              aria-expanded={isProductsOpen}
               onClick={() => setIsProductsOpen(!isProductsOpen)}
-              className="flex w-full items-center justify-between px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+              className="flex min-h-11 w-full items-center justify-between px-6 py-3 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
             >
               Sản phẩm
               <ChevronDown

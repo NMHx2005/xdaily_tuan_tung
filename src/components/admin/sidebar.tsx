@@ -36,7 +36,7 @@ function NavContent({ pathname, onNav }: { pathname: string; onNav?: () => void 
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Điều hướng quản trị">
         {navItems.map((item) => {
           const isActive =
             item.href === "/admin"

@@ -23,7 +23,11 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && close()}>
-      <SheetContent side="right" className="flex w-full flex-col p-0 sm:max-w-md">
+      <SheetContent
+        side="right"
+        showCloseButton={false}
+        className="flex w-full flex-col p-0 sm:max-w-md"
+      >
         <SheetHeader className="border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg font-bold">
@@ -33,10 +37,12 @@ export function CartDrawer() {
               </span>
             </SheetTitle>
             <button
+              type="button"
               onClick={close}
-              className="p-1 transition-colors hover:text-neutral-600"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-1 transition-colors hover:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Đóng giỏ hàng"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden />
             </button>
           </div>
         </SheetHeader>

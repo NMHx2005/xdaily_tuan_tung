@@ -69,25 +69,37 @@ export function SearchBar() {
       <div
         className="fixed inset-0 z-40 bg-black/30"
         onClick={clearAndClose}
+        aria-hidden
       />
-      <div className="absolute left-0 right-0 top-full z-50 border-b bg-background shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Tìm kiếm sản phẩm"
+        className="absolute left-0 right-0 top-full z-50 border-b bg-background shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
+      >
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <form onSubmit={handleSubmit} className="relative">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <form onSubmit={handleSubmit} className="relative" role="search">
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
             <input
               ref={inputRef}
-              type="text"
+              type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Tìm kiếm sản phẩm..."
-              className="w-full rounded-lg border bg-background py-3 pl-12 pr-12 text-base outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold"
+              aria-label="Tìm kiếm sản phẩm"
+              autoComplete="off"
+              className="w-full rounded-lg border bg-background py-3 pl-12 pr-12 text-base outline-none transition-colors focus:border-gold focus:ring-2 focus:ring-gold/40"
             />
             <button
               type="button"
               onClick={clearAndClose}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-3 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Đóng tìm kiếm"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden />
             </button>
           </form>
 

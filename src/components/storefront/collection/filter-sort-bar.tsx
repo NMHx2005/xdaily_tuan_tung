@@ -43,7 +43,10 @@ export function FilterSortBar({ currentSort, totalProducts, collectionName }: Fi
         )}
       </p>
       <Select value={currentSort} onValueChange={handleSort}>
-        <SelectTrigger className="w-full sm:w-48">
+        <SelectTrigger
+          aria-label="Sắp xếp"
+          className="min-h-11 w-full sm:w-48"
+        >
           <SelectValue placeholder="Sắp xếp" />
         </SelectTrigger>
         <SelectContent>

@@ -11,10 +11,10 @@ export function NavMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="hidden lg:flex items-center gap-1">
+    <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
       <Link
         href="/"
-        className="px-3 py-2 text-sm font-medium transition-colors hover:text-gold"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Trang chủ
       </Link>
@@ -24,7 +24,12 @@ export function NavMenu() {
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
-        <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors hover:text-gold">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+          className="flex min-h-11 items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
           Sản phẩm
           <ChevronDown
             className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
@@ -60,13 +65,13 @@ export function NavMenu() {
 
       <Link
         href="/blogs"
-        className="px-3 py-2 text-sm font-medium transition-colors hover:text-gold"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Tin tức
       </Link>
       <Link
         href="/about"
-        className="px-3 py-2 text-sm font-medium transition-colors hover:text-gold"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Giới thiệu
       </Link>

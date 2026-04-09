@@ -87,7 +87,7 @@ export function ProductInfo({
         <span
           className={cn(
             "text-2xl font-bold",
-            isOnSale ? "text-red-600" : "text-neutral-900"
+            isOnSale ? "text-sale" : "text-neutral-900"
           )}
         >
           {formatPrice(activePrice)}

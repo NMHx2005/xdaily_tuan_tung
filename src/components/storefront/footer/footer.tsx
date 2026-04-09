@@ -52,7 +52,7 @@ export function Footer() {
           </div>
 
           {/* Column 2 — Categories */}
-          <div>
+          <nav aria-label="Danh mục chân trang">
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
               Danh mục sản phẩm
             </h4>
@@ -65,10 +65,10 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
           {/* Column 3 — Support */}
-          <div>
+          <nav aria-label="Hỗ trợ khách hàng">
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
               Hỗ trợ khách hàng
             </h4>
@@ -81,7 +81,7 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
           {/* Column 4 — Contact */}
           <div>

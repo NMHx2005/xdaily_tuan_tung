@@ -19,11 +19,12 @@ export function Header() {
           {/* Mobile: hamburger | Desktop: nav */}
           <div className="flex items-center gap-4">
             <button
+              type="button"
               onClick={openMobileMenu}
-              className="p-2 lg:hidden transition-colors hover:text-gold"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 lg:hidden transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label="Mở menu"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5" aria-hidden />
             </button>
             <NavMenu />
           </div>
@@ -31,7 +32,8 @@ export function Header() {
           {/* Logo — center on mobile, left-ish on desktop */}
           <Link
             href="/"
-            className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 lg:order-first font-heading text-xl font-bold tracking-tight"
+            className="absolute left-1/2 -translate-x-1/2 rounded-md lg:static lg:translate-x-0 lg:order-first font-heading text-xl font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="XDAILY — Trang chủ"
           >
             XDAILY
           </Link>
@@ -39,18 +41,19 @@ export function Header() {
           {/* Right actions */}
           <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={openSearch}
-              className="p-2 transition-colors hover:text-gold"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label="Tìm kiếm"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-5 w-5" aria-hidden />
             </button>
             <Link
               href="/account/login"
-              className="hidden sm:block p-2 transition-colors hover:text-gold"
+              className="hidden min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:inline-flex"
               aria-label="Tài khoản"
             >
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5" aria-hidden />
             </Link>
             <CartIcon />
           </div>

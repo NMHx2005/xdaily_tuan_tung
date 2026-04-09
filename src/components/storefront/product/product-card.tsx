@@ -85,8 +85,9 @@ export function ProductCard({
 
         <div className="absolute inset-x-0 bottom-0 p-3 opacity-100 translate-y-0 lg:opacity-0 lg:translate-y-2 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-200">
           <button
+            type="button"
             onClick={handleAddToCart}
-            className="w-full rounded bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="w-full rounded bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             Thêm vào giỏ
           </button>
@@ -116,7 +117,7 @@ export function ProductCard({
 
       <div className="mt-1.5 flex items-baseline gap-2">
         <span
-          className={`text-base font-bold ${isOnSale ? "text-red-600" : "text-neutral-900"}`}
+          className={`text-base font-bold ${isOnSale ? "text-sale" : "text-neutral-900"}`}
         >
           {formatPrice(price)}
         </span>
