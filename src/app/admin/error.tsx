@@ -17,7 +17,7 @@ export default function AdminError({
       <AlertTriangle className="h-12 w-12 text-destructive" aria-hidden />
       <h1 className="mt-6 font-heading text-xl font-bold">Đã xảy ra lỗi</h1>
       <p className="mt-3 max-w-lg rounded-md border bg-muted/50 px-4 py-3 text-left font-mono text-xs text-muted-foreground break-all">
-        {error.message || "Unknown error"}
+        {error.message || "Không có thông báo lỗi chi tiết"}
         {error.digest ? ` · digest: ${error.digest}` : ""}
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
