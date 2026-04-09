@@ -9,7 +9,10 @@ export default defineConfig({
     path: "prisma/migrations",
     seed: "tsx prisma/seed.ts",
   },
+  /** Migrate / CLI: dùng DIRECT_URL (Supabase port 5432). Không dùng pooler 6543 cho migrate. */
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url:
+      process.env["DIRECT_URL"]?.trim() ||
+      process.env["DATABASE_URL"]?.trim(),
   },
 });
