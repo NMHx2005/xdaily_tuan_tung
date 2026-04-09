@@ -8,7 +8,12 @@ import { Separator } from "@/components/ui/separator";
 
 export const metadata: Metadata = {
   title: "Đặt hàng thành công",
-  robots: { index: false },
+  description: "Xác nhận đơn hàng tại XDAILY.",
+  robots: { index: false, follow: true },
+  openGraph: {
+    title: "Đặt hàng thành công | XDAILY",
+    description: "Xác nhận đơn hàng tại XDAILY.",
+  },
 };
 
 interface PageProps {

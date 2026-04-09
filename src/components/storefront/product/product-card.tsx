@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { toast } from "sonner";
 import type { ProductCardData } from "@/types";
+import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 import { useUIStore } from "@/stores/ui-store";
+import { ViewportPrefetchLink } from "@/components/storefront/viewport-prefetch-link";
 
 export function ProductCard({
   id,
@@ -38,18 +39,21 @@ export function ProductCard({
       slug,
       maxStock: 99,
     });
-    toast.success("Đã thêm vào giỏ hàng");
+    toast.success(`Đã thêm ${name} vào giỏ hàng`);
     openCartDrawer();
   }
 
   return (
-    <Link href={`/products/${slug}`} className="group block cursor-pointer">
+    <ViewportPrefetchLink href={`/products/${slug}`} className="group block cursor-pointer">
       <div className="relative aspect-square overflow-hidden rounded-lg bg-neutral-100">
         <Image
           src={thumbnail}
           alt={name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL={TINY_BLUR_DATA_URL}
           className={`object-cover transition-all duration-300 ${
             hoverImage
               ? "group-hover:opacity-0"
@@ -62,6 +66,9 @@ export function ProductCard({
             alt={`${name} - hover`}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            loading="lazy"
+            placeholder="blur"
+            blurDataURL={TINY_BLUR_DATA_URL}
             className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           />
         )}
@@ -119,6 +126,6 @@ export function ProductCard({
           </span>
         )}
       </div>
-    </Link>
+    </ViewportPrefetchLink>
   );
 }

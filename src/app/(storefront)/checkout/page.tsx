@@ -4,7 +4,13 @@ import { CheckoutPageClient } from "@/components/storefront/checkout/checkout-pa
 
 export const metadata: Metadata = {
   title: "Thanh toán",
-  robots: { index: false },
+  description: "Hoàn tất đơn hàng tại XDAILY.",
+  robots: { index: false, follow: true },
+  openGraph: {
+    title: "Thanh toán | XDAILY",
+    description: "Hoàn tất đơn hàng tại XDAILY.",
+    url: "/checkout",
+  },
 };
 
 export default function CheckoutPage() {

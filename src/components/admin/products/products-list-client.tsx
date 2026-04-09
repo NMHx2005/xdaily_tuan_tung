@@ -40,11 +40,11 @@ export function ProductsListClient() {
 
   const deleteMut = trpc.product.delete.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa sản phẩm");
+      toast.success("Đã xóa thành công");
       void refetch();
       router.refresh();
     },
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   const columns = React.useMemo<ColumnDef<ProductRow>[]>(
@@ -166,7 +166,7 @@ export function ProductsListClient() {
           }
           Promise.all(rows.map((r) => deleteMut.mutateAsync({ id: r.id })))
             .then(() => {
-              toast.success("Đã xóa");
+              toast.success("Đã xóa thành công");
               void refetch();
               router.refresh();
             })

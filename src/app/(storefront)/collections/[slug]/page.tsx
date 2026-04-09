@@ -4,11 +4,14 @@ import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
 import { db } from "@/server/db";
 import { PRODUCTS_PER_PAGE } from "@/lib/constants";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { CollectionHeader } from "@/components/storefront/collection/collection-header";
 import { FilterSortBar } from "@/components/storefront/collection/filter-sort-bar";
 import { ProductGrid } from "@/components/storefront/product/product-grid";
 import { Pagination } from "@/components/storefront/collection/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Package } from "lucide-react";
 
 export const revalidate = 30;
 
@@ -29,13 +32,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   try {
     const collection = await trpc.collection.getBySlug({ slug });
+    const title = collection.seoTitle || `${collection.name}`;
+    const description =
+      collection.seoDescription || `Bộ sưu tập ${collection.name} tại XDAILY — nội thất cao cấp.`;
+    const ogImage = collection.image ? absoluteUrl(collection.image) : absoluteUrl(DEFAULT_OG_IMAGE_PATH);
     return {
-      title: collection.seoTitle || collection.name,
-      description: collection.seoDescription || `Bộ sưu tập ${collection.name} tại XDAILY`,
+      title,
+      description,
       openGraph: {
-        title: collection.name,
-        description: collection.seoDescription || `Bộ sưu tập ${collection.name} tại XDAILY`,
+        title: `${collection.name} | XDAILY`,
+        description,
         type: "website",
+        url: `/collections/${collection.slug}`,
+        images: [{ url: ogImage, alt: collection.name }],
       },
       alternates: {
         canonical: `/collections/${collection.slug}`,
@@ -107,8 +116,36 @@ export default async function CollectionPage({ params, searchParams }: PageProps
   const sortParams: Record<string, string> = {};
   if (sort !== "featured") sortParams.sort = sort;
 
+  const base = getSiteUrl();
+  const collectionUrl = `${base}/collections/${collection.slug}`;
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: collection.name,
+    ...(collection.description ? { description: collection.description } : {}),
+    url: collectionUrl,
+    isPartOf: { "@type": "WebSite", name: "XDAILY", url: base },
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Trang chủ", item: base },
+      { "@type": "ListItem", position: 2, name: collection.name, item: collectionUrl },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       <Breadcrumbs
         items={[
           { label: collection.name },
@@ -130,11 +167,13 @@ export default async function CollectionPage({ params, searchParams }: PageProps
       {products.length > 0 ? (
         <ProductGrid products={products} columns={4} />
       ) : (
-        <div className="py-20 text-center">
-          <p className="text-lg text-neutral-500">
-            Chưa có sản phẩm trong danh mục này.
-          </p>
-        </div>
+        <EmptyState
+          icon={Package}
+          title="Chưa có sản phẩm"
+          description="Danh mục này chưa có sản phẩm. Vui lòng quay lại sau hoặc xem các bộ sưu tập khác."
+          actionLabel="Về trang chủ"
+          actionHref="/"
+        />
       )}
 
       <Pagination

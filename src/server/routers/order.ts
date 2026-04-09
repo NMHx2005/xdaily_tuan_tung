@@ -1,11 +1,22 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { Prisma } from '@prisma/client';
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '@/server/trpc/trpc';
 import { shippingSchema } from '@/lib/validators';
 import { generateOrderNumber } from '@/lib/utils';
 import { FREE_SHIPPING_THRESHOLD, DEFAULT_SHIPPING_FEE } from '@/lib/constants';
 import { createVnpayPaymentUrl } from '@/lib/payment/vnpay';
+import { sendOrderConfirmationEmail } from '@/lib/emails/send-order-confirmation';
+
+/** Matches `product.findMany` include in `create` (images + variants). */
+type ProductForCheckout = {
+  id: string;
+  name: string;
+  price: number;
+  inStock: boolean;
+  stockQuantity: number;
+  images: { url: string }[];
+  variants: { id: string; name: string; inStock: boolean; price: number }[];
+};
 
 export const orderRouter = router({
   create: publicProcedure
@@ -26,13 +37,13 @@ export const orderRouter = router({
       const { shipping, paymentMethod, items } = input;
 
       const uniqueProductIds = [...new Set(items.map((i) => i.productId))];
-      const products = await ctx.db.product.findMany({
+      const products = (await ctx.db.product.findMany({
         where: { id: { in: uniqueProductIds } },
         include: {
           images: { take: 1, orderBy: { position: 'asc' } },
           variants: true,
         },
-      });
+      })) as ProductForCheckout[];
 
       if (products.length !== uniqueProductIds.length) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Một số sản phẩm không tồn tại' });
@@ -120,7 +131,10 @@ export const orderRouter = router({
             create: orderItems,
           },
         },
+        include: { items: true },
       });
+
+      void sendOrderConfirmationEmail(order);
 
       if (paymentMethod === 'VNPAY') {
         try {
@@ -189,9 +203,7 @@ export const orderRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const skip = (input.page - 1) * input.limit;
-      const where: Prisma.OrderWhereInput | undefined = input.status
-        ? { status: input.status }
-        : undefined;
+      const where = input.status !== undefined ? { status: input.status } : undefined;
 
       const [items, total] = await Promise.all([
         ctx.db.order.findMany({

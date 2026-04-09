@@ -170,7 +170,9 @@ export const RichTextEditor = React.forwardRef<
   ref
 ) {
   const onChangeRef = React.useRef(onChange);
-  onChangeRef.current = onChange;
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const editor = useEditor({
     immediatelyRender: false,

@@ -5,9 +5,9 @@ import bcrypt from 'bcryptjs';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
-function img(name: string, idx = 1) {
-  const encoded = encodeURIComponent(name);
-  return `https://via.placeholder.com/800x800/EEEEEE/999999?text=${encoded}+${idx}`;
+/** Ảnh tĩnh trong /public — tránh Next Image phải fetch ra ngoài (dễ lỗi TLS/mạng với via.placeholder.com). */
+function img(_name: string, _idx = 1) {
+  return '/placeholders/product.svg';
 }
 
 async function main() {
@@ -36,7 +36,7 @@ async function main() {
   const adminHash = await bcrypt.hash('admin123', 10);
   const customerHash = await bcrypt.hash('test123', 10);
 
-  const admin = await prisma.user.create({
+  await prisma.user.create({
     data: { email: 'admin@xdaily.vn', name: 'XDAILY Admin', passwordHash: adminHash, role: 'ADMIN' },
   });
   const customer = await prisma.user.create({
@@ -168,16 +168,16 @@ async function main() {
   console.log('🖼️  Creating banners...');
   await prisma.banner.createMany({
     data: [
-      { image: 'https://via.placeholder.com/1920x600/2d2d2d/ffffff?text=Bo+suu+tap+ghe+an', title: 'Bộ sưu tập ghế ăn', subtitle: 'Đa dạng kiểu dáng, chất lượng cao cấp', link: '/collections/ghe-an', position: 0 },
-      { image: 'https://via.placeholder.com/1920x600/4a3728/ffffff?text=Ghe+bar+phong+cach', title: 'Ghế bar phong cách', subtitle: 'Điểm nhấn hoàn hảo cho quầy bar', link: '/collections/ghe-bar', position: 1 },
-      { image: 'https://via.placeholder.com/1920x600/1a1a2e/ffffff?text=Ban+tra+hien+dai', title: 'Bàn trà hiện đại', subtitle: 'Bộ sưu tập bàn trà cao cấp', link: '/collections/ban-tra', position: 2 },
+      { image: '/placeholders/cover.svg', title: 'Bộ sưu tập ghế ăn', subtitle: 'Đa dạng kiểu dáng, chất lượng cao cấp', link: '/collections/ghe-an', position: 0 },
+      { image: '/placeholders/cover.svg', title: 'Ghế bar phong cách', subtitle: 'Điểm nhấn hoàn hảo cho quầy bar', link: '/collections/ghe-bar', position: 1 },
+      { image: '/placeholders/cover.svg', title: 'Bàn trà hiện đại', subtitle: 'Bộ sưu tập bàn trà cao cấp', link: '/collections/ban-tra', position: 2 },
     ],
   });
 
   // ── FLASH SALE ──
   console.log('⚡ Creating flash sale...');
   const flashSaleProductIndices = [0, 2, 4, 7, 15]; // granite, tolix-a, katana, sung-bo, bts8
-  const flashSale = await prisma.flashSale.create({
+  await prisma.flashSale.create({
     data: {
       name: 'Flash Sale Tháng 4',
       startsAt: new Date(),
@@ -210,7 +210,7 @@ async function main() {
       data: {
         ...b,
         content: `<h2>${b.title}</h2><p>${b.excerpt}</p><p>Trong ngành công nghiệp nội thất hiện đại, việc hiểu rõ về các loại vật liệu là vô cùng quan trọng. Điều này giúp người tiêu dùng có thể đưa ra quyết định mua sắm thông minh và phù hợp với nhu cầu sử dụng.</p><h3>Giới thiệu</h3><p>Bài viết này sẽ cung cấp cho bạn những thông tin chi tiết và hữu ích nhất về chủ đề này. Hãy cùng XDAILY tìm hiểu nhé!</p><h3>Kết luận</h3><p>Hy vọng bài viết đã cung cấp cho bạn những kiến thức bổ ích. Đừng quên ghé thăm showroom XDAILY để trải nghiệm trực tiếp các sản phẩm nội thất cao cấp.</p>`,
-        thumbnail: `https://via.placeholder.com/800x450/333333/ffffff?text=Blog+${i + 1}`,
+        thumbnail: '/placeholders/cover.svg',
         author: 'XDAILY',
         isPublished: true,
         publishedAt: new Date(Date.now() - i * 3 * 24 * 60 * 60 * 1000),

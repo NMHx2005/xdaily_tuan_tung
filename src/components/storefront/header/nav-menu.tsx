@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { COLLECTIONS } from "@/lib/constants";
 
 export function NavMenu() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -36,16 +38,20 @@ export function NavMenu() {
                 Danh mục sản phẩm
               </p>
               <div className="grid grid-cols-3 gap-1">
-                {COLLECTIONS.map((collection) => (
-                  <Link
-                    key={collection.slug}
-                    href={`/collections/${collection.slug}`}
-                    className="rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-gold"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {collection.name}
-                  </Link>
-                ))}
+                {COLLECTIONS.map((collection) => {
+                  const href = `/collections/${collection.slug}`;
+                  return (
+                    <Link
+                      key={collection.slug}
+                      href={href}
+                      className="rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-gold"
+                      onClick={() => setIsOpen(false)}
+                      onMouseEnter={() => router.prefetch(href)}
+                    >
+                      {collection.name}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>

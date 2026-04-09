@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { Separator } from "@/components/ui/separator";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const statusMap: Record<
   string,
@@ -51,14 +52,14 @@ export function OrderHistoryClient() {
           ))}
         </div>
       ) : !orders || orders.length === 0 ? (
-        <div className="mt-12 flex flex-col items-center py-16 text-center">
-          <Package className="h-16 w-16 text-neutral-300" />
-          <p className="mt-4 text-lg font-medium text-neutral-600">
-            Bạn chưa có đơn hàng nào
-          </p>
-          <p className="mt-1 text-sm text-neutral-400">
-            Hãy bắt đầu mua sắm ngay!
-          </p>
+        <div className="mt-8">
+          <EmptyState
+            icon={Package}
+            title="Bạn chưa có đơn hàng"
+            description="Khi bạn đặt hàng, lịch sử sẽ hiển thị tại đây."
+            actionLabel="Mua sắm ngay"
+            actionHref="/"
+          />
         </div>
       ) : (
         <div className="mt-6 space-y-4">

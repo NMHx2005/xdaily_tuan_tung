@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import { formatDate } from "@/lib/utils";
 
 interface BlogPost {
@@ -48,6 +49,9 @@ export function BlogPreview({ posts }: BlogPreviewProps) {
                     alt={post.title}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    loading="lazy"
+                    placeholder="blur"
+                    blurDataURL={TINY_BLUR_DATA_URL}
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (

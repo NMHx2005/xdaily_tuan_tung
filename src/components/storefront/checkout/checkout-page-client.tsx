@@ -46,11 +46,12 @@ export function CheckoutPageClient() {
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {
+        toast.success("Đặt hàng thành công!");
         router.push(`/order-confirmation/${data.orderNumber}`);
       }
     },
-    onError: (error) => {
-      toast.error(error.message || "Đã xảy ra lỗi khi đặt hàng");
+    onError: () => {
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
       setIsSubmitting(false);
     },
   });

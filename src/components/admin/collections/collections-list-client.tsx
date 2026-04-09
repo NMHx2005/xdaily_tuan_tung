@@ -22,20 +22,20 @@ export function CollectionsListClient() {
 
   const updateMut = trpc.collection.update.useMutation({
     onSuccess: () => {
-      toast.success("Đã cập nhật");
+      toast.success("Đã lưu thành công");
       void utils.collection.getAllForAdmin.invalidate();
       router.refresh();
     },
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   const deleteMut = trpc.collection.delete.useMutation({
     onSuccess: () => {
-      toast.success("Đã xóa");
+      toast.success("Đã xóa thành công");
       void utils.collection.getAllForAdmin.invalidate();
       router.refresh();
     },
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   const columns = React.useMemo<ColumnDef<Row>[]>(

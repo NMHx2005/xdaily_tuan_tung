@@ -4,7 +4,13 @@ import { SearchResultsClient } from "@/components/storefront/search/search-resul
 
 export const metadata: Metadata = {
   title: "Tìm kiếm",
-  robots: { index: false },
+  description: "Tìm kiếm sản phẩm và bài viết trên XDAILY.",
+  robots: { index: false, follow: true },
+  openGraph: {
+    title: "Tìm kiếm | XDAILY",
+    description: "Tìm kiếm sản phẩm và bài viết trên XDAILY.",
+    url: "/search",
+  },
 };
 
 export default function SearchPage() {

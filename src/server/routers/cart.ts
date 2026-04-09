@@ -1,4 +1,4 @@
-import { router, publicProcedure, protectedProcedure } from '@/server/trpc/trpc';
+import { router, protectedProcedure } from '@/server/trpc/trpc';
 
 export const cartRouter = router({
   get: protectedProcedure.query(async () => {

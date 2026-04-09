@@ -40,11 +40,11 @@ export function CollectionCreateClient() {
 
   const createMut = trpc.collection.create.useMutation({
     onSuccess: (c) => {
-      toast.success("Đã tạo bộ sưu tập");
+      toast.success("Đã lưu thành công");
       router.push(`/admin/collections/${c.id}`);
       router.refresh();
     },
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   const form = useForm<FormValues>({

@@ -57,6 +57,11 @@ import {
 
 type ScalarForm = z.infer<typeof adminProductScalarSchema>;
 type ProductAdmin = inferRouterOutputs<AppRouter>["product"]["getById"];
+type ProductAdminImage = ProductAdmin["images"][number];
+type ProductAdminVariant = ProductAdmin["variants"][number];
+type ProductAdminCollection = ProductAdmin["collections"][number];
+type CollectionListItem =
+  inferRouterOutputs<AppRouter>["collection"]["getAllForAdmin"][number];
 
 function defaultScalar(): ScalarForm {
   return {
@@ -102,7 +107,7 @@ function productToScalar(p: ProductAdmin): ScalarForm {
 }
 
 function productToImages(p: ProductAdmin): ImageUploadRow[] {
-  return p.images.map((img) => ({
+  return p.images.map((img: ProductAdminImage) => ({
     id: img.id,
     url: img.url,
     alt: img.alt,
@@ -110,7 +115,7 @@ function productToImages(p: ProductAdmin): ImageUploadRow[] {
 }
 
 function productToVariants(p: ProductAdmin): VariantFormRow[] {
-  return p.variants.map((v) => ({
+  return p.variants.map((v: ProductAdminVariant) => ({
     id: v.id,
     name: v.name,
     colorHex: v.colorHex || "#888888",
@@ -145,7 +150,9 @@ export function ProductForm({
     source ? productToVariants(source) : []
   );
   const [collectionIds, setCollectionIds] = React.useState<string[]>(() =>
-    source ? source.collections.map((c) => c.collectionId) : []
+    source
+      ? source.collections.map((c: ProductAdminCollection) => c.collectionId)
+      : []
   );
 
   const { data: collections = [] } = trpc.collection.getAllForAdmin.useQuery();
@@ -168,10 +175,10 @@ export function ProductForm({
   }, [mode, nameWatch, form]);
 
   const createMut = trpc.product.create.useMutation({
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
   const updateMut = trpc.product.update.useMutation({
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   const buildPayload = (scalar: ScalarForm) => {
@@ -214,7 +221,7 @@ export function ProductForm({
       const payload = buildPayload(scalar);
       if (mode === "create") {
         const created = await createMut.mutateAsync(payload);
-        toast.success("Đã tạo sản phẩm");
+        toast.success("Đã lưu thành công");
         if (opts.stay) {
           router.push(`/admin/products/${created.id}`);
         } else {
@@ -226,7 +233,7 @@ export function ProductForm({
           id: source.id,
           ...payload,
         });
-        toast.success("Đã cập nhật");
+        toast.success("Đã lưu thành công");
         if (!opts.stay) {
           router.push("/admin/products");
         }
@@ -442,7 +449,7 @@ export function ProductForm({
               {collections.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Chưa có danh mục</p>
               ) : (
-                collections.map((c) => (
+                collections.map((c: CollectionListItem) => (
                   <label
                     key={c.id}
                     className="flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm hover:bg-muted/50"

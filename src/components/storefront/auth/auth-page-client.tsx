@@ -68,7 +68,7 @@ export function AuthPageClient() {
         router.refresh();
       }
     } catch {
-      toast.error("Đã xảy ra lỗi");
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +109,7 @@ export function AuthPageClient() {
         router.refresh();
       }
     } catch {
-      toast.error("Đã xảy ra lỗi");
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
     } finally {
       setIsLoading(false);
     }

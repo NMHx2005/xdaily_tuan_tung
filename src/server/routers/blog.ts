@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 
 const blogInclude = {
@@ -17,6 +18,71 @@ const blogInclude = {
 } as const;
 
 export const blogRouter = router({
+  /** Admin: tất cả bài (nháp + đã đăng), có phân trang & tìm theo tiêu đề */
+  listForAdmin: adminProcedure
+    .input(
+      z
+        .object({
+          page: z.number().int().positive().default(1),
+          limit: z.number().int().positive().max(50).default(20),
+          q: z.string().optional(),
+        })
+        .default({ page: 1, limit: 20 })
+    )
+    .query(async ({ ctx, input }) => {
+      const skip = (input.page - 1) * input.limit;
+      const term = input.q?.trim();
+      const where: Prisma.BlogPostWhereInput | undefined = term
+        ? {
+            title: { contains: term, mode: 'insensitive' },
+          }
+        : undefined;
+
+      const [items, total] = await Promise.all([
+        ctx.db.blogPost.findMany({
+          where,
+          skip,
+          take: input.limit,
+          orderBy: { updatedAt: 'desc' },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            excerpt: true,
+            thumbnail: true,
+            author: true,
+            tags: true,
+            isPublished: true,
+            publishedAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        }),
+        ctx.db.blogPost.count({ where }),
+      ]);
+
+      const totalPages = Math.ceil(total / input.limit) || 1;
+
+      return {
+        items,
+        total,
+        page: input.page,
+        totalPages,
+        hasNext: input.page < totalPages,
+        hasPrev: input.page > 1,
+      };
+    }),
+
+  getById: adminProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const post = await ctx.db.blogPost.findUnique({ where: { id: input.id } });
+      if (!post) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy bài viết' });
+      }
+      return post;
+    }),
+
   getAll: publicProcedure
     .input(
       z.object({
@@ -86,21 +152,27 @@ export const blogRouter = router({
       z.object({
         slug: z.string().min(1),
         title: z.string().min(1),
-        excerpt: z.string().default(''),
+        excerpt: z.string().max(300).default(''),
         content: z.string().default(''),
         thumbnail: z.string().nullable().default(null),
         author: z.string().default('XDAILY'),
         tags: z.array(z.string()).default([]),
         isPublished: z.boolean().default(false),
+        publishedAt: z.coerce.date().nullable().optional(),
         seoTitle: z.string().default(''),
         seoDescription: z.string().default(''),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { publishedAt: pubIn, ...rest } = input;
+      let publishedAt: Date | null = null;
+      if (input.isPublished) {
+        publishedAt = pubIn ?? new Date();
+      }
       return ctx.db.blogPost.create({
         data: {
-          ...input,
-          publishedAt: input.isPublished ? new Date() : null,
+          ...rest,
+          publishedAt,
         },
       });
     }),
@@ -111,28 +183,35 @@ export const blogRouter = router({
         id: z.string(),
         slug: z.string().optional(),
         title: z.string().optional(),
-        excerpt: z.string().optional(),
+        excerpt: z.string().max(300).optional(),
         content: z.string().optional(),
         thumbnail: z.string().nullable().optional(),
         author: z.string().optional(),
         tags: z.array(z.string()).optional(),
         isPublished: z.boolean().optional(),
+        publishedAt: z.coerce.date().nullable().optional(),
         seoTitle: z.string().optional(),
         seoDescription: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, isPublished, ...data } = input;
+      const { id, isPublished, publishedAt: pubAt, ...data } = input;
 
       const updateData: Record<string, unknown> = { ...data };
       if (isPublished !== undefined) {
         updateData.isPublished = isPublished;
         if (isPublished) {
           const existing = await ctx.db.blogPost.findUnique({ where: { id } });
-          if (!existing?.publishedAt) {
+          if (pubAt !== undefined) {
+            updateData.publishedAt = pubAt;
+          } else if (!existing?.publishedAt) {
             updateData.publishedAt = new Date();
           }
+        } else {
+          updateData.publishedAt = null;
         }
+      } else if (pubAt !== undefined) {
+        updateData.publishedAt = pubAt;
       }
 
       return ctx.db.blogPost.update({ where: { id }, data: updateData });

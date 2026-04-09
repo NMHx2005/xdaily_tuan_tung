@@ -1,5 +1,6 @@
 export const SITE_NAME = "XDAILY";
 export const SITE_DESCRIPTION = "Nhà máy nội thất XDAILY - Ghế, bàn, sofa cao cấp";
+/** Client-friendly base; server SEO should use `getSiteUrl()` from `@/lib/seo`. */
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const COLLECTIONS = [

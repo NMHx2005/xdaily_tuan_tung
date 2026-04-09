@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
+
+const ProductMainZoomImage = dynamic(() => import("./product-main-zoom-image"), {
+  ssr: false,
+  loading: () => (
+    <div className="aspect-square animate-pulse rounded-lg bg-neutral-100" aria-hidden />
+  ),
+});
 
 interface ProductImage {
   id: string;
@@ -16,26 +25,16 @@ interface ProductGalleryProps {
   activeVariantImage?: string | null;
 }
 
-export function ProductGallery({
+function ProductGalleryInner({
   images,
   productName,
   activeVariantImage,
 }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isZooming, setIsZooming] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-  const prevVariantImage = useRef(activeVariantImage);
 
   const allImages = activeVariantImage
     ? [{ id: "variant", url: activeVariantImage, alt: productName }, ...images]
     : images;
-
-  useEffect(() => {
-    if (activeVariantImage !== prevVariantImage.current) {
-      setSelectedIndex(0);
-      prevVariantImage.current = activeVariantImage;
-    }
-  }, [activeVariantImage]);
 
   const mainImage = allImages[selectedIndex] ?? allImages[0];
 
@@ -47,44 +46,21 @@ export function ProductGallery({
     );
   }
 
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomPos({ x, y });
-  }
-
   return (
     <div>
-      <div
-        className="relative aspect-square overflow-hidden rounded-lg bg-neutral-100 cursor-crosshair"
-        onMouseEnter={() => setIsZooming(true)}
-        onMouseLeave={() => setIsZooming(false)}
-        onMouseMove={handleMouseMove}
-      >
-        <Image
-          src={mainImage.url}
-          alt={mainImage.alt || productName}
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className={cn(
-            "object-cover transition-transform duration-200",
-            isZooming && "scale-150"
-          )}
-          style={
-            isZooming
-              ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` }
-              : undefined
-          }
-        />
-      </div>
+      <ProductMainZoomImage
+        url={mainImage.url}
+        alt={mainImage.alt || productName}
+        productName={productName}
+        priority
+      />
 
       {allImages.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {allImages.map((img, i) => (
             <button
               key={img.id}
+              type="button"
               onClick={() => setSelectedIndex(i)}
               className={cn(
                 "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors",
@@ -98,6 +74,9 @@ export function ProductGallery({
                 alt={img.alt || `${productName} ${i + 1}`}
                 fill
                 sizes="64px"
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL={TINY_BLUR_DATA_URL}
                 className="object-cover"
               />
             </button>
@@ -106,4 +85,10 @@ export function ProductGallery({
       )}
     </div>
   );
+}
+
+/** `key` trên ảnh biến thể reset chỉ số ảnh đang xem khi đổi variant. */
+export function ProductGallery(props: ProductGalleryProps) {
+  const k = props.activeVariantImage ?? "__default__";
+  return <ProductGalleryInner key={k} {...props} />;
 }

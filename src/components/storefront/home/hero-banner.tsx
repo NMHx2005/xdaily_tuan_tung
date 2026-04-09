@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
+import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -113,6 +114,9 @@ function SlideContent({ banner }: { banner: BannerData }) {
         alt={banner.title || "XDAILY Banner"}
         fill
         priority
+        loading="eager"
+        placeholder="blur"
+        blurDataURL={TINY_BLUR_DATA_URL}
         sizes="100vw"
         className="hidden object-cover sm:block"
       />
@@ -121,6 +125,9 @@ function SlideContent({ banner }: { banner: BannerData }) {
         alt={banner.title || "XDAILY Banner"}
         fill
         priority
+        loading="eager"
+        placeholder="blur"
+        blurDataURL={TINY_BLUR_DATA_URL}
         sizes="100vw"
         className="object-cover sm:hidden"
       />

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
@@ -29,7 +30,7 @@ export function CartItem({ item }: CartItemProps) {
 
   function handleRemove() {
     removeItem(item.id);
-    toast.success("Đã xóa khỏi giỏ hàng");
+    toast.info("Đã xóa khỏi giỏ hàng");
   }
 
   return (
@@ -43,6 +44,9 @@ export function CartItem({ item }: CartItemProps) {
           alt={item.name}
           fill
           sizes="80px"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL={TINY_BLUR_DATA_URL}
           className="object-cover"
         />
       </Link>

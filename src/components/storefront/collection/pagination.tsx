@@ -82,7 +82,7 @@ export function Pagination({ currentPage, totalPages, baseUrl, searchParams }: P
         <Link
           href={buildUrl(baseUrl, currentPage + 1, searchParams)}
           className={cn(baseStyle, "border-neutral-200 bg-white hover:bg-neutral-50 px-2")}
-          aria-label="Trang tiếp"
+          aria-label="Trang sau"
         >
           <ChevronRight className="h-4 w-4" />
         </Link>

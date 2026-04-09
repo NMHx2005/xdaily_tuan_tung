@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
-import { formatPrice } from "@/lib/utils";
-import { SITE_URL } from "@/lib/constants";
+import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { ProductDetailClient } from "@/components/storefront/product/product-detail-client";
 import { ProductReviews } from "@/components/storefront/product/product-reviews";
@@ -21,14 +20,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   try {
     const product = await trpc.product.getBySlug({ slug });
+    const title = product.seoTitle || product.name;
+    const description = product.seoDescription || product.shortDescription || product.name;
+    const ogImages = product.images.length
+      ? product.images.map((i) => ({ url: absoluteUrl(i.url), alt: i.alt }))
+      : [{ url: absoluteUrl("/globe.svg"), alt: product.name }];
     return {
-      title: product.seoTitle || product.name,
-      description: product.seoDescription || product.shortDescription,
+      title,
+      description,
       openGraph: {
-        title: product.name,
-        description: product.shortDescription,
-        images: product.images.map((i) => ({ url: i.url, alt: i.alt })),
+        title,
+        description,
+        url: `/products/${product.slug}`,
         type: "website",
+        images: ogImages,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: ogImages.map((i) => (typeof i.url === "string" ? i.url : String(i.url))),
       },
       alternates: {
         canonical: `/products/${product.slug}`,
@@ -95,11 +106,14 @@ export default async function ProductPage({ params }: PageProps) {
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
       : undefined;
 
+  const base = getSiteUrl();
+  const productUrl = `${base}/products/${product.slug}`;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    image: product.images.map((i) => i.url),
+    image: product.images.map((i) => absoluteUrl(i.url)),
     description: product.shortDescription || product.description,
     brand: { "@type": "Brand", name: "XDAILY" },
     sku: product.sku,
@@ -110,7 +124,7 @@ export default async function ProductPage({ params }: PageProps) {
       availability: product.inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      url: `${SITE_URL}/products/${product.slug}`,
+      url: productUrl,
     },
     ...(reviews.length > 0 && avgRating !== undefined
       ? {
@@ -123,11 +137,51 @@ export default async function ProductPage({ params }: PageProps) {
       : {}),
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: base,
+      },
+      ...(collectionInfo
+        ? [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: collectionInfo.name,
+              item: `${base}/collections/${collectionInfo.slug}`,
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.name,
+              item: productUrl,
+            },
+          ]
+        : [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: product.name,
+              item: productUrl,
+            },
+          ]),
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <Breadcrumbs items={breadcrumbItems} />

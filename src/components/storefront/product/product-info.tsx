@@ -75,7 +75,7 @@ export function ProductInfo({
       maxStock: maxQty,
       quantity,
     });
-    toast.success("Đã thêm vào giỏ hàng");
+    toast.success(`Đã thêm ${name} vào giỏ hàng`);
     openCartDrawer();
   }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown, X } from "lucide-react";
 import {
   Sheet,
@@ -13,6 +14,7 @@ import { useUIStore } from "@/stores/ui-store";
 import { COLLECTIONS } from "@/lib/constants";
 
 export function MobileMenu() {
+  const router = useRouter();
   const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
   const closeMobileMenu = useUIStore((s) => s.closeMobileMenu);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
@@ -56,16 +58,20 @@ export function MobileMenu() {
 
             {isProductsOpen && (
               <div className="bg-muted/50 py-1">
-                {COLLECTIONS.map((collection) => (
-                  <Link
-                    key={collection.slug}
-                    href={`/collections/${collection.slug}`}
-                    onClick={handleNav}
-                    className="block px-10 py-2.5 text-sm transition-colors hover:text-gold"
-                  >
-                    {collection.name}
-                  </Link>
-                ))}
+                {COLLECTIONS.map((collection) => {
+                  const href = `/collections/${collection.slug}`;
+                  return (
+                    <Link
+                      key={collection.slug}
+                      href={href}
+                      onClick={handleNav}
+                      onMouseEnter={() => router.prefetch(href)}
+                      className="block px-10 py-2.5 text-sm transition-colors hover:text-gold"
+                    >
+                      {collection.name}
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </div>

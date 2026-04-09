@@ -84,8 +84,8 @@ export function ProductReviews({ productId, reviews: initialReviews }: ProductRe
       setShowForm(false);
       toast.success("Cảm ơn bạn đã đánh giá!");
     },
-    onError: (err) => {
-      toast.error(err.message);
+    onError: () => {
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
     },
   });
 

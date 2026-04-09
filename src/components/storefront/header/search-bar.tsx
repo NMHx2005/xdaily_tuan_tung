@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,11 @@ export function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  const clearAndClose = useCallback(() => {
+    setQuery("");
+    closeSearch();
+  }, [closeSearch]);
+
   const { data, isFetching } = trpc.search.global.useQuery(
     { query: debouncedQuery },
     { enabled: debouncedQuery.length >= 2 }
@@ -31,31 +36,29 @@ export function SearchBar() {
   useEffect(() => {
     if (isSearchOpen) {
       inputRef.current?.focus();
-    } else {
-      setQuery("");
     }
   }, [isSearchOpen]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") closeSearch();
+      if (e.key === "Escape") clearAndClose();
     }
     if (isSearchOpen) {
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [isSearchOpen, closeSearch]);
+  }, [isSearchOpen, clearAndClose]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-      closeSearch();
+      clearAndClose();
     }
   }
 
   function handleNavigate(href: string) {
-    closeSearch();
+    clearAndClose();
     router.push(href);
   }
 
@@ -65,7 +68,7 @@ export function SearchBar() {
     <>
       <div
         className="fixed inset-0 z-40 bg-black/30"
-        onClick={closeSearch}
+        onClick={clearAndClose}
       />
       <div className="absolute left-0 right-0 top-full z-50 border-b bg-background shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
@@ -81,7 +84,7 @@ export function SearchBar() {
             />
             <button
               type="button"
-              onClick={closeSearch}
+              onClick={clearAndClose}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="h-5 w-5" />
@@ -165,7 +168,7 @@ export function SearchBar() {
 
                   <Link
                     href={`/search?q=${encodeURIComponent(debouncedQuery)}`}
-                    onClick={() => closeSearch()}
+                    onClick={() => clearAndClose()}
                     className="block border-t px-4 py-3 text-center text-sm font-medium text-primary transition-colors hover:bg-neutral-50"
                   >
                     Xem tất cả kết quả cho &ldquo;{debouncedQuery}&rdquo;

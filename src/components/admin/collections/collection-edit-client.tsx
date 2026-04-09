@@ -60,10 +60,10 @@ export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
 
   const updateMut = trpc.collection.update.useMutation({
     onSuccess: () => {
-      toast.success("Đã lưu");
+      toast.success("Đã lưu thành công");
       router.refresh();
     },
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   const form = useForm<FormValues>({

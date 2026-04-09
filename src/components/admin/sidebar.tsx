@@ -12,7 +12,6 @@ import {
   Settings,
   ExternalLink,
   Menu,
-  X,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useState } from "react";

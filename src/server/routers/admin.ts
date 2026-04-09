@@ -1,6 +1,23 @@
+import type { Context } from '@/server/trpc/context';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
+
+type Db = Context['db'];
+
+/** Interactive `$transaction` client — same as `Omit<PrismaClient, ITXClientDenyList>`. */
+type PrismaTransactionClient = Omit<
+  Db,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends' | '$use'
+>;
+
+/** Shape of `orderItem.groupBy` rows for top-products (by productId + sums). */
+type AdminTopProductGroupRow = {
+  productId: string;
+  _sum: { quantity: number | null; price: number | null };
+};
+
+type ProductWithThumb = Awaited<ReturnType<Db['product']['findMany']>>[number];
 
 export const adminRouter = router({
   getBanners: publicProcedure.query(async ({ ctx }) => {
@@ -10,11 +27,18 @@ export const adminRouter = router({
     });
   }),
 
+  /** Admin settings: mọi banner (kể cả tắt) */
+  getBannersAll: adminProcedure.query(async ({ ctx }) => {
+    return ctx.db.banner.findMany({
+      orderBy: { position: 'asc' },
+    });
+  }),
+
   createBanner: adminProcedure
     .input(
       z.object({
-        image: z.string().url(),
-        mobileImage: z.string().url().nullable().default(null),
+        image: z.string().min(1),
+        mobileImage: z.string().min(1).nullable().default(null),
         title: z.string().default(''),
         subtitle: z.string().default(''),
         link: z.string().default(''),
@@ -30,8 +54,8 @@ export const adminRouter = router({
     .input(
       z.object({
         id: z.string(),
-        image: z.string().url().optional(),
-        mobileImage: z.string().url().nullable().optional(),
+        image: z.string().min(1).optional(),
+        mobileImage: z.string().min(1).nullable().optional(),
         title: z.string().optional(),
         subtitle: z.string().optional(),
         link: z.string().optional(),
@@ -87,13 +111,120 @@ export const adminRouter = router({
     });
   }),
 
+  getFlashSale: adminProcedure.query(async ({ ctx }) => {
+    const fs = await ctx.db.flashSale.findFirst({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        items: {
+          orderBy: { position: 'asc' },
+          include: {
+            product: {
+              include: {
+                images: { take: 1, orderBy: { position: 'asc' } },
+              },
+            },
+          },
+        },
+      },
+    });
+    return fs;
+  }),
+
+  updateFlashSale: adminProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+        name: z.string().min(1),
+        startsAt: z.coerce.date(),
+        endsAt: z.coerce.date(),
+        isActive: z.boolean(),
+        items: z.array(
+          z.object({
+            productId: z.string(),
+            salePrice: z.number().int().positive(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, items, ...data } = input;
+
+      return ctx.db.$transaction(async (tx: PrismaTransactionClient) => {
+        let flashId = id;
+        if (flashId) {
+          await tx.flashSale.update({
+            where: { id: flashId },
+            data: {
+              name: data.name,
+              startsAt: data.startsAt,
+              endsAt: data.endsAt,
+              isActive: data.isActive,
+            },
+          });
+        } else {
+          const created = await tx.flashSale.create({
+            data: {
+              name: data.name,
+              startsAt: data.startsAt,
+              endsAt: data.endsAt,
+              isActive: data.isActive,
+            },
+          });
+          flashId = created.id;
+        }
+
+        await tx.flashSaleItem.deleteMany({ where: { flashSaleId: flashId } });
+        if (items.length > 0) {
+          await tx.flashSaleItem.createMany({
+            data: items.map((it, index) => ({
+              flashSaleId: flashId!,
+              productId: it.productId,
+              salePrice: it.salePrice,
+              position: index,
+            })),
+          });
+        }
+
+        return tx.flashSale.findUnique({
+          where: { id: flashId },
+          include: {
+            items: {
+              orderBy: { position: 'asc' },
+              include: {
+                product: {
+                  include: {
+                    images: { take: 1, orderBy: { position: 'asc' } },
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+    }),
+
+  reorderBanners: adminProcedure
+    .input(z.object({ orderedIds: z.array(z.string()) }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(
+        input.orderedIds.map((id, index) =>
+          ctx.db.banner.update({
+            where: { id },
+            data: { position: index },
+          })
+        )
+      );
+      return { ok: true };
+    }),
+
   getTopProducts: adminProcedure.query(async ({ ctx }) => {
-    const items = await ctx.db.orderItem.groupBy({
+    const rows = await ctx.db.orderItem.groupBy({
       by: ['productId'],
       _sum: { quantity: true, price: true },
       orderBy: { _sum: { quantity: 'desc' } },
       take: 5,
     });
+    const items = rows as AdminTopProductGroupRow[];
 
     const productIds = items.map((i) => i.productId);
     const products = await ctx.db.product.findMany({
@@ -102,7 +233,7 @@ export const adminRouter = router({
     });
 
     return items.map((item) => {
-      const product = products.find((p) => p.id === item.productId);
+      const product = products.find((p: ProductWithThumb) => p.id === item.productId);
       return {
         id: item.productId,
         name: product?.name ?? 'Sản phẩm đã xóa',

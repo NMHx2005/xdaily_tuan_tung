@@ -1,25 +1,41 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
-import { SITE_URL } from "@/lib/constants";
-import { HeroBanner } from "@/components/storefront/home/hero-banner";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FlashSaleSection } from "@/components/storefront/home/flash-sale-section";
+
+const HeroBanner = dynamic(
+  () =>
+    import("@/components/storefront/home/hero-banner").then((m) => m.HeroBanner),
+  {
+    loading: () => (
+      <div className="w-full">
+        <Skeleton className="h-[300px] w-full sm:h-[400px] lg:h-[500px]" />
+      </div>
+    ),
+  }
+);
 import { ProductSection } from "@/components/storefront/home/product-section";
 import { BlogPreview } from "@/components/storefront/home/blog-preview";
 import { NewsletterForm } from "@/components/storefront/home/newsletter-form";
 
 export const revalidate = 60;
 
+const homeTitle = "XDAILY - Nhà máy nội thất cao cấp";
+const homeDescription = "Ghế ăn, bàn trà, ghế bar, sofa… cao cấp";
+
 export const metadata: Metadata = {
-  title: "XDAILY - Nhà máy nội thất cao cấp",
-  description:
-    "XDAILY cung cấp ghế ăn, bàn trà, ghế bar, sofa, giường ngủ cao cấp. Thiết kế hiện đại, giá tốt nhất.",
+  title: { absolute: homeTitle },
+  description: homeDescription,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "XDAILY - Nhà máy nội thất cao cấp",
-    description:
-      "XDAILY cung cấp ghế ăn, bàn trà, ghế bar, sofa, giường ngủ cao cấp. Thiết kế hiện đại, giá tốt nhất.",
+    title: homeTitle,
+    description: homeDescription,
     type: "website",
-    url: "https://xdaily.vn",
+    url: "/",
+    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: "XDAILY" }],
   },
 };
 
@@ -78,37 +94,36 @@ export default async function HomePage() {
   const coffeeTableCards = coffeeTablesResult?.items.map(toProductCard) ?? [];
   const barStoolCards = barStoolsResult?.items.map(toProductCard) ?? [];
 
-  const jsonLd = {
+  const base = getSiteUrl();
+  const orgJsonLd = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        name: "XDAILY",
-        url: SITE_URL,
-        logo: `${SITE_URL}/logo.png`,
-        sameAs: [
-          "https://www.facebook.com/xdaily.vn",
-          "https://www.instagram.com/xdaily.vn",
-        ],
-      },
-      {
-        "@type": "WebSite",
-        name: "XDAILY - Nhà máy nội thất cao cấp",
-        url: SITE_URL,
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${SITE_URL}/search?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
-      },
-    ],
+    "@type": "Organization",
+    name: "XDAILY",
+    url: base,
+    logo: absoluteUrl("/logo.png"),
+    description: "Nhà máy nội thất XDAILY",
+  };
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "XDAILY",
+    url: base,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${base}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
 
       <HeroBanner banners={banners} />

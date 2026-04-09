@@ -16,6 +16,8 @@ import {
 } from "@/components/admin/order-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ShoppingCart } from "lucide-react";
 
 type Row = inferRouterOutputs<AppRouter>["order"]["getAll"]["items"][number];
 
@@ -121,6 +123,7 @@ export function OrdersListClient() {
   );
 
   const items = data?.items ?? [];
+  const showEmpty = !isLoading && items.length === 0;
 
   return (
     <div className="space-y-4">
@@ -142,6 +145,13 @@ export function OrdersListClient() {
         ))}
       </div>
 
+      {showEmpty ? (
+        <EmptyState
+          icon={ShoppingCart}
+          title="Chưa có đơn hàng"
+          description="Khi có đơn mới, danh sách sẽ hiển thị tại đây."
+        />
+      ) : (
       <DataTable<Row>
         columns={columns}
         data={items}
@@ -155,6 +165,7 @@ export function OrdersListClient() {
         getRowId={(row) => row.id}
         onView={(row) => router.push(`/admin/orders/${row.id}`)}
       />
+      )}
     </div>
   );
 }

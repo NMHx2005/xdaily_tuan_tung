@@ -1,28 +1,36 @@
+import type { Context } from '@/server/trpc/context';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 import { paginationSchema, sortSchema } from '@/lib/validators';
 
+type Db = Context['db'];
+type PrismaTransactionClient = Omit<
+  Db,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends' | '$use'
+>;
+type ProductUpdateData = NonNullable<NonNullable<Parameters<Db['product']['update']>[0]>['data']>;
+
 const specificationsSchema = z.array(z.object({ key: z.string(), value: z.string() }));
 
-function buildOrderBy(sort: z.infer<typeof sortSchema>): Prisma.ProductOrderByWithRelationInput {
+function buildOrderBy(sort: z.infer<typeof sortSchema>) {
   switch (sort) {
     case 'price-asc':
-      return { price: 'asc' };
+      return { price: 'asc' as const };
     case 'price-desc':
-      return { price: 'desc' };
+      return { price: 'desc' as const };
     case 'name-asc':
-      return { name: 'asc' };
+      return { name: 'asc' as const };
     case 'name-desc':
-      return { name: 'desc' };
+      return { name: 'desc' as const };
     case 'newest':
-      return { createdAt: 'desc' };
+      return { createdAt: 'desc' as const };
     case 'bestselling':
-      return { position: 'asc' };
+      return { position: 'asc' as const };
     case 'featured':
     default:
-      return { position: 'asc' };
+      return { position: 'asc' as const };
   }
 }
 
@@ -50,8 +58,8 @@ export const productRouter = router({
       const { page, limit, sort, q } = input;
       const skip = (page - 1) * limit;
       const term = q?.trim();
-      const where: Prisma.ProductWhereInput | undefined = term
-        ? { name: { contains: term, mode: 'insensitive' } }
+      const where = term
+        ? { name: { contains: term, mode: 'insensitive' as const } }
         : undefined;
 
       const [items, total] = await Promise.all([
@@ -125,7 +133,7 @@ export const productRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy danh mục' });
       }
 
-      const where: Prisma.ProductWhereInput = {
+      const where = {
         collections: { some: { collectionId: collection.id } },
       };
 
@@ -192,7 +200,7 @@ export const productRouter = router({
         select: { collectionId: true },
       });
 
-      const collectionIds = productCollections.map((pc) => pc.collectionId);
+      const collectionIds = productCollections.map((pc: { collectionId: string }) => pc.collectionId);
 
       return ctx.db.product.findMany({
         where: {
@@ -251,7 +259,7 @@ export const productRouter = router({
       const { images, variants, collectionIds, ...productData } = input;
 
       try {
-        return await ctx.db.$transaction(async (tx) => {
+        return await ctx.db.$transaction(async (tx: PrismaTransactionClient) => {
           return tx.product.create({
             data: {
               ...productData,
@@ -268,7 +276,7 @@ export const productRouter = router({
           });
         });
       } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
           throw new TRPCError({
             code: 'CONFLICT',
             message: 'Slug hoặc SKU đã tồn tại',
@@ -331,7 +339,7 @@ export const productRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Không tìm thấy sản phẩm' });
       }
 
-      const data: Prisma.ProductUpdateInput = {
+      const data: ProductUpdateData = {
         ...(scalar.slug !== undefined && { slug: scalar.slug }),
         ...(scalar.name !== undefined && { name: scalar.name }),
         ...(scalar.shortDescription !== undefined && { shortDescription: scalar.shortDescription }),
@@ -350,7 +358,7 @@ export const productRouter = router({
       };
 
       try {
-        return await ctx.db.$transaction(async (tx) => {
+        return await ctx.db.$transaction(async (tx: PrismaTransactionClient) => {
           if (Object.keys(data).length > 0) {
             await tx.product.update({ where: { id }, data });
           }
@@ -407,7 +415,7 @@ export const productRouter = router({
           });
         });
       } catch (e) {
-        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
           throw new TRPCError({
             code: 'CONFLICT',
             message: 'Slug hoặc SKU đã tồn tại',

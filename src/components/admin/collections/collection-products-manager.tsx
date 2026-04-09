@@ -21,7 +21,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus, Search, Trash2 } from "lucide-react";
+import type { inferRouterOutputs } from "@trpc/server";
 
+import type { AppRouter } from "@/server/trpc";
 import { trpc } from "@/lib/trpc/client";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SITE_URL } from "@/lib/constants";
@@ -35,6 +37,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+
+type ProductSearchRow =
+  inferRouterOutputs<AppRouter>["product"]["getAll"]["items"][number];
 
 export type CollectionProductEntry = {
   productId: string;
@@ -156,12 +161,7 @@ export function CollectionProductsManager({
     onChange(arrayMove(value, a, b));
   };
 
-  const addProduct = (p: {
-    id: string;
-    name: string;
-    slug: string;
-    images: { url: string }[];
-  }) => {
+  const addProduct = (p: ProductSearchRow) => {
     if (value.some((e) => e.productId === p.id)) {
       return;
     }
@@ -201,7 +201,7 @@ export function CollectionProductsManager({
               />
             </div>
             <ul className="max-h-64 space-y-1 overflow-y-auto">
-              {(searchData?.items ?? []).map((p) => (
+              {(searchData?.items ?? []).map((p: ProductSearchRow) => (
                 <li key={p.id}>
                   <button
                     type="button"

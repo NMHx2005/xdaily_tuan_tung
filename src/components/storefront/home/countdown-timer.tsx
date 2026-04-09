@@ -26,26 +26,24 @@ function calcTimeLeft(endsAt: Date): TimeLeft | null {
 }
 
 export function CountdownTimer({ endsAt }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const target = new Date(endsAt);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(() =>
+    calcTimeLeft(target)
+  );
 
   useEffect(() => {
-    setMounted(true);
-    const target = new Date(endsAt);
-    setTimeLeft(calcTimeLeft(target));
-
+    const t = new Date(endsAt);
+    const tick = () => {
+      setTimeLeft(calcTimeLeft(t));
+    };
+    tick();
     const id = setInterval(() => {
-      const tl = calcTimeLeft(target);
-      setTimeLeft(tl);
-      if (!tl) clearInterval(id);
+      const next = calcTimeLeft(t);
+      setTimeLeft(next);
+      if (!next) clearInterval(id);
     }, 1000);
-
     return () => clearInterval(id);
   }, [endsAt]);
-
-  if (!mounted) {
-    return <span className="text-sm font-medium text-neutral-400">Đang tải...</span>;
-  }
 
   if (!timeLeft) {
     return (

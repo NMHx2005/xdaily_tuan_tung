@@ -103,7 +103,7 @@ export const collectionRouter = router({
       const { id, productIds, ...data } = input;
 
       return ctx.db.$transaction(async (tx) => {
-        const updated = await tx.collection.update({
+        await tx.collection.update({
           where: { id },
           data,
         });

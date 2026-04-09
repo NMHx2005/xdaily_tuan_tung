@@ -1,17 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { useCartStore } from "@/stores/cart-store";
 
 export function useCart() {
-  const [isHydrated, setIsHydrated] = useState(false);
+  const hydrated = useSyncExternalStore(
+    (onStoreChange) => {
+      const unsub = useCartStore.persist.onFinishHydration(() => {
+        onStoreChange();
+      });
+      if (useCartStore.persist.hasHydrated()) {
+        queueMicrotask(onStoreChange);
+      }
+      return unsub;
+    },
+    () => useCartStore.persist.hasHydrated(),
+    () => false
+  );
+
   const cart = useCartStore();
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  if (!isHydrated) {
+  if (!hydrated) {
     return {
       items: [],
       addItem: cart.addItem,

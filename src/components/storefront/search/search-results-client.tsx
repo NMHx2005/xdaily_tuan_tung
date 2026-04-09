@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { ProductGrid } from "@/components/storefront/product/product-grid";
 import { BlogCard } from "@/components/storefront/blog/blog-card";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Tab = "products" | "blogs";
 
@@ -42,15 +43,13 @@ export function SearchResultsClient() {
           Đang tìm kiếm...
         </div>
       ) : products.length === 0 && blogs.length === 0 ? (
-        <div className="flex flex-col items-center py-20 text-center">
-          <SearchX className="h-16 w-16 text-neutral-300" />
-          <p className="mt-4 text-lg font-medium text-neutral-600">
-            Không tìm thấy kết quả cho &ldquo;{q}&rdquo;
-          </p>
-          <p className="mt-1 text-sm text-neutral-400">
-            Hãy thử tìm kiếm với từ khóa khác
-          </p>
-        </div>
+        <EmptyState
+          icon={SearchX}
+          title="Không tìm thấy"
+          description={`Không có kết quả cho "${q}". Hãy thử từ khóa khác hoặc xem danh mục sản phẩm.`}
+          actionLabel="Về trang chủ"
+          actionHref="/"
+        />
       ) : (
         <>
           <div className="mt-6 flex gap-4 border-b">
@@ -85,9 +84,11 @@ export function SearchResultsClient() {
               products.length > 0 ? (
                 <ProductGrid products={products} columns={4} />
               ) : (
-                <p className="py-10 text-center text-neutral-400">
-                  Không có sản phẩm phù hợp
-                </p>
+                <EmptyState
+                  icon={SearchX}
+                  title="Không tìm thấy"
+                  description="Không có sản phẩm phù hợp với từ khóa này."
+                />
               )
             ) : blogs.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -104,9 +105,11 @@ export function SearchResultsClient() {
                 ))}
               </div>
             ) : (
-              <p className="py-10 text-center text-neutral-400">
-                Không có bài viết phù hợp
-              </p>
+              <EmptyState
+                icon={SearchX}
+                title="Không tìm thấy"
+                description="Không có bài viết phù hợp với từ khóa này."
+              />
             )}
           </div>
         </>

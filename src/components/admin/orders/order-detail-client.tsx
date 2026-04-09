@@ -33,6 +33,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 type OrderDetail = inferRouterOutputs<AppRouter>["order"]["getDetail"];
+type OrderLineItem = OrderDetail["items"][number];
 
 const METHOD_LABEL: Record<string, string> = {
   COD: "Thanh toán khi nhận hàng (COD)",
@@ -70,12 +71,12 @@ export function OrderDetailClient({ order: initial }: { order: OrderDetail }) {
 
   const updateMut = trpc.order.updateStatus.useMutation({
     onSuccess: (_, vars) => {
-      toast.success("Đã cập nhật trạng thái");
-      setOrder((o) => ({ ...o, status: vars.status }));
+      toast.success("Đã lưu thành công");
+      setOrder((o: OrderDetail) => ({ ...o, status: vars.status }));
       setNextStatus(vars.status);
       router.refresh();
     },
-    onError: (e) => toast.error(e.message),
+    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
   return (
@@ -108,7 +109,7 @@ export function OrderDetailClient({ order: initial }: { order: OrderDetail }) {
                 </tr>
               </thead>
               <tbody>
-                {order.items.map((item) => {
+                {order.items.map((item: OrderLineItem) => {
                   const slug = item.product?.slug;
                   return (
                     <tr key={item.id} className="border-b last:border-0">

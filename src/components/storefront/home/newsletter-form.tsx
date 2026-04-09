@@ -17,8 +17,8 @@ export function NewsletterForm() {
       toast.success("Đăng ký thành công!");
       setEmail("");
     },
-    onError: (err) => {
-      toast.error(err.message);
+    onError: () => {
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
     },
   });
 

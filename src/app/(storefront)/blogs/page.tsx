@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
+import { DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import { createCaller } from "@/lib/trpc/server";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { BlogCard } from "@/components/storefront/blog/blog-card";
 import { Pagination } from "@/components/storefront/collection/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FileText } from "lucide-react";
 
-export const revalidate = 60;
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Tin tức",
   description:
-    "Tin tức mới nhất về nội thất, xu hướng thiết kế và mẹo trang trí từ XDAILY.",
+    "Tin tức, kiến thức nội thất — xu hướng thiết kế, mẹo trang trí và cập nhật từ XDAILY.",
+  alternates: { canonical: "/blogs" },
   openGraph: {
     title: "Tin tức | XDAILY",
     description:
-      "Tin tức mới nhất về nội thất, xu hướng thiết kế và mẹo trang trí.",
+      "Tin tức, kiến thức nội thất — xu hướng thiết kế, mẹo trang trí và cập nhật từ XDAILY.",
+    type: "website",
+    url: "/blogs",
+    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: "XDAILY Tin tức" }],
   },
 };
 
@@ -50,9 +57,11 @@ export default async function BlogsPage({ searchParams }: PageProps) {
       </div>
 
       {items.length === 0 ? (
-        <div className="py-20 text-center text-neutral-400">
-          Chưa có bài viết nào.
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="Chưa có bài viết"
+          description="Chúng tôi đang cập nhật nội dung. Hãy ghé lại sau nhé."
+        />
       ) : (
         <>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

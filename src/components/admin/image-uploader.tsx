@@ -20,7 +20,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
 
+import { uploadImageWithProgress } from "@/lib/upload-image-client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -32,15 +34,6 @@ export type ImageUploadRow = {
   url: string;
   alt: string;
 };
-
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result));
-    r.onerror = () => reject(new Error("Đọc file thất bại"));
-    r.readAsDataURL(file);
-  });
-}
 
 function SortableThumb({
   item,
@@ -65,6 +58,8 @@ function SortableThumb({
     transition,
   };
 
+  const unopt = item.url.startsWith("data:");
+
   return (
     <div
       ref={setNodeRef}
@@ -82,7 +77,7 @@ function SortableThumb({
             fill
             sizes="120px"
             className="object-cover"
-            unoptimized={item.url.startsWith("data:")}
+            unoptimized={unopt}
           />
         ) : null}
         <button
@@ -140,24 +135,34 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
         ACCEPT.split(",").some((t) => file.type === t.trim()) &&
         file.size <= MAX_BYTES
     );
+    const skipped = Array.from(files).length - list.length;
+    if (skipped > 0) {
+      toast.error("Một số file bị bỏ qua (chỉ JPEG/PNG/WebP, tối đa 5MB)");
+    }
     if (!list.length) return;
 
     setBusy(true);
     setProgress(0);
     try {
       const next = [...value];
-      let done = 0;
-      for (const file of list) {
-        const url = await fileToDataUrl(file);
+      const total = list.length;
+      for (let i = 0; i < list.length; i++) {
+        const file = list[i]!;
+        const url = await uploadImageWithProgress(file, "products", (p) => {
+          setProgress(
+            Math.round(((i + p / 100) / total) * 100)
+          );
+        });
         next.push({
           id: crypto.randomUUID(),
           url,
           alt: file.name.replace(/\.[^.]+$/, ""),
         });
-        done += 1;
-        setProgress(Math.round((done / list.length) * 100));
       }
       onChange(next);
+      toast.success(`Đã tải ${list.length} ảnh lên`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload thất bại");
     } finally {
       setBusy(false);
       setProgress(0);
@@ -213,12 +218,12 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
         <Upload className="size-10 text-muted-foreground" />
         <p className="text-sm font-medium">Kéo thả ảnh vào đây hoặc bấm để chọn</p>
         <p className="text-xs text-muted-foreground">
-          JPEG, PNG, WebP — tối đa 5MB mỗi ảnh (tạm lưu dưới dạng data URL)
+          JPEG, PNG, WebP — tối đa 5MB mỗi ảnh (lưu trên Supabase Storage)
         </p>
         {busy && (
           <div className="w-full max-w-xs space-y-1">
             <p className="text-xs font-medium text-primary">
-              Đang tải ảnh… {progress}%
+              Đang tải lên… {progress}%
             </p>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div

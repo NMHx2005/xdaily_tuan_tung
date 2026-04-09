@@ -4,13 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { createCaller } from "@/lib/trpc/server";
 import { formatDate } from "@/lib/utils";
-import { SITE_URL } from "@/lib/constants";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
+import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { BlogContent } from "@/components/storefront/blog/blog-content";
 import { ShareButtons } from "@/components/storefront/blog/share-buttons";
 import { Badge } from "@/components/ui/badge";
 
-export const revalidate = 60;
+export const revalidate = 120;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -21,16 +22,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const trpc = await createCaller();
     const post = await trpc.blog.getBySlug({ slug });
+    const title = post.seoTitle || post.title;
+    const description = post.seoDescription || post.excerpt || post.title;
+    const ogImage = post.thumbnail ? absoluteUrl(post.thumbnail) : absoluteUrl(DEFAULT_OG_IMAGE_PATH);
     return {
-      title: post.seoTitle || post.title,
-      description: post.seoDescription || post.excerpt || "",
+      title,
+      description,
       openGraph: {
-        title: post.seoTitle || post.title,
-        description: post.seoDescription || post.excerpt || "",
+        title,
+        description,
         type: "article",
+        url: `/blogs/${slug}`,
         publishedTime: post.publishedAt?.toISOString(),
         authors: [post.author],
-        images: post.thumbnail ? [{ url: post.thumbnail }] : [],
+        images: [{ url: ogImage, alt: title }],
+      },
+      alternates: {
+        canonical: `/blogs/${slug}`,
       },
     };
   } catch {
@@ -51,7 +59,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
 
   const recentPosts = await trpc.blog.getRecent({ limit: 5 });
 
-  const postUrl = `${SITE_URL}/blogs/${slug}`;
+  const postUrl = `${getSiteUrl()}/blogs/${slug}`;
   const tags = (post.tags as string[]) || [];
 
   const jsonLd = {
@@ -59,12 +67,22 @@ export default async function BlogArticlePage({ params }: PageProps) {
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
-    image: post.thumbnail,
+    image: post.thumbnail ? absoluteUrl(post.thumbnail) : undefined,
     author: { "@type": "Person", name: post.author },
-    publisher: { "@type": "Organization", name: "XDAILY" },
+    publisher: { "@type": "Organization", name: "XDAILY", url: getSiteUrl() },
     datePublished: post.publishedAt?.toISOString(),
     dateModified: post.updatedAt.toISOString(),
     mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Trang chủ", item: getSiteUrl() },
+      { "@type": "ListItem", position: 2, name: "Tin tức", item: `${getSiteUrl()}/blogs` },
+      { "@type": "ListItem", position: 3, name: post.title, item: postUrl },
+    ],
   };
 
   return (
@@ -72,6 +90,10 @@ export default async function BlogArticlePage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <Breadcrumbs
@@ -110,6 +132,8 @@ export default async function BlogArticlePage({ params }: PageProps) {
                 sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover"
                 priority
+                placeholder="blur"
+                blurDataURL={TINY_BLUR_DATA_URL}
               />
             </div>
           )}
