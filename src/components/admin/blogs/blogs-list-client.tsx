@@ -13,9 +13,20 @@ import type { AppRouter } from "@/server/trpc";
 import { trpc } from "@/lib/trpc/client";
 import { formatDate } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import {
+  AdminAdvancedFilters,
+  AdminFilterField,
+} from "@/components/admin/admin-advanced-filters";
 import { DataTable } from "@/components/admin/data-table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Row =
   inferRouterOutputs<AppRouter>["blog"]["listForAdmin"]["items"][number];
@@ -26,15 +37,21 @@ export function BlogsListClient() {
   const [page, setPage] = React.useState(1);
   const [q, setQ] = React.useState("");
   const debouncedQ = useDebounce(q, 300);
+  const [published, setPublished] = React.useState<
+    "all" | "published" | "draft"
+  >("all");
 
   React.useEffect(() => {
     setPage(1);
-  }, [debouncedQ]);
+  }, [debouncedQ, published]);
+
+  const advCount = published !== "all" ? 1 : 0;
 
   const { data, isLoading } = trpc.blog.listForAdmin.useQuery({
     page,
     limit: 20,
     q: debouncedQ.trim() || undefined,
+    published: published === "all" ? undefined : published,
   });
 
   const deleteMut = trpc.blog.delete.useMutation({
@@ -135,6 +152,29 @@ export function BlogsListClient() {
           disabled={isLoading}
         />
       </div>
+
+      <AdminAdvancedFilters
+        activeCount={advCount}
+        onReset={advCount > 0 ? () => setPublished("all") : undefined}
+      >
+        <AdminFilterField label="Trạng thái đăng">
+          <Select
+            value={published}
+            onValueChange={(v) =>
+              setPublished(v as typeof published)
+            }
+          >
+            <SelectTrigger className="w-full min-w-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="published">Đã đăng</SelectItem>
+              <SelectItem value="draft">Nháp</SelectItem>
+            </SelectContent>
+          </Select>
+        </AdminFilterField>
+      </AdminAdvancedFilters>
 
       <DataTable<Row>
         columns={columns}

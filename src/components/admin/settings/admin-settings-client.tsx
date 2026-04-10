@@ -50,8 +50,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { BlogThumbnail } from "@/components/admin/blogs/blog-thumbnail";
+import { AdminSiteContentClient } from "@/components/admin/settings/admin-site-content-client";
 import { cn } from "@/lib/utils";
 
 type AdminBanner = inferRouterOutputs<AppRouter>["admin"]["getBannersAll"][number];
@@ -305,12 +305,14 @@ function BannersBlock() {
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
         <CardTitle>Banner trang chủ</CardTitle>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogTrigger>
-            <Button type="button" size="sm" variant="outline">
-              <Plus className="size-4" />
-              Thêm banner
-            </Button>
-          </DialogTrigger>
+          <DialogTrigger
+            render={
+              <Button type="button" size="sm" variant="outline">
+                <Plus className="size-4" />
+                Thêm banner
+              </Button>
+            }
+          />
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Banner mới</DialogTitle>
@@ -642,12 +644,14 @@ function FlashSaleBlock() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium">Sản phẩm flash sale</p>
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
-            <DialogTrigger>
-              <Button type="button" size="sm" variant="outline">
-                <Plus className="size-4" />
-                Thêm sản phẩm
-              </Button>
-            </DialogTrigger>
+            <DialogTrigger
+              render={
+                <Button type="button" size="sm" variant="outline">
+                  <Plus className="size-4" />
+                  Thêm sản phẩm
+                </Button>
+              }
+            />
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Chọn sản phẩm</DialogTitle>
@@ -777,23 +781,7 @@ function FlashSaleBlock() {
 export function AdminSettingsClient() {
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Thông tin cửa hàng</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            <span className="font-medium text-foreground">XDAILY Store</span> —
-            hiển thị tĩnh (có thể nối CMS sau).
-          </p>
-          <Textarea
-            readOnly
-            rows={4}
-            className="resize-none bg-muted/40 text-foreground"
-            value={`Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM\nĐiện thoại: 1900 1234\nEmail: support@xdaily.vn`}
-          />
-        </CardContent>
-      </Card>
+      <AdminSiteContentClient />
 
       <BannersBlock />
       <FlashSaleBlock />

@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -66,22 +67,25 @@ export function AdminTopbar({ userName, userEmail }: { userName?: string; userEm
             <span className="hidden sm:block font-medium">{userName || "Admin"}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <p className="font-medium">{userName || "Admin"}</p>
-              <p className="text-xs font-normal text-muted-foreground">{userEmail}</p>
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>
+                <p className="font-medium">{userName || "Admin"}</p>
+                <p className="text-xs font-normal text-muted-foreground">{userEmail}</p>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <Link href="/admin/settings">
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Cài đặt
+            <DropdownMenuGroup>
+              <Link href="/admin/settings">
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Cài đặt
+                </DropdownMenuItem>
+              </Link>
+              <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Đăng xuất
               </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Đăng xuất
-            </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

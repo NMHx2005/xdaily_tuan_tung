@@ -5,6 +5,7 @@ import { createCaller } from "@/lib/trpc/server";
 import { db } from "@/server/db";
 import { PRODUCTS_PER_PAGE } from "@/lib/constants";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
+import { buildCollectionBreadcrumbTrail } from "@/lib/storefront-nav";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { CollectionHeader } from "@/components/storefront/collection/collection-header";
 import { FilterSortBar } from "@/components/storefront/collection/filter-sort-bar";
@@ -98,6 +99,8 @@ export default async function CollectionPage({ params, searchParams }: PageProps
 
   const trpc = await createCaller();
 
+  const navTree = await trpc.collection.getStorefrontNavTree();
+
   let result;
   try {
     result = await trpc.product.getByCollection({
@@ -126,14 +129,17 @@ export default async function CollectionPage({ params, searchParams }: PageProps
     url: collectionUrl,
     isPartOf: { "@type": "WebSite", name: "XDAILY", url: base },
   };
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Trang chủ", item: base },
-      { "@type": "ListItem", position: 2, name: collection.name, item: collectionUrl },
-    ],
-  };
+  const navTrail = buildCollectionBreadcrumbTrail(navTree, slug);
+  const breadcrumbItems = navTrail
+    ? navTrail.map((seg, i, arr) =>
+      i < arr.length - 1
+        ? { label: seg.label, href: seg.href }
+        : {
+          label: seg.label,
+          jsonLdHref: `/collections/${slug}`,
+        },
+    )
+    : [{ label: collection.name, jsonLdHref: `/collections/${slug}` }];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
@@ -141,16 +147,8 @@ export default async function CollectionPage({ params, searchParams }: PageProps
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
 
-      <Breadcrumbs
-        items={[
-          { label: collection.name },
-        ]}
-      />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <CollectionHeader
         name={collection.name}

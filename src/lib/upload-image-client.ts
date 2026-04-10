@@ -1,4 +1,4 @@
-export type StorageBucket = "products" | "blogs" | "banners";
+export type StorageBucket = "products" | "blogs" | "banners" | "collections";
 
 /**
  * POST /api/upload — multipart: file + bucket (admin only).

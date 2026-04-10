@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { createCaller } from "@/lib/trpc/server";
+import { formatShippingAddressLine } from "@/lib/format-shipping-address";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -99,7 +100,7 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
             <div className="space-y-1 text-sm text-neutral-600">
               <p><span className="font-medium">Người nhận:</span> {order.shippingName}</p>
               <p><span className="font-medium">SĐT:</span> {order.shippingPhone}</p>
-              <p><span className="font-medium">Địa chỉ:</span> {order.shippingAddress}, {order.shippingWard}, {order.shippingDistrict}, {order.shippingCity}</p>
+              <p><span className="font-medium">Địa chỉ:</span> {formatShippingAddressLine(order)}</p>
               <p><span className="font-medium">Thanh toán:</span> {order.paymentMethod === "COD" ? "Thanh toán khi nhận hàng" : order.paymentMethod}</p>
             </div>
           </>

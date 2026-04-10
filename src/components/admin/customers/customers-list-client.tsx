@@ -11,8 +11,19 @@ import type { AppRouter } from "@/server/trpc";
 import { trpc } from "@/lib/trpc/client";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
+import {
+  AdminAdvancedFilters,
+  AdminFilterField,
+} from "@/components/admin/admin-advanced-filters";
 import { DataTable } from "@/components/admin/data-table";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -36,16 +47,22 @@ export function CustomersListClient() {
   const [page, setPage] = React.useState(1);
   const [q, setQ] = React.useState("");
   const debouncedQ = useDebounce(q, 300);
+  const [hasOrders, setHasOrders] = React.useState<
+    "any" | "with" | "without"
+  >("any");
   const [detailId, setDetailId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setPage(1);
-  }, [debouncedQ]);
+  }, [debouncedQ, hasOrders]);
+
+  const advCount = (hasOrders !== "any" ? 1 : 0);
 
   const { data, isLoading } = trpc.user.getAll.useQuery({
     page,
     limit: 20,
     q: debouncedQ.trim() || undefined,
+    hasOrders: hasOrders === "any" ? undefined : hasOrders,
   });
 
   const { data: detail, isLoading: detailLoading } =
@@ -132,13 +149,36 @@ export function CustomersListClient() {
         <div className="relative max-w-sm">
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Tìm theo tên hoặc email..."
+            placeholder="Tìm theo tên, email hoặc SĐT..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="pl-9"
             disabled={isLoading}
           />
         </div>
+
+        <AdminAdvancedFilters
+          activeCount={advCount}
+          onReset={advCount > 0 ? () => setHasOrders("any") : undefined}
+        >
+          <AdminFilterField label="Đơn hàng">
+            <Select
+              value={hasOrders}
+              onValueChange={(v) =>
+                setHasOrders(v as typeof hasOrders)
+              }
+            >
+              <SelectTrigger className="w-full min-w-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Tất cả</SelectItem>
+                <SelectItem value="with">Đã có ít nhất 1 đơn</SelectItem>
+                <SelectItem value="without">Chưa có đơn</SelectItem>
+              </SelectContent>
+            </Select>
+          </AdminFilterField>
+        </AdminAdvancedFilters>
 
         <DataTable<Row>
           columns={columns}

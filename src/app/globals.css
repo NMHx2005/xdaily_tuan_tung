@@ -153,3 +153,21 @@
     outline-offset: 2px;
   }
 }
+
+/* Flash sale — marquee tên sản phẩm */
+@keyframes flash-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-flash-marquee {
+  animation: flash-marquee 28s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-flash-marquee {
+    animation: none;
+  }
+}

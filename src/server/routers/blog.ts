@@ -26,17 +26,24 @@ export const blogRouter = router({
           page: z.number().int().positive().default(1),
           limit: z.number().int().positive().max(50).default(20),
           q: z.string().optional(),
+          published: z.enum(['all', 'published', 'draft']).optional(),
         })
         .default({ page: 1, limit: 20 })
     )
     .query(async ({ ctx, input }) => {
       const skip = (input.page - 1) * input.limit;
       const term = input.q?.trim();
-      const where: Prisma.BlogPostWhereInput | undefined = term
-        ? {
-            title: { contains: term, mode: 'insensitive' },
-          }
-        : undefined;
+      const and: Prisma.BlogPostWhereInput[] = [];
+      if (term) {
+        and.push({ title: { contains: term, mode: 'insensitive' } });
+      }
+      if (input.published === 'published') {
+        and.push({ isPublished: true });
+      } else if (input.published === 'draft') {
+        and.push({ isPublished: false });
+      }
+      const where: Prisma.BlogPostWhereInput | undefined =
+        and.length > 0 ? { AND: and } : undefined;
 
       const [items, total] = await Promise.all([
         ctx.db.blogPost.findMany({

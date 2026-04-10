@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Package, ChevronDown, ChevronUp } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
+import { formatShippingAddressLine } from "@/lib/format-shipping-address";
 import { formatPrice, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,12 +33,11 @@ export function OrderHistoryClient() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <Breadcrumbs
         items={[
-          { label: "Trang chủ", href: "/" },
           { label: "Tài khoản", href: "/account" },
-          { label: "Đơn hàng" },
+          { label: "Đơn hàng", jsonLdHref: "/account/orders" },
         ]}
       />
 
@@ -170,8 +170,7 @@ export function OrderHistoryClient() {
                       </p>
                       <p>
                         <span className="font-medium">Địa chỉ:</span>{" "}
-                        {order.shippingAddress}, {order.shippingWard},{" "}
-                        {order.shippingDistrict}, {order.shippingCity}
+                        {formatShippingAddressLine(order)}
                       </p>
                       <p>
                         <span className="font-medium">Thanh toán:</span>{" "}

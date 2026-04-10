@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
+import { buildCollectionBreadcrumbTrail } from "@/lib/storefront-nav";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { ProductDetailClient } from "@/components/storefront/product/product-detail-client";
 import { ProductReviews } from "@/components/storefront/product/product-reviews";
@@ -85,21 +86,42 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const [reviews, relatedRaw] = await Promise.all([
+  const [reviews, relatedRaw, navTree] = await Promise.all([
     trpc.review.getByProduct({ productId: product.id }),
     trpc.product.getRelated({ productId: product.id, limit: 8 }),
+    trpc.collection.getStorefrontNavTree(),
   ]);
 
   const relatedProducts = relatedRaw.map(toProductCard);
 
   const collectionInfo = product.collections[0]?.collection;
 
+  const navTrail = collectionInfo
+    ? buildCollectionBreadcrumbTrail(navTree, collectionInfo.slug)
+    : null;
   const breadcrumbItems = collectionInfo
-    ? [
-        { label: collectionInfo.name, href: `/collections/${collectionInfo.slug}` },
-        { label: product.name },
-      ]
-    : [{ label: product.name }];
+    ? navTrail
+      ? [
+          ...navTrail.map((seg) => ({
+            label: seg.label,
+            href: seg.href,
+          })),
+          {
+            label: product.name,
+            jsonLdHref: `/products/${product.slug}`,
+          },
+        ]
+      : [
+          {
+            label: collectionInfo.name,
+            href: `/collections/${collectionInfo.slug}`,
+          },
+          {
+            label: product.name,
+            jsonLdHref: `/products/${product.slug}`,
+          },
+        ]
+    : [{ label: product.name, jsonLdHref: `/products/${product.slug}` }];
 
   const avgRating =
     reviews.length > 0
@@ -137,53 +159,12 @@ export default async function ProductPage({ params }: PageProps) {
       : {}),
   };
 
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Trang chủ",
-        item: base,
-      },
-      ...(collectionInfo
-        ? [
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: collectionInfo.name,
-              item: `${base}/collections/${collectionInfo.slug}`,
-            },
-            {
-              "@type": "ListItem",
-              position: 3,
-              name: product.name,
-              item: productUrl,
-            },
-          ]
-        : [
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: product.name,
-              item: productUrl,
-            },
-          ]),
-    ],
-  };
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-
       <Breadcrumbs items={breadcrumbItems} />
 
       {/* Gallery + Info */}

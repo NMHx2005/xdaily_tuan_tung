@@ -3,9 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
@@ -21,34 +20,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-
-const schema = z.object({
-  name: z.string().min(1, "Bắt buộc"),
-  slug: z.string().min(1, "Bắt buộc"),
-  description: z.string().optional(),
-  image: z.string().optional(),
-  isVisible: z.boolean(),
-  seoTitle: z.string().optional(),
-  seoDescription: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
+import { CollectionCoverField } from "@/components/admin/collections/collection-cover-field";
+import {
+  CollectionHomeStripFields,
+  CollectionNavFields,
+} from "@/components/admin/collections/collection-form-fields";
+import {
+  collectionAdminFormSchema,
+  type CollectionAdminFormValues,
+} from "@/lib/collection-form-schema";
 
 export function CollectionCreateClient() {
   const router = useRouter();
+  const utils = trpc.useUtils();
   const slugTouched = React.useRef(false);
 
   const createMut = trpc.collection.create.useMutation({
     onSuccess: (c) => {
       toast.success("Đã lưu thành công");
+      void utils.collection.getStorefrontNavTree.invalidate();
+      void utils.collection.getAllForAdmin.invalidate();
       router.push(`/admin/collections/${c.id}`);
       router.refresh();
     },
     onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const form = useForm<CollectionAdminFormValues>({
+    resolver: zodResolver(collectionAdminFormSchema),
     defaultValues: {
       name: "",
       slug: "",
@@ -57,6 +56,14 @@ export function CollectionCreateClient() {
       isVisible: true,
       seoTitle: "",
       seoDescription: "",
+      parentId: null,
+      navLabel: "",
+      navIcon: "Package",
+      showInStorefrontNav: false,
+      position: 0,
+      showOnHomeCategoryStrip: false,
+      homeStripPosition: 0,
+      homeStripLabel: "",
     },
   });
 
@@ -70,7 +77,7 @@ export function CollectionCreateClient() {
   return (
     <form
       className="max-w-2xl space-y-6"
-      onSubmit={form.handleSubmit((vals) =>
+      onSubmit={form.handleSubmit((vals: CollectionAdminFormValues) =>
         createMut.mutate({
           name: vals.name,
           slug: vals.slug,
@@ -79,7 +86,15 @@ export function CollectionCreateClient() {
           isVisible: vals.isVisible,
           seoTitle: vals.seoTitle ?? "",
           seoDescription: vals.seoDescription ?? "",
-        })
+          parentId: vals.parentId,
+          navLabel: vals.navLabel || undefined,
+          navIcon: vals.navIcon,
+          showInStorefrontNav: vals.showInStorefrontNav,
+          position: vals.position,
+          showOnHomeCategoryStrip: vals.showOnHomeCategoryStrip,
+          homeStripPosition: vals.homeStripPosition,
+          homeStripLabel: vals.homeStripLabel || undefined,
+        }),
       )}
     >
       <Card>
@@ -107,10 +122,17 @@ export function CollectionCreateClient() {
             <Label htmlFor="description">Mô tả</Label>
             <Textarea id="description" rows={4} {...form.register("description")} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="image">Ảnh đại diện (URL)</Label>
-            <Input id="image" {...form.register("image")} placeholder="https://..." />
-          </div>
+          <Controller
+            name="image"
+            control={form.control}
+            render={({ field }) => (
+              <CollectionCoverField
+                id="image"
+                url={field.value ?? ""}
+                onChange={field.onChange}
+              />
+            )}
+          />
           <div className="flex items-center justify-between">
             <Label htmlFor="isVisible">Hiển thị</Label>
             <Switch
@@ -127,6 +149,16 @@ export function CollectionCreateClient() {
             <Label htmlFor="seoDescription">SEO Description</Label>
             <Textarea id="seoDescription" rows={3} {...form.register("seoDescription")} />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Menu storefront</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <CollectionNavFields control={form.control} />
+          <CollectionHomeStripFields control={form.control} />
         </CardContent>
       </Card>
 

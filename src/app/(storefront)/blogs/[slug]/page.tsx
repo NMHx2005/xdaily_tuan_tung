@@ -75,32 +75,17 @@ export default async function BlogArticlePage({ params }: PageProps) {
     mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
   };
 
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Trang chủ", item: getSiteUrl() },
-      { "@type": "ListItem", position: 2, name: "Tin tức", item: `${getSiteUrl()}/blogs` },
-      { "@type": "ListItem", position: 3, name: post.title, item: postUrl },
-    ],
-  };
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
 
       <Breadcrumbs
         items={[
-          { label: "Trang chủ", href: "/" },
           { label: "Tin tức", href: "/blogs" },
-          { label: post.title },
+          { label: post.title, jsonLdHref: `/blogs/${slug}` },
         ]}
       />
 

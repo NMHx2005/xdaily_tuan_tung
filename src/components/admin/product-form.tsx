@@ -155,7 +155,7 @@ export function ProductForm({
       : []
   );
 
-  const { data: collections = [] } = trpc.collection.getAllForAdmin.useQuery();
+  const { data: collections = [] } = trpc.collection.getAllForAdmin.useQuery({});
 
   const form = useForm<ScalarForm>({
     resolver: zodResolver(

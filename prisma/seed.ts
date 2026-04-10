@@ -55,12 +55,206 @@ async function main() {
     { slug: 'ban-an', name: 'Bàn ăn', description: 'Bàn ăn gỗ tự nhiên và kim loại cho phòng ăn.', position: 7 },
     { slug: 'ban-tra', name: 'Bàn trà', description: 'Bàn trà phòng khách đa dạng kiểu dáng.', position: 8 },
     { slug: 'bo-ban-ghe', name: 'Bộ bàn ghế', description: 'Combo bàn ghế tiết kiệm, đồng bộ phong cách.', position: 9 },
+    {
+      slug: 'noi-that-phong-bep',
+      name: 'Nội thất phòng bếp',
+      description: 'Danh mục nhóm phòng bếp — bàn ăn, ghế bar, ghế ăn.',
+      position: 10,
+    },
+    {
+      slug: 'noi-that-cafe',
+      name: 'Nội thất cafe, nhà hàng',
+      description: 'Thiết kế không gian F&B — ghế bar, bàn cafe.',
+      position: 11,
+    },
   ];
 
   const collections: Record<string, string> = {};
   for (const c of collectionsData) {
     const col = await prisma.collection.create({ data: c });
     collections[c.slug] = col.id;
+  }
+
+  console.log('📐 Storefront menu (phân cấp + nav)...');
+  const sofaId = collections['sofa']!;
+  const phongBepId = collections['noi-that-phong-bep']!;
+  const phongCafeId = collections['noi-that-cafe']!;
+
+  await prisma.$transaction([
+    prisma.collection.update({
+      where: { id: collections['ghe-an'] },
+      data: {
+        navLabel: 'GIẢM GIÁ',
+        showInStorefrontNav: true,
+        navIcon: 'Percent',
+        position: 0,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: sofaId },
+      data: {
+        showInStorefrontNav: true,
+        navIcon: 'Armchair',
+        position: 1,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['ban-tra'] },
+      data: {
+        parentId: sofaId,
+        position: 0,
+        showInStorefrontNav: true,
+        navIcon: 'Package',
+      },
+    }),
+    prisma.collection.update({
+      where: { id: phongBepId },
+      data: {
+        showInStorefrontNav: true,
+        navIcon: 'Utensils',
+        position: 2,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['ban-an'] },
+      data: {
+        parentId: phongBepId,
+        position: 0,
+        showInStorefrontNav: true,
+        navIcon: 'Package',
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['ghe-bar'] },
+      data: {
+        parentId: phongBepId,
+        position: 1,
+        showInStorefrontNav: true,
+        navIcon: 'Package',
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['giuong-ngu'] },
+      data: {
+        showInStorefrontNav: true,
+        navIcon: 'Bed',
+        position: 3,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['ghe-chan-xoay'] },
+      data: {
+        showInStorefrontNav: true,
+        navIcon: 'Briefcase',
+        position: 4,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: phongCafeId },
+      data: {
+        showInStorefrontNav: true,
+        navIcon: 'Coffee',
+        position: 5,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['ghe-thu-gian'] },
+      data: {
+        navLabel: 'SPA',
+        showInStorefrontNav: true,
+        navIcon: 'Sparkles',
+        position: 6,
+        parentId: null,
+      },
+    }),
+    prisma.collection.update({
+      where: { id: collections['bo-ban-ghe'] },
+      data: {
+        navLabel: 'Vật liệu',
+        showInStorefrontNav: true,
+        navIcon: 'Package',
+        position: 7,
+        parentId: null,
+      },
+    }),
+  ]);
+
+  const homeCategoryStripSeed: {
+    slug: string;
+    homeStripPosition: number;
+    image: string;
+    homeStripLabel?: string;
+  }[] = [
+    {
+      slug: 'ghe-an',
+      homeStripPosition: 0,
+      image:
+        'https://file.hstatic.net/1000400963/file/ghe-an-xdaily-valle-chair-01__3__compact.jpg',
+    },
+    {
+      slug: 'ghe-bar',
+      homeStripPosition: 1,
+      image: 'https://file.hstatic.net/1000400963/file/xdaily-kink-bar_compact.jpg',
+    },
+    {
+      slug: 'ghe-chan-xoay',
+      homeStripPosition: 2,
+      image:
+        'https://file.hstatic.net/1000400963/file/ghe-van-phong-xdaily-gx882__2__compact.jpg',
+    },
+    {
+      slug: 'ghe-thu-gian',
+      homeStripPosition: 3,
+      image:
+        'https://file.hstatic.net/1000400963/file/mat-truoc-ghe-shell-chair_compact.jpg',
+    },
+    {
+      slug: 'sofa',
+      homeStripPosition: 4,
+      image: 'https://file.hstatic.net/1000400963/file/sofa-xdaily-fly-01_compact.jpg',
+    },
+    {
+      slug: 'giuong-ngu',
+      homeStripPosition: 5,
+      image:
+        'https://file.hstatic.net/1000400963/file/giuong-ngu-xdaily-bed-italia__1__compact.jpg',
+    },
+    {
+      slug: 'ban-an',
+      homeStripPosition: 6,
+      image:
+        'https://file.hstatic.net/1000400963/file/24062_n_wedge-dining-01-scont_compact.jpg',
+    },
+    {
+      slug: 'noi-that-cafe',
+      homeStripPosition: 7,
+      image:
+        'https://file.hstatic.net/1000400963/file/ban-cafe-nhua-duc-xdaily-bl1__2__compact.jpg',
+      homeStripLabel: 'Bộ sưu tập chân bàn cafe',
+    },
+    {
+      slug: 'bo-ban-ghe',
+      homeStripPosition: 8,
+      image:
+        'https://file.hstatic.net/1000400963/file/ghe-an-xdaily-valle-chair__8__compact.jpg',
+    },
+  ];
+  for (const row of homeCategoryStripSeed) {
+    await prisma.collection.updateMany({
+      where: { slug: row.slug },
+      data: {
+        image: row.image,
+        showOnHomeCategoryStrip: true,
+        homeStripPosition: row.homeStripPosition,
+        ...(row.homeStripLabel ? { homeStripLabel: row.homeStripLabel } : {}),
+      },
+    });
   }
 
   // ── PRODUCTS ──

@@ -41,10 +41,7 @@ export default async function BlogsPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <Breadcrumbs
-        items={[
-          { label: "Trang chủ", href: "/" },
-          { label: "Tin tức" },
-        ]}
+        items={[{ label: "Tin tức", jsonLdHref: "/blogs" }]}
       />
 
       <div className="mt-4">

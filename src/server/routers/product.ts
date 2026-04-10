@@ -1,6 +1,7 @@
 import type { Context } from '@/server/trpc/context';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 import { paginationSchema, sortSchema } from '@/lib/validators';
@@ -51,16 +52,45 @@ export const productRouter = router({
   getAll: publicProcedure
     .input(
       paginationSchema
-        .extend({ sort: sortSchema, q: z.string().optional() })
+        .extend({
+          sort: sortSchema,
+          q: z.string().optional(),
+          collectionId: z.string().optional(),
+          stockFilter: z.enum(['all', 'in_stock', 'out_of_stock', 'low_stock']).optional(),
+          featuredOnly: z.boolean().optional(),
+        })
         .default({ page: 1, limit: 24, sort: 'featured' })
     )
     .query(async ({ ctx, input }) => {
-      const { page, limit, sort, q } = input;
+      const { page, limit, sort, q, collectionId, stockFilter, featuredOnly } = input;
       const skip = (page - 1) * limit;
       const term = q?.trim();
-      const where = term
-        ? { name: { contains: term, mode: 'insensitive' as const } }
-        : undefined;
+
+      const and: Prisma.ProductWhereInput[] = [];
+      if (term) {
+        and.push({
+          OR: [
+            { name: { contains: term, mode: 'insensitive' } },
+            { sku: { contains: term, mode: 'insensitive' } },
+          ],
+        });
+      }
+      if (collectionId) {
+        and.push({ collections: { some: { collectionId } } });
+      }
+      if (stockFilter === 'in_stock') {
+        and.push({ stockQuantity: { gt: 0 } });
+      } else if (stockFilter === 'out_of_stock') {
+        and.push({ stockQuantity: { lte: 0 } });
+      } else if (stockFilter === 'low_stock') {
+        and.push({ stockQuantity: { gt: 0, lte: 10 } });
+      }
+      if (featuredOnly) {
+        and.push({ isFeatured: true });
+      }
+
+      const where: Prisma.ProductWhereInput | undefined =
+        and.length > 0 ? { AND: and } : undefined;
 
       const [items, total] = await Promise.all([
         ctx.db.product.findMany({

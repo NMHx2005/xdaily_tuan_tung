@@ -3,9 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import type { inferRouterOutputs } from "@trpc/server";
 
@@ -27,23 +26,23 @@ import {
   CollectionProductsManager,
   type CollectionProductEntry,
 } from "@/components/admin/collections/collection-products-manager";
+import { CollectionCoverField } from "@/components/admin/collections/collection-cover-field";
+import {
+  CollectionHomeStripFields,
+  CollectionNavFields,
+} from "@/components/admin/collections/collection-form-fields";
+import {
+  collectionAdminFormSchema,
+  type CollectionAdminFormValues,
+} from "@/lib/collection-form-schema";
 
 type CollectionFull = inferRouterOutputs<AppRouter>["collection"]["getById"];
 
-const schema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  description: z.string().optional(),
-  image: z.string().optional(),
-  isVisible: z.boolean(),
-  seoTitle: z.string().optional(),
-  seoDescription: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
+/** Một dòng join ProductCollection + product (khớp include trong collection.getById) */
+type CollectionProductJoin = NonNullable<CollectionFull["products"]>[number];
 
 function toEntries(c: CollectionFull): CollectionProductEntry[] {
-  return c.products.map((pc) => ({
+  return c.products.map((pc: CollectionProductJoin) => ({
     productId: pc.productId,
     name: pc.product.name,
     slug: pc.product.slug,
@@ -53,21 +52,25 @@ function toEntries(c: CollectionFull): CollectionProductEntry[] {
 
 export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
   const router = useRouter();
+  const utils = trpc.useUtils();
   const slugTouched = React.useRef(false);
   const [entries, setEntries] = React.useState<CollectionProductEntry[]>(() =>
-    toEntries(initial)
+    toEntries(initial),
   );
 
   const updateMut = trpc.collection.update.useMutation({
     onSuccess: () => {
       toast.success("Đã lưu thành công");
+      void utils.collection.getStorefrontNavTree.invalidate();
+      void utils.collection.getAllForAdmin.invalidate();
+      void utils.collection.getHomeCategoryStrip.invalidate();
       router.refresh();
     },
     onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  const form = useForm<CollectionAdminFormValues>({
+    resolver: zodResolver(collectionAdminFormSchema),
     defaultValues: {
       name: initial.name,
       slug: initial.slug,
@@ -76,6 +79,14 @@ export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
       isVisible: initial.isVisible,
       seoTitle: initial.seoTitle,
       seoDescription: initial.seoDescription,
+      parentId: initial.parentId ?? null,
+      navLabel: initial.navLabel ?? "",
+      navIcon: (initial.navIcon as CollectionAdminFormValues["navIcon"]) ?? "Package",
+      showInStorefrontNav: initial.showInStorefrontNav,
+      position: initial.position,
+      showOnHomeCategoryStrip: initial.showOnHomeCategoryStrip,
+      homeStripPosition: initial.homeStripPosition,
+      homeStripLabel: initial.homeStripLabel ?? "",
     },
   });
 
@@ -86,7 +97,7 @@ export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
     }
   }, [name, form]);
 
-  const onSubmit = (vals: FormValues) => {
+  const onSubmit = (vals: CollectionAdminFormValues) => {
     updateMut.mutate({
       id: initial.id,
       name: vals.name,
@@ -96,6 +107,14 @@ export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
       isVisible: vals.isVisible,
       seoTitle: vals.seoTitle ?? "",
       seoDescription: vals.seoDescription ?? "",
+      parentId: vals.parentId,
+      navLabel: vals.navLabel || null,
+      navIcon: vals.navIcon,
+      showInStorefrontNav: vals.showInStorefrontNav,
+      position: vals.position,
+      showOnHomeCategoryStrip: vals.showOnHomeCategoryStrip,
+      homeStripPosition: vals.homeStripPosition,
+      homeStripLabel: vals.homeStripLabel || null,
       productIds: entries.map((e) => e.productId),
     });
   };
@@ -133,10 +152,17 @@ export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
                   {...form.register("description")}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="image">Ảnh đại diện (URL)</Label>
-                <Input id="image" {...form.register("image")} />
-              </div>
+              <Controller
+                name="image"
+                control={form.control}
+                render={({ field }) => (
+                  <CollectionCoverField
+                    id="image"
+                    url={field.value ?? ""}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
             </CardContent>
           </Card>
 
@@ -176,6 +202,19 @@ export function CollectionEditClient({ initial }: { initial: CollectionFull }) {
                   {...form.register("seoDescription")}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Menu storefront</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <CollectionNavFields
+                control={form.control}
+                excludeCollectionId={initial.id}
+              />
+              <CollectionHomeStripFields control={form.control} />
             </CardContent>
           </Card>
         </div>

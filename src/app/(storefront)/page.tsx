@@ -5,14 +5,16 @@ import { createCaller } from "@/lib/trpc/server";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FlashSaleSection } from "@/components/storefront/home/flash-sale-section";
+import { HomeCategoryStrip } from "@/components/storefront/home/home-category-strip";
+import { CategorySidebar } from "@/components/storefront/home/category-sidebar";
 
 const HeroBanner = dynamic(
   () =>
     import("@/components/storefront/home/hero-banner").then((m) => m.HeroBanner),
   {
     loading: () => (
-      <div className="w-full">
-        <Skeleton className="h-[300px] w-full sm:h-[400px] lg:h-[500px]" />
+      <div className="min-w-0 flex-1 bg-[#0066FF]">
+        <Skeleton className="h-[280px] w-full sm:h-[380px] lg:h-[352px]" />
       </div>
     ),
   }
@@ -70,6 +72,7 @@ export default async function HomePage() {
 
   const [
     banners,
+    homeCategoryStrip,
     flashSale,
     newArrivals,
     bestsellers,
@@ -79,6 +82,7 @@ export default async function HomePage() {
     recentBlogs,
   ] = await Promise.all([
     trpc.admin.getBanners(),
+    trpc.collection.getHomeCategoryStrip(),
     trpc.product.getFlashSale(),
     trpc.product.getNewArrivals(),
     trpc.product.getBestsellers(),
@@ -126,7 +130,19 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
 
-      <HeroBanner banners={banners} />
+      <div className="mx-auto max-w-7xl px-0 sm:px-4 lg:px-8">
+        {/* isolate + z-index: cột hero/slide không che sidebar (hover link được) */}
+        <div className="relative isolate flex flex-col gap-0 lg:flex-row lg:items-start">
+          <CategorySidebar />
+          <div className="relative z-0 min-w-0 flex-1 lg:mt-4 lg:pl-2">
+            <HeroBanner banners={banners} />
+          </div>
+        </div>
+
+        {homeCategoryStrip.length > 0 && (
+          <HomeCategoryStrip items={homeCategoryStrip} />
+        )}
+      </div>
 
       {flashSale && <FlashSaleSection flashSale={flashSale} />}
 

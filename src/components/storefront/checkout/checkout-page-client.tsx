@@ -33,9 +33,6 @@ export function CheckoutPageClient() {
       phone: "",
       email: "",
       address: "",
-      city: "",
-      district: "",
-      ward: "",
       note: "",
     },
   });
@@ -62,6 +59,13 @@ export function CheckoutPageClient() {
       return;
     }
 
+    if (paymentMethod === "VNPAY" || paymentMethod === "MOMO") {
+      toast.info(
+        "Thanh toán VNPay/MoMo đang được phát triển. Vui lòng chọn thanh toán khi nhận hàng (COD)."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     createOrder.mutate({
@@ -70,9 +74,6 @@ export function CheckoutPageClient() {
         phone: values.phone,
         email: values.email,
         address: values.address,
-        city: values.city,
-        district: values.district,
-        ward: values.ward,
         note: values.note,
       },
       paymentMethod,
@@ -112,7 +113,9 @@ export function CheckoutPageClient() {
 
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting || paymentMethod === "VNPAY" || paymentMethod === "MOMO"
+                }
                 className="h-12 w-full text-base font-semibold"
               >
                 {isSubmitting ? "Đang xử lý..." : "ĐẶT HÀNG"}

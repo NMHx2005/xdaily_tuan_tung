@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, X } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { ChevronDown, LogOut, X } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -13,11 +14,17 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 import { COLLECTIONS } from "@/lib/constants";
 
-export function MobileMenu() {
+export function MobileMenu({ brandName = "XDAILY" }: { brandName?: string }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
   const closeMobileMenu = useUIStore((s) => s.closeMobileMenu);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
+
+  const displayName =
+    session?.user?.name?.trim() ||
+    session?.user?.email?.split("@")[0] ||
+    "";
 
   function handleNav() {
     closeMobileMenu();
@@ -33,7 +40,7 @@ export function MobileMenu() {
       >
         <SheetHeader className="border-b px-6 py-4">
           <div className="flex items-center justify-between">
-            <SheetTitle className="font-heading text-xl font-bold">XDAILY</SheetTitle>
+            <SheetTitle className="font-heading text-xl font-bold">{brandName}</SheetTitle>
             <button
               type="button"
               onClick={closeMobileMenu}
@@ -92,7 +99,7 @@ export function MobileMenu() {
             onClick={handleNav}
             className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
           >
-            Tin tức
+            Blog
           </Link>
           <Link
             href="/about"
@@ -101,16 +108,51 @@ export function MobileMenu() {
           >
             Giới thiệu
           </Link>
-
-          <div className="mx-6 my-4 border-t" />
-
           <Link
-            href="/account/login"
+            href="/contact"
             onClick={handleNav}
             className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
           >
-            Đăng nhập
+            Liên hệ
           </Link>
+
+          <div className="mx-6 my-4 border-t" />
+
+          {session?.user ? (
+            <>
+              <div className="px-6 py-2 text-xs text-muted-foreground">
+                {displayName ? (
+                  <span className="font-medium text-foreground">{displayName}</span>
+                ) : null}
+              </div>
+              <Link
+                href="/account"
+                onClick={handleNav}
+                className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+              >
+                Tài khoản
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  handleNav();
+                  void signOut({ callbackUrl: "/" });
+                }}
+                className="flex w-full items-center gap-2 px-6 py-3 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden />
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/account/login"
+              onClick={handleNav}
+              className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            >
+              Đăng nhập
+            </Link>
+          )}
           <Link
             href="/search"
             onClick={handleNav}

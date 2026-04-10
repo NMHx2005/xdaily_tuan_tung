@@ -77,10 +77,10 @@ export const shippingSchema = z.object({
   fullName: z.string().min(2, "Họ tên tối thiểu 2 ký tự"),
   phone: z.string().regex(/^(0[35789])\d{8}$/, "Số điện thoại không hợp lệ"),
   email: z.string().email("Email không hợp lệ"),
-  address: z.string().min(5, "Địa chỉ tối thiểu 5 ký tự"),
-  city: z.string().min(1, "Vui lòng chọn tỉnh/thành phố"),
-  district: z.string().min(1, "Vui lòng chọn quận/huyện"),
-  ward: z.string().min(1, "Vui lòng chọn phường/xã"),
+  address: z
+    .string()
+    .min(5, "Địa chỉ tối thiểu 5 ký tự")
+    .max(500, "Địa chỉ tối đa 500 ký tự"),
   note: z.string().default(""),
 });
 

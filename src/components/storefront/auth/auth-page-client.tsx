@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,11 +33,16 @@ const registerSchema = z
     path: ["confirmPassword"],
   });
 
-export function AuthPageClient() {
+export function AuthPageClient({
+  initialTab = "login",
+}: {
+  initialTab?: Tab;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { update: updateSession } = useSession();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const [tab, setTab] = useState<Tab>("login");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,6 +69,7 @@ export function AuthPageClient() {
         toast.error("Email hoặc mật khẩu không đúng");
       } else {
         toast.success("Đăng nhập thành công");
+        await updateSession();
         router.push(callbackUrl);
         router.refresh();
       }
@@ -105,6 +111,7 @@ export function AuthPageClient() {
         setTab("login");
       } else {
         toast.success("Đăng ký thành công");
+        await updateSession();
         router.push(callbackUrl);
         router.refresh();
       }

@@ -6,7 +6,7 @@ import authConfig from "@/auth.config";
 /** Chỉ dùng config Edge-safe — không import Prisma/bcrypt (xem auth.config.ts). */
 const { auth } = NextAuth(authConfig);
 
-const protectedRoutes = ["/admin", "/checkout"];
+const protectedRoutes = ["/admin"];
 const authRoutes = ["/account"];
 const publicAuthRoutes = ["/account/login", "/account/register"];
 

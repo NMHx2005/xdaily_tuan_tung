@@ -29,6 +29,34 @@ export async function GET() {
 
   const urls: { loc: string; lastmod: string }[] = [];
 
+  const staticPaths = [
+    "/",
+    "/contact",
+    "/about",
+    "/huong-dan-mua-hang",
+    "/chinh-sach-doi-tra",
+    "/chinh-sach-van-chuyen",
+    "/faq",
+    "/chinh-sach-bao-mat",
+    "/dieu-khoan-su-dung",
+  ];
+  const staticLastmod = new Date().toISOString();
+  for (const path of staticPaths) {
+    urls.push({
+      loc: `${base}${path}`,
+      lastmod: staticLastmod,
+    });
+  }
+
+  const latestProductUpdate = products.reduce<Date | null>(
+    (acc, p) => (acc && acc > p.updatedAt ? acc : p.updatedAt),
+    products[0]?.updatedAt ?? null,
+  );
+  urls.push({
+    loc: `${base}/collections`,
+    lastmod: (latestProductUpdate ?? new Date()).toISOString(),
+  });
+
   for (const p of products) {
     urls.push({
       loc: `${base}/products/${p.slug}`,

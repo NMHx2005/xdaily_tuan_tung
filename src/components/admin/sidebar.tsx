@@ -12,6 +12,7 @@ import {
   Settings,
   ExternalLink,
   Menu,
+  Mail,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -24,6 +25,7 @@ const navItems = [
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingCart },
   { label: "Bài viết", href: "/admin/blogs", icon: FileText },
   { label: "Khách hàng", href: "/admin/customers", icon: Users },
+  { label: "Liên hệ", href: "/admin/contact-messages", icon: Mail },
   { label: "Cài đặt", href: "/admin/settings", icon: Settings },
 ];
 
@@ -92,11 +94,12 @@ export function AdminMobileSidebar() {
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="p-2 lg:hidden"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Mở menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5" aria-hidden />
       </button>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-64 p-0">

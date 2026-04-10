@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { TRPCError } from '@trpc/server';
 import { router, protectedProcedure, adminProcedure } from '@/server/trpc/trpc';
 
@@ -17,7 +19,7 @@ type OrderSpendByUserRow = { userId: string; _sum: { total: number | null } };
 
 export const userRouter = router({
   getProfile: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.user.findUnique({
+    const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id },
       select: {
         id: true,
@@ -26,21 +28,35 @@ export const userRouter = router({
         phone: true,
         role: true,
         createdAt: true,
+        passwordHash: true,
       },
     });
+    if (!user) return null;
+    const { passwordHash, ...rest } = user;
+    return {
+      ...rest,
+      canChangePassword: !!passwordHash,
+    };
   }),
 
   updateProfile: protectedProcedure
     .input(
       z.object({
-        name: z.string().min(2, 'Tên tối thiểu 2 ký tự').optional(),
-        phone: z.string().optional(),
+        name: z.string().min(2, 'Tên tối thiểu 2 ký tự'),
+        phone: z
+          .string()
+          .max(20, 'Số điện thoại tối đa 20 ký tự')
+          .optional()
+          .transform((s) => (s === undefined ? undefined : s.trim() === '' ? null : s.trim())),
       })
     )
     .mutation(async ({ ctx, input }) => {
       return ctx.db.user.update({
         where: { id: ctx.session.user.id },
-        data: input,
+        data: {
+          name: input.name,
+          ...(input.phone !== undefined && { phone: input.phone }),
+        },
         select: {
           id: true,
           name: true,
@@ -50,6 +66,43 @@ export const userRouter = router({
       });
     }),
 
+  changePassword: protectedProcedure
+    .input(
+      z.object({
+        currentPassword: z.string().min(1, 'Nhập mật khẩu hiện tại'),
+        newPassword: z.string().min(6, 'Mật khẩu mới tối thiểu 6 ký tự').max(72, 'Mật khẩu tối đa 72 ký tự'),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { passwordHash: true },
+      });
+
+      if (!user?.passwordHash) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Tài khoản đăng nhập bằng Google không đổi mật khẩu tại đây.',
+        });
+      }
+
+      const match = await bcrypt.compare(input.currentPassword, user.passwordHash);
+      if (!match) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Mật khẩu hiện tại không đúng.',
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(input.newPassword, 12);
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { passwordHash },
+      });
+
+      return { ok: true as const };
+    }),
+
   getAll: adminProcedure
     .input(
       z
@@ -57,6 +110,7 @@ export const userRouter = router({
           page: z.number().int().positive().default(1),
           limit: z.number().int().positive().max(100).default(20),
           q: z.string().optional(),
+          hasOrders: z.enum(['any', 'with', 'without']).optional(),
         })
         .default({ page: 1, limit: 20 })
     )
@@ -64,15 +118,23 @@ export const userRouter = router({
       const skip = (input.page - 1) * input.limit;
       const term = input.q?.trim();
 
-      const where = {
-        role: 'CUSTOMER' as const,
-        ...(term && {
+      const and: Prisma.UserWhereInput[] = [{ role: 'CUSTOMER' }];
+      if (term) {
+        and.push({
           OR: [
-            { name: { contains: term, mode: 'insensitive' as const } },
-            { email: { contains: term, mode: 'insensitive' as const } },
+            { name: { contains: term, mode: 'insensitive' } },
+            { email: { contains: term, mode: 'insensitive' } },
+            { phone: { contains: term, mode: 'insensitive' } },
           ],
-        }),
-      };
+        });
+      }
+      if (input.hasOrders === 'with') {
+        and.push({ orders: { some: {} } });
+      } else if (input.hasOrders === 'without') {
+        and.push({ orders: { none: {} } });
+      }
+
+      const where: Prisma.UserWhereInput = { AND: and };
 
       const [users, total] = await Promise.all([
         ctx.db.user.findMany({

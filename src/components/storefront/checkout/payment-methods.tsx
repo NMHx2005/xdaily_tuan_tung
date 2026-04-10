@@ -64,6 +64,16 @@ export function PaymentMethods({ value, onChange }: PaymentMethodsProps) {
           );
         })}
       </div>
+
+      {(value === "VNPAY" || value === "MOMO") && (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+        >
+          Thanh toán qua {value === "VNPAY" ? "VNPay" : "MoMo"} đang được phát triển. Vui lòng chọn{" "}
+          <strong>thanh toán khi nhận hàng (COD)</strong> để hoàn tất đơn.
+        </div>
+      )}
     </div>
   );
 }

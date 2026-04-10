@@ -9,6 +9,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "@/server/trpc";
 import { trpc } from "@/lib/trpc/client";
+import { formatShippingAddressLine } from "@/lib/format-shipping-address";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { SITE_URL } from "@/lib/constants";
 import {
@@ -246,8 +247,7 @@ export function OrderDetailClient({ order: initial }: { order: OrderDetail }) {
             <p>{order.shippingPhone}</p>
             <p className="text-muted-foreground">{order.shippingEmail}</p>
             <p className="pt-2 leading-relaxed">
-              {order.shippingAddress}, {order.shippingWard}, {order.shippingDistrict},{" "}
-              {order.shippingCity}
+              {formatShippingAddressLine(order)}
             </p>
             {order.shippingNote && (
               <p className="pt-2 text-muted-foreground">

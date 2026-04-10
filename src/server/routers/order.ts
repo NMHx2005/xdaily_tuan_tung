@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '@/server/trpc/trpc';
 import { shippingSchema } from '@/lib/validators';
 import { generateOrderNumber } from '@/lib/utils';
 import { FREE_SHIPPING_THRESHOLD, DEFAULT_SHIPPING_FEE } from '@/lib/constants';
-import { createVnpayPaymentUrl } from '@/lib/payment/vnpay';
 import { sendOrderConfirmationEmail } from '@/lib/emails/send-order-confirmation';
 
 /** Matches `product.findMany` include in `create` (images + variants). */
@@ -119,9 +119,9 @@ export const orderRouter = router({
           shippingPhone: shipping.phone,
           shippingEmail: shipping.email,
           shippingAddress: shipping.address,
-          shippingCity: shipping.city,
-          shippingDistrict: shipping.district,
-          shippingWard: shipping.ward,
+          shippingCity: '',
+          shippingDistrict: '',
+          shippingWard: '',
           shippingNote: shipping.note || null,
           subtotal,
           shippingFee,
@@ -135,20 +135,6 @@ export const orderRouter = router({
       });
 
       void sendOrderConfirmationEmail(order);
-
-      if (paymentMethod === 'VNPAY') {
-        try {
-          const paymentUrl = createVnpayPaymentUrl({
-            orderId: order.id,
-            amount: total,
-            orderInfo: `Thanh toan don hang ${orderNumber}`,
-            ipAddr: '127.0.0.1',
-          });
-          return { orderNumber, paymentUrl };
-        } catch {
-          return { orderNumber, paymentUrl: null };
-        }
-      }
 
       return { orderNumber, paymentUrl: null };
     }),
@@ -198,12 +184,53 @@ export const orderRouter = router({
               'CANCELLED',
             ])
             .optional(),
+          paymentStatus: z.enum(['PENDING', 'PAID', 'FAILED', 'REFUNDED']).optional(),
+          paymentMethod: z.enum(['COD', 'VNPAY', 'MOMO']).optional(),
+          q: z.string().optional(),
+          dateFrom: z.string().optional(),
+          dateTo: z.string().optional(),
         })
         .default({ page: 1, limit: 20 })
     )
     .query(async ({ ctx, input }) => {
       const skip = (input.page - 1) * input.limit;
-      const where = input.status !== undefined ? { status: input.status } : undefined;
+
+      const and: Prisma.OrderWhereInput[] = [];
+      if (input.status !== undefined) {
+        and.push({ status: input.status });
+      }
+      if (input.paymentStatus !== undefined) {
+        and.push({ paymentStatus: input.paymentStatus });
+      }
+      if (input.paymentMethod !== undefined) {
+        and.push({ paymentMethod: input.paymentMethod });
+      }
+      const term = input.q?.trim();
+      if (term) {
+        and.push({
+          OR: [
+            { orderNumber: { contains: term, mode: 'insensitive' } },
+            { shippingPhone: { contains: term, mode: 'insensitive' } },
+            { shippingName: { contains: term, mode: 'insensitive' } },
+            { shippingEmail: { contains: term, mode: 'insensitive' } },
+          ],
+        });
+      }
+      if (input.dateFrom) {
+        const d = new Date(`${input.dateFrom}T00:00:00.000Z`);
+        if (!Number.isNaN(d.getTime())) {
+          and.push({ createdAt: { gte: d } });
+        }
+      }
+      if (input.dateTo) {
+        const d = new Date(`${input.dateTo}T23:59:59.999Z`);
+        if (!Number.isNaN(d.getTime())) {
+          and.push({ createdAt: { lte: d } });
+        }
+      }
+
+      const where: Prisma.OrderWhereInput | undefined =
+        and.length > 0 ? { AND: and } : undefined;
 
       const [items, total] = await Promise.all([
         ctx.db.order.findMany({

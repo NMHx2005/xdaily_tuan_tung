@@ -181,12 +181,14 @@ export function CollectionProductsManager({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">Sản phẩm trong bộ sưu tập</p>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger>
-            <Button type="button" size="sm" variant="outline">
-              <Plus className="size-4" />
-              Thêm sản phẩm
-            </Button>
-          </DialogTrigger>
+          <DialogTrigger
+            render={
+              <Button type="button" size="sm" variant="outline">
+                <Plus className="size-4" />
+                Thêm sản phẩm
+              </Button>
+            }
+          />
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Tìm và thêm sản phẩm</DialogTitle>

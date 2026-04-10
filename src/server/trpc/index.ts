@@ -9,6 +9,8 @@ import { userRouter } from '@/server/routers/user';
 import { searchRouter } from '@/server/routers/search';
 import { adminRouter } from '@/server/routers/admin';
 import { newsletterRouter } from '@/server/routers/newsletter';
+import { siteRouter } from '@/server/routers/site';
+import { contactRouter } from '@/server/routers/contact';
 
 export const appRouter = router({
   product: productRouter,
@@ -21,6 +23,8 @@ export const appRouter = router({
   search: searchRouter,
   admin: adminRouter,
   newsletter: newsletterRouter,
+  site: siteRouter,
+  contact: contactRouter,
 });
 
 export type AppRouter = typeof appRouter;

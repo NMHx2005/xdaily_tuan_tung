@@ -12,7 +12,7 @@ const MIME_TO_EXT = new Map([
   ["image/webp", "webp"],
 ]);
 
-const BUCKETS = new Set(["products", "blogs", "banners"]);
+const BUCKETS = new Set(["products", "blogs", "banners", "collections"]);
 
 export async function POST(request: Request) {
   const session = await auth();

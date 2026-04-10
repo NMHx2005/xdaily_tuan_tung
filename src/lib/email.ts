@@ -24,3 +24,17 @@ export function getResendFromAddress(): string {
     "XDAILY <orders@xdaily.vn>"
   );
 }
+
+/** Gửi thông báo có tin nhắn liên hệ mới — bật `ENABLE_CONTACT_NOTIFICATION_EMAIL=true` và có `RESEND_API_KEY`. */
+export function isContactNotificationEmailEnabled(): boolean {
+  const enabled =
+    process.env.ENABLE_CONTACT_NOTIFICATION_EMAIL?.trim().toLowerCase();
+  if (enabled !== "true" && enabled !== "1") return false;
+  return !!process.env.RESEND_API_KEY?.trim();
+}
+
+/** Email nhận thông báo liên hệ; fallback `CONTACT_NOTIFICATION_EMAIL` rỗng thì không gửi mail (vẫn lưu DB). */
+export function getContactNotificationTo(): string | null {
+  const to = process.env.CONTACT_NOTIFICATION_EMAIL?.trim();
+  return to || null;
+}

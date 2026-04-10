@@ -10,6 +10,8 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-export const db = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
+/** Production: singleton. Dev: không gắn global để sau `prisma generate` chỉ cần restart dev (tránh giữ instance/engine cũ). */
+export const db =
+  process.env.NODE_ENV === 'production'
+    ? (globalForPrisma.prisma ??= createPrismaClient())
+    : createPrismaClient();

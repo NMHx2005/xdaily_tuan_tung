@@ -12,6 +12,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { formatShippingAddressLine } from "@/lib/format-shipping-address";
 
 export type OrderConfirmationItem = {
   name: string;
@@ -151,9 +152,7 @@ export function OrderConfirmationEmail({ order }: { order: OrderConfirmationPayl
               <strong>Số điện thoại:</strong> {order.shippingPhone}
             </Text>
             <Text style={paragraph}>
-              <strong>Địa chỉ:</strong>{" "}
-              {order.shippingAddress}, {order.shippingWard}, {order.shippingDistrict},{" "}
-              {order.shippingCity}
+              <strong>Địa chỉ:</strong> {formatShippingAddressLine(order)}
             </Text>
             {order.shippingNote ? (
               <Text style={paragraph}>

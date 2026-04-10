@@ -166,6 +166,24 @@ model Collection {
   position    Int     @default(0)
   isVisible   Boolean @default(true)
 
+  /** Tên hiển thị trên menu storefront (nếu trống dùng `name`) */
+  navLabel String @default("")
+  /** Icon menu: Percent, Armchair, Utensils, Bed, Briefcase, Coffee, Sparkles, Package */
+  navIcon  String @default("Package")
+  /** Hiện trong sidebar trang chủ / mega menu */
+  showInStorefrontNav Boolean @default(false)
+
+  /** Hiện trong dải icon bộ sưu tập (dưới hero) */
+  showOnHomeCategoryStrip Boolean @default(false)
+  /** Thứ tự trên dải (nhỏ hơn = trái hơn) */
+  homeStripPosition       Int    @default(0)
+  /** Nhãn trên dải (để trống = tự ghép "Bộ sưu tập …" từ tên) */
+  homeStripLabel          String @default("")
+
+  parentId String?
+  parent   Collection?  @relation("CollectionTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Collection[] @relation("CollectionTree")
+
   seoTitle       String @default("")
   seoDescription String @default("")
 
@@ -175,6 +193,7 @@ model Collection {
   updatedAt DateTime @updatedAt
 
   @@index([slug])
+  @@index([parentId])
 }
 
 // 7. ProductCollection (join table)
@@ -365,11 +384,38 @@ model FlashSaleItem {
 }
 
 // ──────────────────────────────────
-// 16. NEWSLETTER
+// 16. SITE CONTENT (singleton — /admin/settings)
+// ──────────────────────────────────
+
+model SiteContent {
+  id        String   @id @default("default")
+  payload   Json     @default("{}")
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────────────
+// 17. NEWSLETTER
 // ──────────────────────────────────
 
 model Newsletter {
   id        String   @id @default(cuid())
   email     String   @unique
   createdAt DateTime @default(now())
+}
+
+// ──────────────────────────────────
+// 18. CONTACT MESSAGES (form /contact)
+// ──────────────────────────────────
+
+model ContactMessage {
+  id        String    @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String    @db.Text
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([email, createdAt])
 }

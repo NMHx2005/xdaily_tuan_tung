@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import type { SiteContentData } from "@/lib/site-content-schema";
 
 const categories = [
+  { name: "Tất cả sản phẩm", href: "/collections" },
   { name: "Ghế ăn", href: "/collections/ghe-an" },
   { name: "Ghế bar", href: "/collections/ghe-bar" },
   { name: "Bàn trà", href: "/collections/ban-tra" },
@@ -11,32 +13,41 @@ const categories = [
 ];
 
 const support = [
-  { name: "Hướng dẫn mua hàng", href: "#" },
-  { name: "Chính sách đổi trả", href: "#" },
-  { name: "Chính sách vận chuyển", href: "#" },
-  { name: "Câu hỏi thường gặp", href: "#" },
+  { name: "Hướng dẫn mua hàng", href: "/huong-dan-mua-hang" },
+  { name: "Chính sách đổi trả", href: "/chinh-sach-doi-tra" },
+  { name: "Chính sách vận chuyển", href: "/chinh-sach-van-chuyen" },
+  { name: "Câu hỏi thường gặp", href: "/faq" },
 ];
 
-const contact = [
-  { icon: MapPin, text: "Số 123, Đường ABC, Quận XYZ, TP.HCM" },
-  { icon: Phone, text: "0123 456 789" },
-  { icon: Mail, text: "contact@xdaily.vn" },
-  { icon: Clock, text: "Thứ 2 - Thứ 7: 8h00 - 18h00" },
-];
+export function Footer({ site }: { site: SiteContentData }) {
+  const { siteBrand, siteContact } = site;
+  const hotlineTel = `tel:${siteContact.hotlineDigits}`;
 
-export function Footer() {
+  const contact = [
+    { icon: MapPin, text: siteContact.address },
+    {
+      icon: Phone,
+      text: siteContact.hotlineDisplay,
+      href: hotlineTel,
+    },
+    {
+      icon: Mail,
+      text: siteContact.email,
+      href: `mailto:${siteContact.email}`,
+    },
+    { icon: Clock, text: siteContact.openingHours },
+  ] as const;
+
   return (
     <footer className="bg-neutral-900 text-neutral-300">
-      {/* Main footer */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Column 1 — About */}
           <div>
             <Link href="/" className="font-heading text-xl font-bold text-white">
-              XDAILY
+              {siteBrand.name}
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-neutral-400">
-              Nhà máy nội thất XDAILY — Cung cấp ghế, bàn, sofa cao cấp cho mọi không gian.
+              {siteBrand.footerTagline}
             </p>
             <div className="mt-5 flex items-center gap-3">
               <a href="#" aria-label="Facebook" className="rounded-full border border-neutral-700 p-2 transition-colors hover:border-white hover:text-white">
@@ -51,7 +62,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2 — Categories */}
           <nav aria-label="Danh mục chân trang">
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
               Danh mục sản phẩm
@@ -67,7 +77,6 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Column 3 — Support */}
           <nav aria-label="Hỗ trợ khách hàng">
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
               Hỗ trợ khách hàng
@@ -83,8 +92,7 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Column 4 — Contact */}
-          <div>
+          <div id="lien-he">
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">
               Liên hệ
             </h4>
@@ -92,19 +100,47 @@ export function Footer() {
               {contact.map((item) => (
                 <li key={item.text} className="flex gap-3 text-sm text-neutral-400">
                   <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-neutral-500" />
-                  <span>{item.text}</span>
+                  {"href" in item && item.href ? (
+                    <a href={item.href} className="transition-colors hover:text-white">
+                      {item.text}
+                    </a>
+                  ) : (
+                    <span>{item.text}</span>
+                  )}
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm">
+              <Link href="/contact" className="font-medium text-[#0066FF] hover:underline">
+                Trang liên hệ đầy đủ
+              </Link>
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="border-t border-neutral-800">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <p className="text-center text-xs text-neutral-500">
-            © {new Date().getFullYear()} XDAILY. Tất cả quyền được bảo lưu.
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-xs text-neutral-500">
+            <span>
+              © {new Date().getFullYear()} {siteBrand.name}. Tất cả quyền được bảo lưu.
+            </span>
+            <span className="hidden sm:inline" aria-hidden>
+              ·
+            </span>
+            <Link
+              href="/chinh-sach-bao-mat"
+              className="text-neutral-400 underline-offset-2 hover:text-white hover:underline"
+            >
+              Chính sách bảo mật
+            </Link>
+            <span aria-hidden>·</span>
+            <Link
+              href="/dieu-khoan-su-dung"
+              className="text-neutral-400 underline-offset-2 hover:text-white hover:underline"
+            >
+              Điều khoản sử dụng
+            </Link>
           </p>
         </div>
       </div>
