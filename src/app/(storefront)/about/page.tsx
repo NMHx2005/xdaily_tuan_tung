@@ -114,7 +114,9 @@ export default async function AboutPage() {
             <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
               {hero.h1}
             </h1>
-            <p className="mt-4 text-lg leading-relaxed text-white/90">{hero.lead}</p>
+            <p className="mt-4 whitespace-pre-line text-lg leading-relaxed text-white/90">
+              {hero.lead}
+            </p>
           </div>
         </div>
       </section>
@@ -150,7 +152,9 @@ export default async function AboutPage() {
             <h2 className="mt-3 font-heading text-2xl font-bold text-neutral-900 sm:text-3xl">
               {story.title}
             </h2>
-            <p className="mt-4 text-neutral-600 leading-relaxed">{story.body}</p>
+            <p className="mt-4 whitespace-pre-line text-neutral-600 leading-relaxed">
+              {story.body}
+            </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href={story.primaryCta.href}

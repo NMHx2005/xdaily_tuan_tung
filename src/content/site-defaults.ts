@@ -3,33 +3,35 @@
  *
  * Trên production: chỉnh tại **Quản trị → Trang Giới thiệu** hoặc **Website &amp; liên hệ**.
  * Nút **Nạp mẫu** trong admin lấy đúng cấu trúc này để sửa rồi **Lưu**.
+ * Logo: upload lên Supabase Storage (bucket public) rồi dán URL trong Admin → Website &amp; liên hệ.
  */
 export const defaultSiteContent = {
   siteBrand: {
-    name: "XDAILY",
-    logoUrl: "https://file.hstatic.net/1000400963/file/logo__1_.png",
+    name: "Nội thất Tú Anh",
+    /** Thay bằng URL ảnh trên Supabase sau khi upload (hoặc giữ đường dẫn `/...` trong public) */
+    logoUrl: "/placeholders/cover.svg",
     footerTagline:
-      "Nhà máy nội thất XDAILY — Cung cấp ghế, bàn, sofa cao cấp cho mọi không gian.",
+      "Nội thất Tú Anh — Không gian đẹp, giá trị bền lâu. Thiết kế tinh gọn, thi công tại Thạch Thất, Hà Nội.",
   },
   siteContact: {
-    hotlineDigits: "0845220066",
-    hotlineDisplay: "0845 220 066",
-    email: "contact@xdaily.vn",
+    hotlineDigits: "0866876869",
+    hotlineDisplay: "0866 876 869",
+    email: "tuanhfurniture@gmail.com",
     address:
-      "Showroom: 123 Đường Võ Văn Kiệt, Phường Cầu Ông Lãnh, Quận 1, TP. Hồ Chí Minh",
+      "Xưởng 1: Làng Chàng, Thạch Xá, Thạch Thất, Hà Nội · Xưởng 2: Đồng Thạch, Hữu Bằng, Thạch Thất · Kho: 40 Đường Thái Hòa, Hữu Bằng, Thạch Thất, Hà Nội",
     openingHours: "Thứ 2 – Thứ 7: 8h00 – 18h00 · Chủ nhật: nghỉ",
   },
   contactPageContent: {
     meta: {
       title: "Liên hệ",
       description:
-        "Liên hệ XDAILY — hotline, email, địa chỉ showroom và form gửi yêu cầu tư vấn nội thất.",
-      openGraphTitle: "Liên hệ | XDAILY",
+        "Liên hệ Nội thất Tú Anh — hotline 0866 876 869, email tuanhfurniture@gmail.com, xưởng & kho tại Thạch Thất, Hà Nội.",
+      openGraphTitle: "Liên hệ | Nội thất Tú Anh",
     },
     hero: {
       title: "Liên hệ",
       lead:
-        "Đội ngũ XDAILY hỗ trợ tư vấn sản phẩm, báo giá và chăm sóc sau mua. Hãy để lại tin nhắn hoặc liên hệ trực tiếp qua hotline.",
+        "Đội ngũ Tú Anh hỗ trợ tư vấn không gian, báo giá và lịch thi công. Gọi hotline, gửi email hoặc để lại tin nhắn — chúng tôi phản hồi trong giờ làm việc.",
     },
     bottomHint: {
       prefix: "Mua hàng online?",
@@ -50,92 +52,108 @@ export const defaultSiteContent = {
     meta: {
       title: "Giới thiệu",
       description:
-        "XDAILY — nhà máy & thương hiệu nội thất: ghế ăn, bàn trà, sofa… đồng hành không gian sống hiện đại.",
-      openGraphTitle: "Giới thiệu | XDAILY",
+        "Nội thất Tú Anh — thiết kế tinh gọn, xưởng sản xuất tại Thạch Thất, chủ động nguồn hàng và tiến độ. Không gian đẹp, giá trị bền lâu.",
+      openGraphTitle: "Giới thiệu | Nội thất Tú Anh",
     },
     organizationJsonLd: {
       description:
-        "Thương hiệu nội thất XDAILY — ghế ăn, bàn trà, ghế bar, sofa và giải pháp trang trí cho nhà ở.",
+        "Nội thất Tú Anh — thương hiệu nội thất tại Thạch Thất, Hà Nội: thiết kế riêng, thi công chính xác, hai xưởng sản xuất và hệ thống kho hàng.",
     },
     hero: {
-      h1: "Giới thiệu XDAILY",
+      h1: "NỘI THẤT TÚ ANH",
       lead:
-        "Chúng tôi tin rằng nội thất tốt không chỉ đẹp — mà còn phải bền, phù hợp không gian và phục vụ đúng nhu cầu từng gia đình.",
-      /** Để trống = ảnh mặc định trên trang */
+        "Không gian đẹp – Giá trị bền lâu\n\nBạn không chỉ mua nội thất. Bạn đang chọn cách sống mỗi ngày.",
       backgroundImageUrl: "",
     },
     stats: [
-      { value: "10+", label: "Năm kinh nghiệm ngành" },
-      { value: "500+", label: "Mẫu sản phẩm & biến thể" },
-      { value: "63", label: "Tỉnh thành phục vụ" },
-      { value: "24/7", label: "Hỗ trợ đặt hàng online" },
+      { value: "2", label: "Xưởng sản xuất (Thạch Thất)" },
+      { value: "1", label: "Kho hàng trung tâm" },
+      { value: "100%", label: "Cam kết hoàn thiện tỉ mỉ" },
+      { value: "Ưu tiên", label: "Đẹp thực tế — không chỉ trên ảnh studio" },
     ],
     story: {
-      imageAlt: "Không gian trưng bày nội thất XDAILY",
+      imageAlt: "Không gian nội thất Nội thất Tú Anh",
       imageUrl: "",
-      eyebrow: "Câu chuyện thương hiệu",
-      title: "Đồng hành cùng không gian sống hiện đại",
+      eyebrow: "Về chúng tôi",
+      title: "Hội tụ thiết kế tinh gọn — am hiểu không gian sống Việt",
       body:
-        "XDAILY xuất phát từ nhu cầu mang nội thất có thiết kế rõ ràng, chất lượng ổn định và mức giá minh bạch đến tay người tiêu dùng. Chúng tôi kết hợp sản xuất nội địa với nhập khẩu linh kiện — để mỗi sản phẩm đều có lộ trình kiểm định trước khi đến showroom và website.",
+        "Nội Thất Tú Anh – nơi hội tụ của những thiết kế tinh gọn, chất liệu được tuyển chọn và sự am hiểu sâu sắc về không gian sống Việt. Chúng tôi không làm tất cả, nhưng chúng tôi làm những gì thực sự đẹp, thực sử dụng được và thực sự xứng đáng với căn nhà của bạn.",
       primaryCta: { label: "Xem sản phẩm", href: "/collections" },
       secondaryCta: { label: "Liên hệ tư vấn", href: "/contact" },
     },
     pillars: [
       {
         icon: "factory" as const,
-        title: "Sản xuất & nhập khẩu",
-        text: "Hệ thống nhà xưởng và đối tác nhập khẩu giúp kiểm soát chất lượng và giá thành hợp lý.",
+        title: "Hai xưởng & kho chủ động",
+        text:
+          "Với hai xưởng sản xuất tại Thạch Thất và hệ thống kho hàng rộng rãi, chúng tôi chủ động về nguồn hàng và tiến độ — để bạn yên tâm từ khâu chọn mẫu đến ngày bàn giao.",
       },
       {
         icon: "sparkles" as const,
-        title: "Thiết kế bền vững",
-        text: "Ưu tiên vật liệu an toàn, form dáng hiện đại phù hợp xu hướng và nhu cầu gia đình Việt.",
+        title: "Đẹp thực tế",
+        text:
+          "Từ phòng khách ấm cúng, phòng ngủ thư giãn, góc làm việc tối giản đến bếp gọn gàng — sản phẩm thiết kế riêng, thi công chính xác, không chỉ đẹp trên ảnh chụp studio.",
       },
       {
         icon: "heartHandshake" as const,
-        title: "Phục vụ tận tâm",
-        text: "Tư vấn trước mua, đóng gói cẩn thận và đồng hành sau bán — minh bạch trong mọi giao dịch.",
+        title: "Đội ngũ có tâm",
+        text:
+          "Tư vấn đúng người, đúng việc — không đẩy hàng tồn. Linh hoạt theo ngân sách; thợ làm thật, hoàn thiện thật.",
       },
     ],
     sections: [
       {
-        eyebrow: "Về chúng tôi",
-        title: "XDAILY là ai?",
+        eyebrow: "Khách hàng",
+        title: "Vì sao khách hàng tìm đến Tú Anh?",
         paragraphs: [
-          "XDAILY là thương hiệu nội thất hướng tới gia đình và không gian sống đô thị: ghế ăn, bàn trà, ghế bar, sofa… được chọn lọc và mô tả rõ ràng trên website để bạn dễ so sánh và đặt mua.",
-          "Với mạng lưới đối tác sản xuất và nhập khẩu, chúng tôi có thể đáp ứng đơn lẻ lẫn nhu cầu trang trí theo khu vực — luôn ưu tiên an toàn sử dụng và độ bền theo thời gian.",
+          "Bởi họ không muốn một căn nhộn nhịp, lộn xộn.",
+          'Bởi họ cần sự tư vấn đúng người, đúng việc – không bán hàng kiểu "đẩy hàng tồn".',
+          "Bởi họ trân trọng cái đẹp đúng nghĩa: không phô trương, không hào nhoáng rẻ tiền.",
         ],
       },
       {
-        eyebrow: "Định hướng",
-        title: "Hướng đến cộng đồng",
+        eyebrow: "Dịch vụ",
+        title: "Chúng tôi làm gì?",
         paragraphs: [
-          "Chúng tôi muốn XDAILY là cái tên được nhắc tới khi người dùng tìm nội thất đẹp, dễ bảo trì và dịch vụ rõ ràng: từ tư vấn online đến giao nhận và hỗ trợ sau mua.",
+          "Từ phòng khách ấm cúng, phòng ngủ thư giãn, góc làm việc tối giản cho đến không gian bếp gọn gàng – Tú Anh mang đến những sản phẩm nội thất thiết kế riêng, thi công chính xác, hoàn thiện tỉ mỉ.",
+          "Với hai xưởng sản xuất tại Thạch Thất và hệ thống kho hàng rộng rãi, chúng tôi chủ động về nguồn hàng, chủ động về tiến độ – để bạn yên tâm từ khâu chọn mẫu đến ngày bàn giao.",
         ],
       },
       {
-        eyebrow: "Sứ mệnh",
-        title: "Cam kết với khách hàng",
+        eyebrow: "Khác biệt",
+        title: "Tú Anh khác biệt thế nào?",
         paragraphs: [
-          "Không ngừng cải thiện trải nghiệm mua sắm — mô tả trung thực, hình ảnh sát thực tế, chính sách đổi trả và vận chuyển minh bạch. Mọi góp ý đều là cơ hội để chúng tôi phục vụ tốt hơn.",
+          "Đẹp thực tế – không chỉ đẹp trên ảnh chụp studio",
+          "Vừa vặn với không gian nhà bạn – không áp đặt mẫu mã",
+          "Linh hoạt theo ngân sách – luôn có phương án phù hợp",
+          "Đội ngũ thợ có tâm – làm thật, hoàn thiện thật",
         ],
       },
       {
-        eyebrow: "Đội ngũ",
-        title: "Con người XDAILY",
+        eyebrow: "Cam kết",
+        title: "Gửi gắm của chúng tôi",
         paragraphs: [
-          "Đội ngũ vận hành, kho vận và chăm sóc khách hàng làm việc phối hợp chặt chẽ với đối tác sản xuất — để đơn hàng được xử lý nhanh, đóng gói cẩn thận và đến tay bạn đúng cam kết.",
+          "Chúng tôi không hứa những điều viển vông.",
+          "Chúng tôi chỉ hứa làm đúng, làm đẹp, và có trách nhiệm với từng sản phẩm mang tên Tú Anh.",
+          '"Hãy đến Tú Anh khi bạn muốn ngôi nhà của mình được nâng niu đúng cách – không ảo tưởng, không chiêu trò."',
         ],
-        trailingImage: {
-          alt: "Không gian làm việc và showroom XDAILY",
-          url: "",
-        },
+      },
+      {
+        eyebrow: "Thông tin",
+        title: "Xưởng sản xuất nội thất Tú Anh",
+        paragraphs: [
+          "Hệ thống cơ sở sản xuất & kho hàng:",
+          "· Xưởng sản xuất 1: Làng Chàng, Thạch Xá, Thạch Thất, Hà Nội",
+          "· Xưởng sản xuất 2: Đồng Thạch, Hữu Bằng, Thạch Thất, Hà Nội",
+          "· Kho hàng: 40 Đường Thái Hòa, Hữu Bằng, Thạch Thất, Hà Nội",
+          "Hotline: 0866876869 · Email: tuanhfurniture@gmail.com",
+        ],
       },
     ],
     cta: {
-      title: "Cần tư vấn thêm?",
+      title: "Cần tư vấn không gian?",
       subtitle:
-        "Để lại tin nhắn hoặc gọi hotline — chúng tôi phản hồi trong giờ làm việc.",
+        "Gọi hotline 0866 876 869 hoặc để lại tin — chúng tôi phản hồi trong giờ làm việc.",
       buttonLabel: "Liên hệ ngay",
       buttonHref: "/contact",
     },
