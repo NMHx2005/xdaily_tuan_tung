@@ -77,16 +77,17 @@ export function Header({
     "Khách";
 
   return (
-    <>
-      <header
-        id="header"
-        className="site-header sticky top-0 z-50 w-full"
-        style={{ ["--height-header" as string]: "107px" }}
-      >
+    <div className="storefront-header-root sticky top-0 z-50 w-full">
+      <header id="header" className="site-header w-full">
         {/* Top — blue */}
-        <div className={cn(brandClass.bg, "text-white")}>
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:gap-6 lg:px-8 lg:py-2.5">
-            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4 lg:max-w-[220px] lg:flex-none">
+        <div
+          className={cn(
+            brandClass.bg,
+            "text-white pt-[env(safe-area-inset-top,0px)]",
+          )}
+        >
+          <div className="mx-auto flex max-w-7xl flex-nowrap items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4 lg:gap-6 lg:px-8 lg:py-2.5">
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 lg:max-w-[220px] lg:flex-none">
               <button
                 type="button"
                 onClick={openMobileMenu}
@@ -97,7 +98,7 @@ export function Header({
               </button>
               <Link
                 href="/"
-                className="relative h-[40px] w-[140px] shrink-0 sm:h-[50px] sm:w-[180px] lg:h-[50px] lg:w-[200px]"
+                className="relative h-10 w-[min(140px,40vw)] shrink-0 sm:h-[50px] sm:w-[180px] lg:h-[50px] lg:w-[200px]"
                 aria-label={`${brandName} — Trang chủ`}
               >
                 <Image
@@ -118,8 +119,8 @@ export function Header({
               action="/search"
               method="get"
               className={cn(
-                "order-3 flex w-full min-w-0 flex-1 items-stretch overflow-hidden rounded-[10px] border border-white",
-                "lg:order-none lg:max-w-2xl",
+                "hidden min-w-0 flex-1 items-stretch overflow-hidden rounded-[10px] border border-white lg:flex",
+                "lg:max-w-2xl",
               )}
             >
               <label htmlFor="header-search-q" className="sr-only">
@@ -160,7 +161,7 @@ export function Header({
               </button>
             </form>
 
-            <div className="ml-auto flex flex-shrink-0 items-center gap-2 sm:gap-4 lg:gap-6">
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3 lg:gap-6">
               <a
                 href={hotlineTel}
                 className="hidden items-center gap-2 rounded-md py-1.5 text-white transition-colors hover:bg-white/10 md:flex"
@@ -208,7 +209,7 @@ export function Header({
               <button
                 type="button"
                 onClick={openSearch}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors hover:bg-white/10 md:hidden"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors hover:bg-white/10 lg:hidden"
                 aria-label="Tìm kiếm"
               >
                 <Search className="h-5 w-5" aria-hidden />
@@ -262,6 +263,6 @@ export function Header({
 
       <SearchBar />
       <MobileMenu brandName={brandName} logoUrl={logoUrl} />
-    </>
+    </div>
   );
 }

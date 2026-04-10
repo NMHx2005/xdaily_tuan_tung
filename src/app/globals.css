@@ -229,3 +229,14 @@
     animation: none;
   }
 }
+
+/* Storefront header — offset cho overlay tìm kiếm (fixed); mobile 1 hàng + desktop 2 hàng */
+.storefront-header-root {
+  --height-header: calc(4.75rem + env(safe-area-inset-top, 0px));
+}
+
+@media (min-width: 1024px) {
+  .storefront-header-root {
+    --height-header: calc(6.6875rem + env(safe-area-inset-top, 0px));
+  }
+}

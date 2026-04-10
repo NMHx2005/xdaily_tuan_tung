@@ -31,7 +31,7 @@ export function CartIcon({ className, variant = "default" }: CartIconProps) {
         "relative inline-flex min-h-11 items-center justify-center rounded-md p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2",
         brandClass.ringOffset,
         isHeader
-          ? "gap-2 rounded-lg border-2 border-white px-3 text-white hover:bg-white/10"
+          ? "gap-1.5 rounded-lg border-2 border-white px-2 text-white hover:bg-white/10 sm:gap-2 sm:px-3"
           : cn("min-w-11 focus-visible:ring-ring", brandClass.textHover),
         className,
       )}

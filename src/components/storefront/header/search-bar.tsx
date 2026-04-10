@@ -67,7 +67,7 @@ export function SearchBar() {
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-black/30"
+        className="fixed inset-0 z-[55] bg-black/30"
         onClick={clearAndClose}
         aria-hidden
       />
@@ -75,7 +75,10 @@ export function SearchBar() {
         role="dialog"
         aria-modal="true"
         aria-label="Tìm kiếm sản phẩm"
-        className="absolute left-0 right-0 top-full z-50 border-b bg-background shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
+        style={{
+          top: "var(--height-header, 4.75rem)",
+        }}
+        className="fixed left-0 right-0 z-[60] max-h-[min(32rem,calc(100dvh-5rem))] overflow-y-auto border-b bg-background shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
       >
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <form onSubmit={handleSubmit} className="relative" role="search">

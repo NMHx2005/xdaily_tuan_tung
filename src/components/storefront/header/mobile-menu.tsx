@@ -43,9 +43,9 @@ export function MobileMenu({
       <SheetContent
         side="left"
         showCloseButton={false}
-        className="w-80 p-0"
+        className="w-[min(20rem,calc(100vw-0.75rem))] max-w-[calc(100vw-0.5rem)] p-0 pb-[env(safe-area-inset-bottom,0px)]"
       >
-        <SheetHeader className="border-b px-6 py-4">
+        <SheetHeader className="border-b px-4 py-3.5 sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {logoUrl ? (
@@ -77,11 +77,14 @@ export function MobileMenu({
           </div>
         </SheetHeader>
 
-        <nav className="flex flex-col py-4" aria-label="Main navigation">
+        <nav
+          className="flex max-h-[calc(100dvh-5.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] flex-col overflow-y-auto overscroll-contain py-2 sm:py-4"
+          aria-label="Main navigation"
+        >
           <Link
             href="/"
             onClick={handleNav}
-            className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
           >
             Trang chủ
           </Link>
@@ -91,7 +94,7 @@ export function MobileMenu({
               type="button"
               aria-expanded={isProductsOpen}
               onClick={() => setIsProductsOpen(!isProductsOpen)}
-              className="flex min-h-11 w-full items-center justify-between px-6 py-3 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+              className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset sm:px-6"
             >
               Sản phẩm
               <ChevronDown
@@ -109,7 +112,7 @@ export function MobileMenu({
                       href={href}
                       onClick={handleNav}
                       onMouseEnter={() => router.prefetch(href)}
-                      className="block px-10 py-2.5 text-sm transition-colors hover:text-brand"
+                      className="block px-8 py-2.5 text-sm transition-colors hover:text-brand sm:px-10"
                     >
                       {collection.name}
                     </Link>
@@ -122,30 +125,30 @@ export function MobileMenu({
           <Link
             href="/blogs"
             onClick={handleNav}
-            className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
           >
             Blog
           </Link>
           <Link
             href="/about"
             onClick={handleNav}
-            className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
           >
             Giới thiệu
           </Link>
           <Link
             href="/contact"
             onClick={handleNav}
-            className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
           >
             Liên hệ
           </Link>
 
-          <div className="mx-6 my-4 border-t" />
+          <div className="mx-4 my-4 border-t sm:mx-6" />
 
           {session?.user ? (
             <>
-              <div className="px-6 py-2 text-xs text-muted-foreground">
+              <div className="px-4 py-2 text-xs text-muted-foreground sm:px-6">
                 {displayName ? (
                   <span className="font-medium text-foreground">{displayName}</span>
                 ) : null}
@@ -153,7 +156,7 @@ export function MobileMenu({
               <Link
                 href="/account"
                 onClick={handleNav}
-                className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+                className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
               >
                 Tài khoản
               </Link>
@@ -163,7 +166,7 @@ export function MobileMenu({
                   handleNav();
                   void signOut({ callbackUrl: "/" });
                 }}
-                className="flex w-full items-center gap-2 px-6 py-3 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:px-6"
               >
                 <LogOut className="h-4 w-4 shrink-0" aria-hidden />
                 Đăng xuất
@@ -173,7 +176,7 @@ export function MobileMenu({
             <Link
               href="/account/login"
               onClick={handleNav}
-              className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+              className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
             >
               Đăng nhập
             </Link>
@@ -181,7 +184,7 @@ export function MobileMenu({
           <Link
             href="/search"
             onClick={handleNav}
-            className="px-6 py-3 text-sm font-medium transition-colors hover:bg-muted"
+            className="px-4 py-3 text-sm font-medium transition-colors hover:bg-muted sm:px-6"
           >
             Tìm kiếm
           </Link>
