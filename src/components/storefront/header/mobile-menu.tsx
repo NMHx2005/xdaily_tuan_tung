@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -14,7 +15,13 @@ import {
 import { useUIStore } from "@/stores/ui-store";
 import { COLLECTIONS } from "@/lib/constants";
 
-export function MobileMenu({ brandName = "XDAILY" }: { brandName?: string }) {
+export function MobileMenu({
+  brandName = "XDAILY",
+  logoUrl,
+}: {
+  brandName?: string;
+  logoUrl?: string;
+}) {
   const router = useRouter();
   const { data: session } = useSession();
   const isMobileMenuOpen = useUIStore((s) => s.isMobileMenuOpen);
@@ -39,12 +46,30 @@ export function MobileMenu({ brandName = "XDAILY" }: { brandName?: string }) {
         className="w-80 p-0"
       >
         <SheetHeader className="border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="font-heading text-xl font-bold">{brandName}</SheetTitle>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              {logoUrl ? (
+                <span className="relative h-9 w-24 shrink-0">
+                  <Image
+                    src={logoUrl}
+                    alt=""
+                    fill
+                    className="object-contain object-left"
+                    sizes="96px"
+                    unoptimized={
+                      logoUrl.startsWith("data:") || logoUrl.startsWith("blob:")
+                    }
+                  />
+                </span>
+              ) : null}
+              <SheetTitle className="min-w-0 truncate font-heading text-xl font-bold">
+                {brandName}
+              </SheetTitle>
+            </div>
             <button
               type="button"
               onClick={closeMobileMenu}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-1 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-1 transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Đóng menu"
             >
               <X className="h-5 w-5" aria-hidden />
@@ -84,7 +109,7 @@ export function MobileMenu({ brandName = "XDAILY" }: { brandName?: string }) {
                       href={href}
                       onClick={handleNav}
                       onMouseEnter={() => router.prefetch(href)}
-                      className="block px-10 py-2.5 text-sm transition-colors hover:text-gold"
+                      className="block px-10 py-2.5 text-sm transition-colors hover:text-brand"
                     >
                       {collection.name}
                     </Link>

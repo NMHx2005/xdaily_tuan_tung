@@ -31,7 +31,7 @@ export function HomeCategoryStrip({ items }: { items: HomeCategoryStripItem[] })
               <div className="box-cat flex flex-col items-center text-center">
                 <Link
                   href={item.href}
-                  className="img-cat relative block size-[100px] overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-100 transition-transform duration-200 hover:scale-105 hover:ring-[#0066FF]/30 sm:size-[110px]"
+                  className="img-cat relative block size-[100px] overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-100 transition-transform duration-200 hover:scale-105 hover:ring-brand/30 sm:size-[110px]"
                 >
                   <Image
                     src={item.imageUrl}
@@ -44,7 +44,7 @@ export function HomeCategoryStrip({ items }: { items: HomeCategoryStripItem[] })
                 <div className="banner-content mt-2 px-0.5">
                   <Link
                     href={item.href}
-                    className="text-xs font-medium leading-snug text-neutral-800 transition-colors hover:text-[#0066FF] sm:text-[13px]"
+                    className="text-xs font-medium leading-snug text-neutral-800 transition-colors hover:text-brand sm:text-[13px]"
                   >
                     {item.label}
                   </Link>

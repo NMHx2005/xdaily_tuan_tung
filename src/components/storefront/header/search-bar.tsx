@@ -91,7 +91,7 @@ export function SearchBar() {
               placeholder="Tìm kiếm sản phẩm..."
               aria-label="Tìm kiếm sản phẩm"
               autoComplete="off"
-              className="w-full rounded-lg border bg-background py-3 pl-12 pr-12 text-base outline-none transition-colors focus:border-gold focus:ring-2 focus:ring-gold/40"
+              className="w-full rounded-lg border bg-background py-3 pl-12 pr-12 text-base outline-none transition-colors focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/40"
             />
             <button
               type="button"

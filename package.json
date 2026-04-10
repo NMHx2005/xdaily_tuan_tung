@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
+    "dev:clean": "rm -rf .next node_modules/.cache && next dev",
     "build": "next build",
     "analyze": "ANALYZE=true npm run build",
     "postbuild": "next-sitemap",

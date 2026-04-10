@@ -53,15 +53,59 @@
   --color-gold-light: var(--gold-light);
   --color-gold-dark: var(--gold-dark);
   --color-sale: var(--sale);
+  /* Storefront brand (thay đổi trong :root — xem comment PRESETS bên dưới) */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-active: var(--brand-active);
+  --color-brand-soft: var(--brand-soft);
 }
+
+/*
+  PRESETS — copy block vào :root (thay các dòng --brand… hiện tại):
+
+  A) Xanh điện tử (mặc định, giống trước)
+  --brand: #0066ff;
+  --brand-hover: #0052cc;
+  --brand-active: #0047b3;
+  --brand-soft: #60a5fa;
+
+  B) Vàng champagne (sang trọng)
+  --brand: #b8924a;
+  --brand-hover: #9a7638;
+  --brand-active: #7d5f2c;
+  --brand-soft: #d4bc8e;
+
+  C) Xanh ngọc (tươi, hiện đại)
+  --brand: #0d9488;
+  --brand-hover: #0f766e;
+  --brand-active: #115e59;
+  --brand-soft: #5eead4;
+
+  D) Đỏ rượu (ẩm thực / cao cấp)
+  --brand: #9f1239;
+  --brand-hover: #881337;
+  --brand-active: #6f1028;
+  --brand-soft: #fda4af;
+
+  E) Tím than (thời trang)
+  --brand: #5b21b6;
+  --brand-hover: #4c1d95;
+  --brand-active: #3b0764;
+  --brand-soft: #c4b5fd;
+*/
 
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --gold: #c9a96e;
-  --gold-light: #d4bc8e;
-  --gold-dark: #a88a4e;
-  --sale: #e53e3e;
+  /* Màu thương hiệu — chỉnh preset ở comment PRESETS; gold/sale trùng brand */
+  --brand: #FF7F00;
+  --brand-hover: #0052cc;
+  --brand-active: #0047b3;
+  --brand-soft: #60a5fa;
+  --gold: var(--brand);
+  --gold-light: var(--brand-soft);
+  --gold-dark: var(--brand-hover);
+  --sale: var(--brand);
   --font-heading: "Playfair Display", serif;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -99,10 +143,14 @@
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
-  --gold: #d4bc8e;
-  --gold-light: #e0cfa8;
-  --gold-dark: #c9a96e;
-  --sale: #fc5858;
+  --brand: #0066ff;
+  --brand-hover: #0052cc;
+  --brand-active: #0047b3;
+  --brand-soft: #60a5fa;
+  --gold: var(--brand);
+  --gold-light: var(--brand-soft);
+  --gold-dark: var(--brand-hover);
+  --sale: var(--brand);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -138,16 +186,23 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans), sans-serif;
   }
+
   html {
     @apply font-sans;
   }
-  h1, h2, h3, h4 {
+
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-heading), serif;
   }
+
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
@@ -159,13 +214,16 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-50%);
   }
 }
+
 .animate-flash-marquee {
   animation: flash-marquee 28s linear infinite;
 }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-flash-marquee {
     animation: none;

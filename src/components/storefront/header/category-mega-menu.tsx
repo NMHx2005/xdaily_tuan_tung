@@ -18,6 +18,7 @@ import {
   navIconComponent,
 } from "@/components/storefront/home/category-sidebar";
 import { useStorefrontNav } from "@/components/storefront/storefront-nav-context";
+import { brandClass } from "@/lib/brand-tailwind";
 import { cn } from "@/lib/utils";
 
 export function CategoryMegaMenu() {
@@ -179,7 +180,10 @@ export function CategoryMegaMenu() {
                       <li key={`${link.slug}-${link.label}`}>
                         <Link
                           href={`/collections/${link.slug}`}
-                          className="block py-1.5 text-sm text-neutral-800 transition-colors hover:text-[#0066FF]"
+                          className={cn(
+                            "block py-1.5 text-sm text-neutral-800 transition-colors",
+                            brandClass.textHover,
+                          )}
                           onClick={closePanel}
                         >
                           {link.label}
@@ -199,7 +203,11 @@ export function CategoryMegaMenu() {
                   </p>
                   <Link
                     href={`/collections/${activeItem.slug}`}
-                    className="mt-4 inline-flex w-fit rounded-md bg-[#0066FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#0052cc]"
+                    className={cn(
+                      "mt-4 inline-flex w-fit rounded-md px-4 py-2 text-sm font-medium text-white",
+                      brandClass.bg,
+                      brandClass.bgHover,
+                    )}
                     onClick={closePanel}
                   >
                     Đến danh mục
@@ -217,7 +225,9 @@ export function CategoryMegaMenu() {
     <>
       <div
         ref={triggerRef}
-        className="relative z-30 flex h-12 w-[280px] shrink-0 cursor-default items-center gap-2 bg-[#0066FF] px-3 text-white"
+        className="relative z-30 flex h-12 w-[280px] shrink-0 cursor-default items-center gap-2 px-3 text-white"
+        style={{ backgroundColor: "var(--brand)" }}
+        suppressHydrationWarning
         onMouseEnter={openPanel}
         onMouseLeave={scheduleClose}
       >

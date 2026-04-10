@@ -17,3 +17,12 @@ export function absoluteUrl(path: string): string {
 
 /** Default OG / schema image when a page has no specific image. */
 export const DEFAULT_OG_IMAGE_PATH = "/globe.svg";
+
+/**
+ * Chuỗi JSON-LD an toàn khi nhét vào `<script type="application/ld+json">`.
+ * Nếu dữ liệu có `</script>` hoặc `<...` trong chuỗi, HTML parser có thể đóng thẻ sớm
+ * và phần sau (kể cả mô tả dài) hiện như nội dung trang — trông giống “mô tả đầu trang”.
+ */
+export function jsonLdSafeStringify(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}

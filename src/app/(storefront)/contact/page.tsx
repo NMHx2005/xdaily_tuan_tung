@@ -91,7 +91,7 @@ export default async function ContactPage() {
             sizes="100vw"
             priority
           />
-          <div className="absolute inset-0 bg-linear-to-r from-neutral-950/95 via-neutral-900/85 to-[#0066FF]/25" />
+          <div className="absolute inset-0 bg-linear-to-r from-neutral-950/95 via-neutral-900/85 to-brand/25" />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8 [&_nav_a]:text-white/85 [&_nav_a:hover]:text-white [&_nav_.font-medium]:text-white [&_nav_ol>span]:text-white/45">
           <Breadcrumbs items={[{ label: meta.title, jsonLdHref: "/contact" }]} />
@@ -113,9 +113,9 @@ export default async function ContactPage() {
                 return (
                   <div
                     key={c.label}
-                    className="flex gap-4 rounded-xl border border-neutral-200 bg-neutral-50/80 p-4 transition-colors hover:border-[#0066FF]/30 hover:bg-white"
+                    className="flex gap-4 rounded-xl border border-neutral-200 bg-neutral-50/80 p-4 transition-colors hover:border-brand/30 hover:bg-white"
                   >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#0066FF]/10 text-[#0066FF]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand">
                       <Icon className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -130,7 +130,7 @@ export default async function ContactPage() {
                           href={c.href}
                           target={c.external ? "_blank" : undefined}
                           rel={c.external ? "noopener noreferrer" : undefined}
-                          className="mt-2 inline-block text-sm font-semibold text-[#0066FF] hover:underline"
+                          className="mt-2 inline-block text-sm font-semibold text-brand hover:underline"
                         >
                           {c.linkLabel}
                         </a>
@@ -154,11 +154,11 @@ export default async function ContactPage() {
             {bottomHint.prefix.trim() ? (
               <p className="text-sm text-neutral-500">
                 {bottomHint.prefix}{" "}
-                <Link href="/collections" className="font-medium text-[#0066FF] hover:underline">
+                <Link href="/collections" className="font-medium text-brand hover:underline">
                   {bottomHint.linkProductsLabel}
                 </Link>{" "}
                 ·{" "}
-                <Link href="/cart" className="font-medium text-[#0066FF] hover:underline">
+                <Link href="/cart" className="font-medium text-brand hover:underline">
                   {bottomHint.linkCartLabel}
                 </Link>
               </p>
@@ -171,14 +171,14 @@ export default async function ContactPage() {
               Khi gửi form, bạn xác nhận đã đọc{" "}
               <Link
                 href="/chinh-sach-bao-mat"
-                className="font-medium text-[#0066FF] hover:underline"
+                className="font-medium text-brand hover:underline"
               >
                 Chính sách bảo mật
               </Link>{" "}
               và{" "}
               <Link
                 href="/dieu-khoan-su-dung"
-                className="font-medium text-[#0066FF] hover:underline"
+                className="font-medium text-brand hover:underline"
               >
                 Điều khoản sử dụng
               </Link>

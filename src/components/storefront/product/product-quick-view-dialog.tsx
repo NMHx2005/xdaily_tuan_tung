@@ -156,12 +156,12 @@ export function ProductQuickViewDialog({
       : 99;
 
   const mainImageUrl = React.useMemo(() => {
-    if (!product) return "/placeholder.png";
+    if (!product) return "/placeholders/product.svg";
     if (images.length > 0) {
       const i = Math.min(Math.max(0, imgIndex), images.length - 1);
       return images[i]!.url;
     }
-    return selected?.image ?? "/placeholder.png";
+    return selected?.image ?? "/placeholders/product.svg";
   }, [product, images, imgIndex, selected?.image]);
 
   const isOnSale =
@@ -357,14 +357,14 @@ export function ProductQuickViewDialog({
                             className={cn(
                               "relative min-h-10 min-w-18 rounded border-2 px-3 py-1.5 text-left text-sm font-medium transition-colors",
                               active
-                                ? "sd border-[#0066FF] text-neutral-900 ring-1 ring-[#0066FF]/25"
+                                ? "sd border-brand text-neutral-900 ring-1 ring-brand/25"
                                 : "border-neutral-200 text-neutral-700 hover:border-neutral-300",
                               !v.inStock && "cursor-not-allowed opacity-40",
                             )}
                           >
                             {active && (
                               <Check
-                                className="img-check pointer-events-none absolute right-0.5 top-0.5 h-3.5 w-3.5 text-[#0066FF]"
+                                className="img-check pointer-events-none absolute right-0.5 top-0.5 h-3.5 w-3.5 text-brand"
                                 strokeWidth={3}
                                 aria-hidden
                               />
@@ -412,8 +412,8 @@ export function ProductQuickViewDialog({
                   onClick={handleAddToCart}
                   disabled={!inStock || activePrice <= 0}
                   className={cn(
-                    "add-to-cart-style-qv flex w-full items-start gap-3 rounded-md border border-black/10 bg-[#0066FF] px-4 py-3 text-left text-white shadow-sm",
-                    "transition-colors hover:bg-[#0052cc] active:bg-[#0047b3]",
+                    "add-to-cart-style-qv flex w-full items-start gap-3 rounded-md border border-black/10 bg-brand px-4 py-3 text-left text-white shadow-sm",
+                    "transition-colors hover:bg-brand-hover active:bg-brand-active",
                     "disabled:cursor-not-allowed disabled:opacity-45",
                   )}
                 >
@@ -436,7 +436,7 @@ export function ProductQuickViewDialog({
               <Link
                 href={`/products/${product.slug}`}
                 onClick={() => onOpenChange(false)}
-                className="view-detail mt-1 text-center text-sm font-medium text-[#0066FF] underline underline-offset-2 hover:text-[#0052cc]"
+                className="view-detail mt-1 text-center text-sm font-medium text-brand underline underline-offset-2 hover:text-brand-hover"
               >
                 Xem chi tiết »
               </Link>

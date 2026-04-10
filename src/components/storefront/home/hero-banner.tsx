@@ -43,7 +43,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
 
   if (banners.length === 0) {
     return (
-      <section className="relative z-0 overflow-hidden bg-[#0066FF]">
+      <section className="relative z-0 overflow-hidden bg-brand">
         <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
           aria-hidden
@@ -67,7 +67,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
   }
 
   return (
-    <section className="relative z-0 overflow-hidden bg-[#0066FF]">
+    <section className="relative z-0 overflow-hidden bg-brand">
       <div
         className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center overflow-hidden"
         aria-hidden

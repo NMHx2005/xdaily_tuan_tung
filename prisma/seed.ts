@@ -1,8 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type Prisma } from '@prisma/client';
+import { siteContentSchema } from '../src/lib/site-content-schema';
+import { defaultSiteContent } from '../src/content/site-defaults';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
+import { getPrismaPgPoolConfig } from '../src/lib/prisma-pg-pool-config';
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const adapter = new PrismaPg(getPrismaPgPoolConfig());
 const prisma = new PrismaClient({ adapter });
 
 /** Ảnh tĩnh trong /public — tránh Next Image phải fetch ra ngoài (dễ lỗi TLS/mạng với via.placeholder.com). */
@@ -28,6 +31,8 @@ async function main() {
   await prisma.banner.deleteMany();
   await prisma.blogPost.deleteMany();
   await prisma.newsletter.deleteMany();
+  await prisma.allowedImageHost.deleteMany();
+  await prisma.siteContent.deleteMany();
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
 
@@ -436,6 +441,21 @@ async function main() {
       },
     });
   }
+
+  console.log('🌐 Seeding site content (logo, liên hệ, trang Giới thiệu & Liên hệ)...');
+  const sitePayload = siteContentSchema.parse(
+    JSON.parse(JSON.stringify(defaultSiteContent)),
+  );
+  await prisma.siteContent.upsert({
+    where: { id: 'default' },
+    create: {
+      id: 'default',
+      payload: sitePayload as unknown as Prisma.InputJsonValue,
+    },
+    update: {
+      payload: sitePayload as unknown as Prisma.InputJsonValue,
+    },
+  });
 
   console.log('✅ Seed completed!');
   console.log(`   ${products.length} products`);

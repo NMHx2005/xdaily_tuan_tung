@@ -208,7 +208,7 @@ export const collectionRouter = router({
         slug: c.slug,
         href: `/collections/${c.slug}`,
         label,
-        imageUrl: trimmed || '/placeholder.png',
+        imageUrl: trimmed || '/placeholders/product.svg',
       };
     });
   }),

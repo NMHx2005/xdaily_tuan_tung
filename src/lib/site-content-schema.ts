@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const siteBrandSchema = z.object({
   name: z.string().min(1),
+  /** Logo header — URL tuyệt đối (CDN/Supabase) hoặc đường dẫn `/...` trong public */
+  logoUrl: z.string().min(1),
   footerTagline: z.string(),
 });
 
@@ -41,14 +43,26 @@ const contactPageSchema = z.object({
 
 const pillarIconSchema = z.enum(["factory", "sparkles", "heartHandshake"]);
 
+/** URL tuyệt đối (https…) hoặc đường dẫn `/…` trong public; chuỗi rỗng = dùng ảnh mặc định trên trang. */
+const aboutImageUrlField = z
+  .union([z.string(), z.undefined()])
+  .transform((s) => (typeof s === "string" ? s.trim() : ""));
+
+const aboutTrailingImageSchema = z
+  .object({
+    alt: z.string(),
+    url: z.union([z.string(), z.undefined()]).transform((s) => (typeof s === "string" ? s.trim() : "")),
+  })
+  .transform((o) => ({ alt: o.alt, url: o.url }));
+
 const aboutSectionSchema = z.object({
   eyebrow: z.string(),
   title: z.string(),
   paragraphs: z.array(z.string()),
-  trailingImage: z.object({ alt: z.string() }).optional(),
+  trailingImage: aboutTrailingImageSchema.optional(),
 });
 
-const aboutPageSchema = z.object({
+export const aboutPageContentSchema = z.object({
   meta: z.object({
     title: z.string().min(1),
     description: z.string(),
@@ -60,6 +74,7 @@ const aboutPageSchema = z.object({
   hero: z.object({
     h1: z.string().min(1),
     lead: z.string(),
+    backgroundImageUrl: aboutImageUrlField,
   }),
   stats: z.array(
     z.object({
@@ -69,6 +84,8 @@ const aboutPageSchema = z.object({
   ),
   story: z.object({
     imageAlt: z.string(),
+    /** Ảnh khối câu chuyện — rỗng thì dùng ảnh mặc định */
+    imageUrl: aboutImageUrlField,
     eyebrow: z.string(),
     title: z.string(),
     body: z.string(),
@@ -101,8 +118,9 @@ export const siteContentSchema = z.object({
   siteBrand: siteBrandSchema,
   siteContact: siteContactSchema,
   contactPageContent: contactPageSchema,
-  aboutPageContent: aboutPageSchema,
+  aboutPageContent: aboutPageContentSchema,
 });
 
 export type SiteContentData = z.infer<typeof siteContentSchema>;
+export type AboutPageContentData = z.infer<typeof aboutPageContentSchema>;
 export type AboutPillarIcon = z.infer<typeof pillarIconSchema>;

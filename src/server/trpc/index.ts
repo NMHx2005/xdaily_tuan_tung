@@ -11,6 +11,7 @@ import { adminRouter } from '@/server/routers/admin';
 import { newsletterRouter } from '@/server/routers/newsletter';
 import { siteRouter } from '@/server/routers/site';
 import { contactRouter } from '@/server/routers/contact';
+import { imageHostRouter } from '@/server/routers/image-host';
 
 export const appRouter = router({
   product: productRouter,
@@ -25,6 +26,7 @@ export const appRouter = router({
   newsletter: newsletterRouter,
   site: siteRouter,
   contact: contactRouter,
+  imageHost: imageHostRouter,
 });
 
 export type AppRouter = typeof appRouter;

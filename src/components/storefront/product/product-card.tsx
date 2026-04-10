@@ -91,7 +91,7 @@ export function ProductCard({
 
         {discountPercent !== null && (
           <div className="product-sale pointer-events-none absolute left-2 top-2 z-5">
-            <span className="inline-block rounded bg-[#e53935] px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+            <span className="inline-block rounded bg-brand px-2 py-0.5 text-xs font-bold text-white shadow-sm">
               -{discountPercent}%
             </span>
           </div>
@@ -101,7 +101,7 @@ export function ProductCard({
           type="button"
           onClick={handleAddToCart}
           className={cn(
-            "group/atc absolute bottom-2 right-2 z-20 flex h-10 max-w-10 items-center justify-end overflow-hidden rounded-full bg-[#e53935] shadow-md transition-[max-width] duration-300 ease-out",
+            "group/atc absolute bottom-2 right-2 z-20 flex h-10 max-w-10 items-center justify-end overflow-hidden rounded-full bg-brand shadow-md transition-[max-width] duration-300 ease-out",
             "hover:max-w-[min(260px,calc(100vw-2rem))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-100",
           )}
           aria-label={`Thêm ${name} vào giỏ`}
@@ -110,7 +110,7 @@ export function ProductCard({
             Thêm vào giỏ
           </span>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white">
-            <ShoppingBag className="h-5 w-5 text-[#e53935]" strokeWidth={2} aria-hidden />
+            <ShoppingBag className="h-5 w-5 text-brand" strokeWidth={2} aria-hidden />
           </span>
         </button>
 
@@ -140,7 +140,7 @@ export function ProductCard({
         <h3 className="pro-name text-sm font-medium leading-snug text-neutral-900">
           <Link
             href={productHref}
-            className="line-clamp-2 hover:text-[#0066FF]"
+            className="line-clamp-2 hover:text-brand"
           >
             {name}
           </Link>
@@ -157,7 +157,7 @@ export function ProductCard({
             <span
               className={cn(
                 "text-base font-bold",
-                isOnSale ? "text-[#e53935]" : "text-neutral-900",
+                isOnSale ? "text-brand" : "text-neutral-900",
               )}
             >
               {formatPrice(price)}

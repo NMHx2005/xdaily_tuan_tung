@@ -47,7 +47,7 @@ function toProductCard(
     name: item.product.name,
     price: item.salePrice,
     compareAtPrice: item.product.price,
-    thumbnail: item.product.images[0]?.url ?? "/placeholder.png",
+    thumbnail: item.product.images[0]?.url ?? "/placeholders/product.svg",
     hoverImage: item.product.images[1]?.url ?? null,
     variantCount: item.product.variants.length,
     variantColors: item.product.variants.map((v) => v.colorHex).filter(Boolean),
@@ -142,7 +142,7 @@ function FlashCountdown({ endsAt }: { endsAt: Date }) {
         {placeholder.map(({ label, value }) => (
           <li
             key={label}
-            className="flex min-w-[2.5rem] flex-col items-center rounded-md border border-[#0066FF]/20 bg-white px-1.5 py-1 shadow-sm sm:min-w-[3rem] sm:px-2"
+            className="flex min-w-[2.5rem] flex-col items-center rounded-md border border-brand/20 bg-white px-1.5 py-1 shadow-sm sm:min-w-[3rem] sm:px-2"
           >
             <strong className="text-sm tabular-nums text-neutral-300 sm:text-base">
               {value}
@@ -177,7 +177,7 @@ function FlashCountdown({ endsAt }: { endsAt: Date }) {
       {units.map(({ label, value }) => (
         <li
           key={label}
-          className="flex min-w-[2.5rem] flex-col items-center rounded-md border border-[#0066FF]/20 bg-white px-1.5 py-1 shadow-sm sm:min-w-[3rem] sm:px-2"
+          className="flex min-w-[2.5rem] flex-col items-center rounded-md border border-brand/20 bg-white px-1.5 py-1 shadow-sm sm:min-w-[3rem] sm:px-2"
         >
           <strong className="text-sm tabular-nums text-neutral-900 sm:text-base">
             {String(value).padStart(2, "0")}
@@ -249,14 +249,16 @@ export function FlashSaleSection({ flashSale }: FlashSaleSectionProps) {
           <div className="wd-top-title grid gap-4 lg:grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto] lg:items-center lg:gap-5">
             <h2 className="title-section m-0 font-heading text-lg font-bold text-neutral-900 sm:text-xl">
               <span className="inline-flex items-center gap-2">
-                <Image
-                  src={FLASH_TITLE_BADGE_IMG}
-                  alt=""
-                  width={30}
-                  height={13}
-                  className="shrink-0 object-contain"
-                  unoptimized
-                />
+                <span className="relative inline-block h-[13px] w-[30px] shrink-0 align-middle">
+                  <Image
+                    src={FLASH_TITLE_BADGE_IMG}
+                    alt=""
+                    fill
+                    className="object-contain"
+                    sizes="30px"
+                    unoptimized
+                  />
+                </span>
                 {titleText}
               </span>
             </h2>
@@ -316,7 +318,7 @@ export function FlashSaleSection({ flashSale }: FlashSaleSectionProps) {
                           className={cn(
                             "h-2 w-2 rounded-full transition-colors",
                             selected === i
-                              ? "bg-[#0066FF]"
+                              ? "bg-brand"
                               : "bg-neutral-300 hover:bg-neutral-400",
                           )}
                           onClick={() => emblaApi?.scrollTo(i)}
@@ -333,7 +335,7 @@ export function FlashSaleSection({ flashSale }: FlashSaleSectionProps) {
           <div className="mt-6 text-center">
             <Link
               href="/collections/ghe-an"
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-300 bg-white px-6 text-sm font-medium text-neutral-800 transition-colors hover:border-[#0066FF] hover:text-[#0066FF]"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-neutral-300 bg-white px-6 text-sm font-medium text-neutral-800 transition-colors hover:border-brand hover:text-brand"
             >
               Xem tất cả »
             </Link>

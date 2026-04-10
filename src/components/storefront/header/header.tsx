@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,17 +20,16 @@ import { SearchBar } from "./search-bar";
 import { CartIcon } from "./cart-icon";
 import { MobileMenu } from "./mobile-menu";
 import { CategoryMegaMenu } from "./category-mega-menu";
+import { brandClass } from "@/lib/brand-tailwind";
 import { cn } from "@/lib/utils";
 
-const LOGO_SRC = "https://file.hstatic.net/1000400963/file/logo__1_.png";
-
 const MAIN_NAV = [
-  { href: "/", label: "Trang chủ", icon: Home, iconActive: "text-[#0066FF]" },
+  { href: "/", label: "Trang chủ", icon: Home, iconActive: brandClass.text },
   {
     href: "/collections",
     label: "Sản phẩm",
     icon: FileText,
-    iconActive: "text-red-500",
+    iconActive: brandClass.text,
   },
   {
     href: "/blogs",
@@ -53,15 +53,21 @@ const MAIN_NAV = [
 
 export function Header({
   brandName,
+  logoUrl,
   hotlineDisplay,
   hotlineTel,
 }: {
   brandName: string;
+  logoUrl: string;
   hotlineDisplay: string;
   hotlineTel: string;
 }) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const [authReady, setAuthReady] = useState(false);
+  useEffect(() => {
+    setAuthReady(true);
+  }, []);
   const openMobileMenu = useUIStore((s) => s.openMobileMenu);
   const openSearch = useUIStore((s) => s.openSearch);
 
@@ -78,7 +84,7 @@ export function Header({
         style={{ ["--height-header" as string]: "107px" }}
       >
         {/* Top — blue */}
-        <div className="bg-[#0066FF] text-white">
+        <div className={cn(brandClass.bg, "text-white")}>
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6 lg:flex-nowrap lg:gap-6 lg:px-8 lg:py-2.5">
             <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4 lg:max-w-[220px] lg:flex-none">
               <button
@@ -95,12 +101,15 @@ export function Header({
                 aria-label={`${brandName} — Trang chủ`}
               >
                 <Image
-                  src={LOGO_SRC}
+                  src={logoUrl}
                   alt={brandName}
                   fill
                   className="object-contain object-left"
                   sizes="200px"
                   priority
+                  unoptimized={
+                    logoUrl.startsWith("data:") || logoUrl.startsWith("blob:")
+                  }
                 />
               </Link>
             </div>
@@ -134,9 +143,12 @@ export function Header({
                 type="submit"
                 className={cn(
                   "inline-flex min-w-[48px] shrink-0 items-center justify-center rounded-none rounded-r-[9px]",
-                  "border-l border-white/40 bg-[#0066FF] px-3.5 transition-colors",
-                  "hover:bg-[#0058e6] active:bg-[#004dcc]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0066FF]",
+                  "border-l border-white/40 px-3.5 transition-colors",
+                  brandClass.bg,
+                  brandClass.bgHover,
+                  brandClass.bgActive,
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2",
+                  brandClass.ringOffset,
                 )}
                 aria-label="Tìm kiếm"
               >
@@ -162,7 +174,7 @@ export function Header({
                 </span>
               </a>
 
-              {status === "loading" ? (
+              {!authReady || status === "loading" ? (
                 <span
                   className="hidden h-9 w-[7.5rem] animate-pulse rounded-md bg-white/20 sm:block lg:w-40"
                   aria-hidden
@@ -211,7 +223,6 @@ export function Header({
         <div className="hidden border-b border-neutral-200 bg-white lg:block">
           <div className="mx-auto flex max-w-7xl items-stretch px-4 sm:px-6 lg:px-8">
             <CategoryMegaMenu />
-
             <nav
               className="flex min-h-12 flex-1 items-center gap-1 xl:gap-2"
               aria-label="Điều hướng chính"
@@ -228,8 +239,9 @@ export function Header({
                     key={href}
                     href={href}
                     className={cn(
-                      "flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100 hover:text-[#0066FF] xl:px-3",
-                      active && "text-[#0066FF]",
+                      "flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100 xl:px-3",
+                      brandClass.textHover,
+                      active && brandClass.text,
                     )}
                   >
                     <Icon
@@ -249,7 +261,7 @@ export function Header({
       </header>
 
       <SearchBar />
-      <MobileMenu brandName={brandName} />
+      <MobileMenu brandName={brandName} logoUrl={logoUrl} />
     </>
   );
 }

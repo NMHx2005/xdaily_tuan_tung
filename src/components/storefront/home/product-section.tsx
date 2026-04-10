@@ -42,7 +42,7 @@ export function ProductSection({
           <div className="btn-view-all-tab mt-8 text-center">
             <Link
               href={viewAllLink}
-              className="btn btn-all-tab inline-flex min-h-11 min-w-[200px] items-center justify-center rounded-lg bg-[#0066FF] px-8 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#0052cc]"
+              className="btn btn-all-tab inline-flex min-h-11 min-w-[200px] items-center justify-center rounded-lg bg-brand px-8 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-hover"
             >
               {viewAllText}
             </Link>

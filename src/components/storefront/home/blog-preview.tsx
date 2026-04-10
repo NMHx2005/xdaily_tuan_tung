@@ -29,7 +29,7 @@ export function BlogPreview({ posts }: BlogPreviewProps) {
           </h2>
           <Link
             href="/blogs"
-            className="text-sm text-gold transition-colors hover:underline"
+            className="text-sm text-brand transition-colors hover:underline"
           >
             Xem tất cả &raquo;
           </Link>
@@ -60,7 +60,7 @@ export function BlogPreview({ posts }: BlogPreviewProps) {
                   </div>
                 )}
               </div>
-              <h3 className="mt-3 text-sm font-medium text-neutral-800 line-clamp-2 group-hover:text-gold transition-colors">
+              <h3 className="mt-3 text-sm font-medium text-neutral-800 line-clamp-2 group-hover:text-brand transition-colors">
                 {post.title}
               </h3>
               {post.excerpt && (

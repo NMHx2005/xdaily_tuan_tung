@@ -155,7 +155,7 @@ export function ContactForm() {
       <Button
         type="submit"
         disabled={isSubmitting || submitMut.isPending}
-        className="h-11 w-full bg-[#0066FF] text-base font-semibold hover:bg-[#0052CC] sm:w-auto sm:min-w-[180px]"
+        className="h-11 w-full bg-brand text-base font-semibold hover:bg-brand-hover sm:w-auto sm:min-w-[180px]"
       >
         {isSubmitting ? (
           <>

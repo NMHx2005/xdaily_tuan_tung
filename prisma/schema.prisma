@@ -384,13 +384,29 @@ model FlashSaleItem {
 }
 
 // ──────────────────────────────────
-// 16. SITE CONTENT (singleton — /admin/settings)
+// 16. SITE CONTENT (singleton — /admin/website, /admin/about-content)
 // ──────────────────────────────────
 
 model SiteContent {
   id        String   @id @default("default")
   payload   Json     @default("{}")
   updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────────────
+// 16b. ALLOWED IMAGE HOSTS (ảnh ngoài — /admin/image-domains)
+// ──────────────────────────────────
+
+model AllowedImageHost {
+  id       String @id @default(cuid())
+  /** Hostname thường: file.hstatic.net — hoặc *.hstatic.net để khớp mọi subdomain */
+  hostname String @unique
+  note     String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hostname])
 }
 
 // ──────────────────────────────────

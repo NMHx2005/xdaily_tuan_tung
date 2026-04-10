@@ -37,7 +37,7 @@ interface ProductDetailClientProps {
 export function ProductDetailClient(props: ProductDetailClientProps) {
   const [activeVariantImage, setActiveVariantImage] = useState<string | null>(null);
 
-  const thumbnail = props.images[0]?.url ?? "/placeholder.png";
+  const thumbnail = props.images[0]?.url ?? "/placeholders/product.svg";
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">

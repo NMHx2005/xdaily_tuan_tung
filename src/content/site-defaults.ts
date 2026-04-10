@@ -1,12 +1,13 @@
 /**
  * Giá trị mặc định trong code (khi DB chưa có hoặc lỗi định dạng).
  *
- * Trên production: chỉnh nội dung tại **Quản trị → Cài đặt → Nội dung website** (JSON).
- * Nút **Nạp mẫu** lấy đúng cấu trúc này để sửa rồi **Lưu**.
+ * Trên production: chỉnh tại **Quản trị → Trang Giới thiệu** hoặc **Website &amp; liên hệ**.
+ * Nút **Nạp mẫu** trong admin lấy đúng cấu trúc này để sửa rồi **Lưu**.
  */
 export const defaultSiteContent = {
   siteBrand: {
     name: "XDAILY",
+    logoUrl: "https://file.hstatic.net/1000400963/file/logo__1_.png",
     footerTagline:
       "Nhà máy nội thất XDAILY — Cung cấp ghế, bàn, sofa cao cấp cho mọi không gian.",
   },
@@ -60,6 +61,8 @@ export const defaultSiteContent = {
       h1: "Giới thiệu XDAILY",
       lead:
         "Chúng tôi tin rằng nội thất tốt không chỉ đẹp — mà còn phải bền, phù hợp không gian và phục vụ đúng nhu cầu từng gia đình.",
+      /** Để trống = ảnh mặc định trên trang */
+      backgroundImageUrl: "",
     },
     stats: [
       { value: "10+", label: "Năm kinh nghiệm ngành" },
@@ -69,6 +72,7 @@ export const defaultSiteContent = {
     ],
     story: {
       imageAlt: "Không gian trưng bày nội thất XDAILY",
+      imageUrl: "",
       eyebrow: "Câu chuyện thương hiệu",
       title: "Đồng hành cùng không gian sống hiện đại",
       body:
@@ -124,6 +128,7 @@ export const defaultSiteContent = {
         ],
         trailingImage: {
           alt: "Không gian làm việc và showroom XDAILY",
+          url: "",
         },
       },
     ],

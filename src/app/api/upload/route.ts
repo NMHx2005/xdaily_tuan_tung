@@ -71,8 +71,18 @@ export async function POST(request: Request) {
     });
 
   if (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[api/upload]", { bucket, message: error.message, error });
+    }
     return NextResponse.json(
-      { error: error.message || "Upload thất bại" },
+      {
+        error: error.message || "Upload thất bại",
+        hint:
+          error.message?.includes("Bucket not found") ||
+          error.message?.toLowerCase().includes("not found")
+            ? "Tạo bucket trong Supabase → Storage (tên: products | blogs | banners | collections) và thử lại."
+            : undefined,
+      },
       { status: 500 }
     );
   }

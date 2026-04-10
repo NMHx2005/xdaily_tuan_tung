@@ -13,7 +13,7 @@ const HeroBanner = dynamic(
     import("@/components/storefront/home/hero-banner").then((m) => m.HeroBanner),
   {
     loading: () => (
-      <div className="min-w-0 flex-1 bg-[#0066FF]">
+      <div className="min-w-0 flex-1 bg-brand">
         <Skeleton className="h-[280px] w-full sm:h-[380px] lg:h-[352px]" />
       </div>
     ),
@@ -59,7 +59,7 @@ function toProductCard(
     name: product.name,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
-    thumbnail: product.images[0]?.url ?? "/placeholder.png",
+    thumbnail: product.images[0]?.url ?? "/placeholders/product.svg",
     hoverImage: product.images[1]?.url ?? null,
     variantCount: product.variants.length,
     variantColors: product.variants.map((v) => v.colorHex).filter(Boolean),

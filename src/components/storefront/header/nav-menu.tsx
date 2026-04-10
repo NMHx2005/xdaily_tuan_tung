@@ -14,7 +14,7 @@ export function NavMenu() {
     <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
       <Link
         href="/"
-        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Trang chủ
       </Link>
@@ -28,7 +28,7 @@ export function NavMenu() {
           type="button"
           aria-expanded={isOpen}
           aria-haspopup="true"
-          className="flex min-h-11 items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="flex min-h-11 items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Sản phẩm
           <ChevronDown
@@ -49,7 +49,7 @@ export function NavMenu() {
                     <Link
                       key={collection.slug}
                       href={href}
-                      className="rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-gold"
+                      className="rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-brand"
                       onClick={() => setIsOpen(false)}
                       onMouseEnter={() => router.prefetch(href)}
                     >
@@ -65,19 +65,19 @@ export function NavMenu() {
 
       <Link
         href="/blogs"
-        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Tin tức
       </Link>
       <Link
         href="/about"
-        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Giới thiệu
       </Link>
       <Link
         href="/contact"
-        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Liên hệ
       </Link>

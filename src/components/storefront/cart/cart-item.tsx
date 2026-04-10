@@ -55,7 +55,7 @@ export function CartItem({ item }: CartItemProps) {
         <div>
           <Link
             href={`/products/${item.slug}`}
-            className="text-sm font-medium line-clamp-2 hover:text-gold transition-colors"
+            className="text-sm font-medium line-clamp-2 hover:text-brand transition-colors"
           >
             {item.name}
           </Link>
@@ -93,7 +93,7 @@ export function CartItem({ item }: CartItemProps) {
 
           <button
             onClick={handleRemove}
-            className="p-1 text-neutral-400 transition-colors hover:text-red-500"
+            className="p-1 text-neutral-400 transition-colors hover:text-brand"
             aria-label="Xóa"
           >
             <Trash2 className="h-4 w-4" />

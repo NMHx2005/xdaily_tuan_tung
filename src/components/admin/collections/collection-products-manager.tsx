@@ -127,6 +127,67 @@ export interface CollectionProductsManagerProps {
   onChange: (next: CollectionProductEntry[]) => void;
 }
 
+/** Danh sách tĩnh cùng giao diện — tránh SSR DndContext (@dnd-kit id không khớp client). */
+function StaticProductRows({
+  value,
+  onChange,
+}: {
+  value: CollectionProductEntry[];
+  onChange: (next: CollectionProductEntry[]) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      {value.map((entry) => (
+        <div
+          key={entry.productId}
+          className="flex items-center gap-3 rounded-lg border bg-card p-2 pr-3"
+        >
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted opacity-40"
+            aria-hidden
+          >
+            <GripVertical className="size-4 text-muted-foreground" />
+          </div>
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-muted">
+            {entry.image ? (
+              <Image
+                src={entry.image}
+                alt=""
+                fill
+                sizes="56px"
+                className="object-cover"
+              />
+            ) : null}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium">{entry.name}</p>
+            <Link
+              href={`${SITE_URL}/products/${entry.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs text-primary hover:underline"
+            >
+              Xem trên site
+            </Link>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="text-destructive"
+            onClick={() =>
+              onChange(value.filter((e) => e.productId !== entry.productId))
+            }
+            aria-label="Gỡ khỏi danh mục"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CollectionProductsManager({
   value,
   onChange,
@@ -134,6 +195,11 @@ export function CollectionProductsManager({
   const [open, setOpen] = React.useState(false);
   const [q, setQ] = React.useState("");
   const debounced = useDebounce(q, 300);
+  /** Chỉ mount Dnd sau khi client hydrate — tránh hydration mismatch với aria-describedby của dnd-kit. */
+  const [dndReady, setDndReady] = React.useState(false);
+  React.useLayoutEffect(() => {
+    setDndReady(true);
+  }, []);
 
   const { data: searchData } = trpc.product.getAll.useQuery(
     {
@@ -239,28 +305,34 @@ export function CollectionProductsManager({
         </Dialog>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={onDragEnd}
-      >
-        <SortableContext
-          items={value.map((e) => e.productId)}
-          strategy={verticalListSortingStrategy}
+      {dndReady ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
         >
-          <div className="space-y-2">
-            {value.map((entry) => (
-              <SortableRow
-                key={entry.productId}
-                entry={entry}
-                onRemove={() =>
-                  onChange(value.filter((e) => e.productId !== entry.productId))
-                }
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={value.map((e) => e.productId)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {value.map((entry) => (
+                <SortableRow
+                  key={entry.productId}
+                  entry={entry}
+                  onRemove={() =>
+                    onChange(
+                      value.filter((e) => e.productId !== entry.productId)
+                    )
+                  }
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      ) : (
+        <StaticProductRows value={value} onChange={onChange} />
+      )}
 
       {value.length === 0 && (
         <p className="rounded-lg border border-dashed py-8 text-center text-sm text-muted-foreground">

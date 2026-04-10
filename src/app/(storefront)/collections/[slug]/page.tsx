@@ -4,7 +4,12 @@ import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
 import { db } from "@/server/db";
 import { PRODUCTS_PER_PAGE } from "@/lib/constants";
-import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
+import {
+  absoluteUrl,
+  DEFAULT_OG_IMAGE_PATH,
+  getSiteUrl,
+  jsonLdSafeStringify,
+} from "@/lib/seo";
 import { buildCollectionBreadcrumbTrail } from "@/lib/storefront-nav";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { CollectionHeader } from "@/components/storefront/collection/collection-header";
@@ -80,7 +85,7 @@ function toProductCard(product: {
     name: product.name,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
-    thumbnail: product.images[0]?.url ?? "/placeholder.png",
+    thumbnail: product.images[0]?.url ?? "/placeholders/product.svg",
     hoverImage: product.images[1]?.url ?? null,
     variantCount: product.variants.length,
     variantColors: product.variants.map((v) => v.colorHex).filter(Boolean),
@@ -145,16 +150,14 @@ export default async function CollectionPage({ params, searchParams }: PageProps
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: jsonLdSafeStringify(collectionJsonLd),
+        }}
       />
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <CollectionHeader
-        name={collection.name}
-        description={collection.description ?? null}
-        productCount={total}
-      />
+      <CollectionHeader name={collection.name} productCount={total} />
 
       <FilterSortBar
         currentSort={sort}

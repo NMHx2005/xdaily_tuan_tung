@@ -111,7 +111,7 @@ export function FlashSaleProductCard({
           <span
             className={cn(
               "pointer-events-none absolute right-2 top-2 z-5 max-w-[min(100%,11rem)] rounded px-2 py-1 text-[10px] font-semibold leading-tight text-white sm:text-xs",
-              badge === "bestseller" ? "bg-sale" : "bg-emerald-600",
+              badge === "bestseller" ? "bg-sale" : "bg-brand",
             )}
           >
             {badge === "bestseller"
@@ -124,7 +124,7 @@ export function FlashSaleProductCard({
           type="button"
           onClick={handleAddToCart}
           className={cn(
-            "group/atc absolute bottom-2 right-2 z-20 flex h-10 max-w-10 items-center justify-end overflow-hidden rounded-full bg-[#e53935] shadow-md transition-[max-width] duration-300 ease-out",
+            "group/atc absolute bottom-2 right-2 z-20 flex h-10 max-w-10 items-center justify-end overflow-hidden rounded-full bg-brand shadow-md transition-[max-width] duration-300 ease-out",
             "hover:max-w-[min(260px,calc(100vw-2rem))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-100",
           )}
           aria-label={`Thêm ${name} vào giỏ`}
@@ -133,7 +133,7 @@ export function FlashSaleProductCard({
             Thêm vào giỏ
           </span>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white">
-            <ShoppingBag className="h-5 w-5 text-[#e53935]" strokeWidth={2} aria-hidden />
+            <ShoppingBag className="h-5 w-5 text-brand" strokeWidth={2} aria-hidden />
           </span>
         </button>
 
@@ -162,7 +162,7 @@ export function FlashSaleProductCard({
       <h3 className="pro-name mt-2.5 text-sm font-medium leading-snug text-neutral-900">
         <ViewportPrefetchLink
           href={productHref}
-          className="line-clamp-2 hover:text-[#0066FF]"
+          className="line-clamp-2 hover:text-brand"
         >
           {name}
         </ViewportPrefetchLink>
@@ -202,7 +202,7 @@ export function FlashSaleProductCard({
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200">
           <div
-            className="h-full rounded-full bg-linear-to-r from-[#60a5fa] to-[#0066FF] transition-[width] duration-500"
+            className="h-full rounded-full bg-linear-to-r from-brand-soft to-brand transition-[width] duration-500"
             style={{ width: `${extras.progressPercent}%` }}
           />
         </div>

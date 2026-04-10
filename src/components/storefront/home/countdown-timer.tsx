@@ -47,7 +47,7 @@ export function CountdownTimer({ endsAt }: CountdownTimerProps) {
 
   if (!timeLeft) {
     return (
-      <span className="text-sm font-medium text-red-600">Đã kết thúc</span>
+      <span className="text-sm font-medium text-brand">Đã kết thúc</span>
     );
   }
 
@@ -63,7 +63,7 @@ export function CountdownTimer({ endsAt }: CountdownTimerProps) {
       {units.map(({ label, value }, i) => (
         <div key={label} className="flex items-center gap-1.5">
           <div className="flex flex-col items-center">
-            <span className="flex h-9 w-9 items-center justify-center rounded bg-red-500 text-sm font-bold text-white sm:h-10 sm:w-10 sm:text-base">
+            <span className="flex h-9 w-9 items-center justify-center rounded bg-brand text-sm font-bold text-white sm:h-10 sm:w-10 sm:text-base">
               {String(value).padStart(2, "0")}
             </span>
             <span className="mt-0.5 text-[10px] text-neutral-500">
@@ -71,7 +71,7 @@ export function CountdownTimer({ endsAt }: CountdownTimerProps) {
             </span>
           </div>
           {i < units.length - 1 && (
-            <span className="mb-3 text-sm font-bold text-red-500">:</span>
+            <span className="mb-3 text-sm font-bold text-brand">:</span>
           )}
         </div>
       ))}

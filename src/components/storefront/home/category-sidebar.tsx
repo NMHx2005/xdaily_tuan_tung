@@ -75,47 +75,20 @@ const NAV_ICON_MAP: Record<string, LucideIcon> = {
   Heart,
 };
 
-const NAV_ICON_CLASS: Record<string, string> = {
-  Percent: "text-rose-500",
-  Armchair: "text-amber-600",
-  Utensils: "text-emerald-600",
-  Bed: "text-violet-600",
-  Briefcase: "text-sky-600",
-  Coffee: "text-orange-500",
-  Sparkles: "text-teal-600",
-  Package: "text-slate-600",
-  ShoppingBag: "text-pink-600",
-  Home: "text-amber-700",
-  Shirt: "text-fuchsia-600",
-  Smartphone: "text-blue-600",
-  Headphones: "text-indigo-600",
-  Baby: "text-rose-400",
-  Flower2: "text-green-500",
-  Gift: "text-red-500",
-  Star: "text-yellow-500",
-  Zap: "text-yellow-600",
-  Car: "text-slate-700",
-  TreePine: "text-green-700",
-  BookOpen: "text-amber-600",
-  Wrench: "text-zinc-600",
-  Dog: "text-amber-800",
-  Heart: "text-red-400",
-};
-
 export function navIconComponent(key: string): LucideIcon {
   return NAV_ICON_MAP[key] ?? Package;
 }
 
-export function navIconColorClass(key: string): string {
-  return NAV_ICON_CLASS[key] ?? "text-neutral-500";
+export function navIconColorClass(_key: string): string {
+  return "text-brand";
 }
 
 /** Dùng chung sidebar trang chủ + cột trái mega menu */
 export const CATEGORY_NAV_LINK_CLASS =
-  "flex items-center gap-2 px-3 py-2.5 text-sm text-neutral-800 transition-colors hover:text-[#0066FF]";
+  "flex items-center gap-2 px-3 py-2.5 text-sm text-neutral-800 transition-colors hover:text-brand";
 
 /** Hàng đang chọn trong mega menu — chỉ nhấn mạnh màu chữ, không nền */
-export const CATEGORY_NAV_LINK_MEGA_ACTIVE_CLASS = "text-[#0066FF]";
+export const CATEGORY_NAV_LINK_MEGA_ACTIVE_CLASS = "text-brand";
 
 export function categoryItemShowsChevron(item: StorefrontNavItem): boolean {
   return getMegaColumns(item) !== null;
@@ -204,7 +177,7 @@ function SubcategoryFlyoutPanel({
             <li key={`${link.slug}-${link.label}`}>
               <Link
                 href={`/collections/${link.slug}`}
-                className="block py-1.5 text-sm text-neutral-800 transition-colors hover:text-[#0066FF]"
+                className="block py-1.5 text-sm text-neutral-800 transition-colors hover:text-brand"
                 onClick={onNavigate}
               >
                 {link.label}

@@ -13,6 +13,9 @@ import {
   ExternalLink,
   Menu,
   Mail,
+  Globe,
+  BookOpen,
+  Shield,
 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -26,6 +29,9 @@ const navItems = [
   { label: "Bài viết", href: "/admin/blogs", icon: FileText },
   { label: "Khách hàng", href: "/admin/customers", icon: Users },
   { label: "Liên hệ", href: "/admin/contact-messages", icon: Mail },
+  { label: "Website", href: "/admin/website", icon: Globe },
+  { label: "Trang Giới thiệu", href: "/admin/about-content", icon: BookOpen },
+  { label: "Domain ảnh", href: "/admin/image-domains", icon: Shield },
   { label: "Cài đặt", href: "/admin/settings", icon: Settings },
 ];
 

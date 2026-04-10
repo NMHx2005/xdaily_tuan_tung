@@ -60,7 +60,7 @@ export function AccountProfileClient() {
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
       <Link
         href="/account"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-[#0066FF]"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-brand"
       >
         <ArrowLeft className="size-4" aria-hidden />
         Về tài khoản

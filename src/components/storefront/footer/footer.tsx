@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import type { SiteContentData } from "@/lib/site-content-schema";
 
@@ -43,8 +44,26 @@ export function Footer({ site }: { site: SiteContentData }) {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href="/" className="font-heading text-xl font-bold text-white">
-              {siteBrand.name}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3 font-heading text-xl font-bold text-white"
+            >
+              {siteBrand.logoUrl ? (
+                <span className="relative h-10 w-28 shrink-0">
+                  <Image
+                    src={siteBrand.logoUrl}
+                    alt=""
+                    fill
+                    className="object-contain object-left"
+                    sizes="112px"
+                    unoptimized={
+                      siteBrand.logoUrl.startsWith("data:") ||
+                      siteBrand.logoUrl.startsWith("blob:")
+                    }
+                  />
+                </span>
+              ) : null}
+              <span>{siteBrand.name}</span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-neutral-400">
               {siteBrand.footerTagline}
@@ -111,7 +130,7 @@ export function Footer({ site }: { site: SiteContentData }) {
               ))}
             </ul>
             <p className="mt-4 text-sm">
-              <Link href="/contact" className="font-medium text-[#0066FF] hover:underline">
+              <Link href="/contact" className="font-medium text-brand hover:underline">
                 Trang liên hệ đầy đủ
               </Link>
             </p>

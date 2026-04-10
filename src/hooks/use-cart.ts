@@ -1,28 +1,24 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+import type { CartItem } from "@/stores/cart-store";
 import { useCartStore } from "@/stores/cart-store";
 
+/**
+ * Chỉ dùng dữ liệu persist sau khi client mount — trùng với SSR (giỏ rỗng, count 0),
+ * tránh hydration mismatch với useSyncExternalStore + zustand rehydrate.
+ */
 export function useCart() {
-  const hydrated = useSyncExternalStore(
-    (onStoreChange) => {
-      const unsub = useCartStore.persist.onFinishHydration(() => {
-        onStoreChange();
-      });
-      if (useCartStore.persist.hasHydrated()) {
-        queueMicrotask(onStoreChange);
-      }
-      return unsub;
-    },
-    () => useCartStore.persist.hasHydrated(),
-    () => false
-  );
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
 
   const cart = useCartStore();
 
-  if (!hydrated) {
+  if (!ready) {
     return {
-      items: [],
+      items: [] as CartItem[],
       addItem: cart.addItem,
       removeItem: cart.removeItem,
       updateQuantity: cart.updateQuantity,

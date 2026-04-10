@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
   DndContext,
@@ -20,6 +21,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  BookOpen,
+  ChevronRight,
+  Globe,
   GripVertical,
   Pencil,
   Plus,
@@ -37,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -51,7 +56,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { BlogThumbnail } from "@/components/admin/blogs/blog-thumbnail";
-import { AdminSiteContentClient } from "@/components/admin/settings/admin-site-content-client";
 import { cn } from "@/lib/utils";
 
 type AdminBanner = inferRouterOutputs<AppRouter>["admin"]["getBannersAll"][number];
@@ -215,6 +219,43 @@ function BannerFormFields({
         />
       </div>
     </div>
+  );
+}
+
+function SiteContentNavCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nội dung website</CardTitle>
+        <CardDescription>
+          Logo, hotline, trang liên hệ và trang Giới thiệu chỉnh ở các trang riêng — không gộp với banner và flash sale bên dưới.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/admin/website"
+            className="flex flex-1 items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-muted/80"
+          >
+            <span className="flex items-center gap-2">
+              <Globe className="size-4 text-primary" />
+              Website &amp; liên hệ
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </Link>
+          <Link
+            href="/admin/about-content"
+            className="flex flex-1 items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-muted/80"
+          >
+            <span className="flex items-center gap-2">
+              <BookOpen className="size-4 text-primary" />
+              Trang Giới thiệu
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -781,7 +822,7 @@ function FlashSaleBlock() {
 export function AdminSettingsClient() {
   return (
     <div className="space-y-8">
-      <AdminSiteContentClient />
+      <SiteContentNavCard />
 
       <BannersBlock />
       <FlashSaleBlock />

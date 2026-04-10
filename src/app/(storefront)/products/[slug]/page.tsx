@@ -67,7 +67,7 @@ function toProductCard(product: {
     name: product.name,
     price: product.price,
     compareAtPrice: product.compareAtPrice,
-    thumbnail: product.images[0]?.url ?? "/placeholder.png",
+    thumbnail: product.images[0]?.url ?? "/placeholders/product.svg",
     hoverImage: product.images[1]?.url ?? null,
     variantCount: product.variants.length,
     variantColors: product.variants.map((v) => v.colorHex).filter(Boolean),
