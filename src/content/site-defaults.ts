@@ -16,7 +16,7 @@ export const defaultSiteContent = {
   siteContact: {
     hotlineDigits: "0866876869",
     hotlineDisplay: "0866 876 869",
-    email: "tuanhfurniture@gmail.com",
+    email: "TUANHfurniture@gmail.com",
     address:
       "Xưởng 1: Làng Chàng, Thạch Xá, Thạch Thất, Hà Nội · Xưởng 2: Đồng Thạch, Hữu Bằng, Thạch Thất · Kho: 40 Đường Thái Hòa, Hữu Bằng, Thạch Thất, Hà Nội",
     openingHours: "Thứ 2 – Thứ 7: 8h00 – 18h00 · Chủ nhật: nghỉ",
@@ -25,7 +25,7 @@ export const defaultSiteContent = {
     meta: {
       title: "Liên hệ",
       description:
-        "Liên hệ Nội thất Tú Anh — hotline 0866 876 869, email tuanhfurniture@gmail.com, xưởng & kho tại Thạch Thất, Hà Nội.",
+        "Liên hệ Nội thất Tú Anh — hotline 0866 876 869, email TUANHfurniture@gmail.com, xưởng & kho tại Thạch Thất, Hà Nội.",
       openGraphTitle: "Liên hệ | Nội thất Tú Anh",
     },
     hero: {
@@ -146,7 +146,7 @@ export const defaultSiteContent = {
           "· Xưởng sản xuất 1: Làng Chàng, Thạch Xá, Thạch Thất, Hà Nội",
           "· Xưởng sản xuất 2: Đồng Thạch, Hữu Bằng, Thạch Thất, Hà Nội",
           "· Kho hàng: 40 Đường Thái Hòa, Hữu Bằng, Thạch Thất, Hà Nội",
-          "Hotline: 0866876869 · Email: tuanhfurniture@gmail.com",
+          "Hotline: 0866876869 · Email: TUANHfurniture@gmail.com",
         ],
       },
     ],

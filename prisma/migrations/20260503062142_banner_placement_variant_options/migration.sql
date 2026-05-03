@@ -5,7 +5,7 @@ CREATE TYPE "BannerPlacement" AS ENUM ('HERO', 'HOME_FOUR');
 ALTER TABLE "Banner" ADD COLUMN     "placement" "BannerPlacement" NOT NULL DEFAULT 'HERO';
 
 -- AlterTable
-ALTER TABLE "BlogPost" ALTER COLUMN "author" SET DEFAULT 'TuAnh';
+ALTER TABLE "BlogPost" ALTER COLUMN "author" SET DEFAULT 'TUANH';
 
 -- AlterTable
 ALTER TABLE "Product" ADD COLUMN     "variantOptionGroups" JSONB NOT NULL DEFAULT '[]';

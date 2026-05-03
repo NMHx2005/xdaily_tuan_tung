@@ -168,7 +168,7 @@ async function main() {
   const customerHash = await bcrypt.hash('test123', 10);
 
   await prisma.user.create({
-    data: { email: 'admin@xdaily.vn', name: 'TuAnh Admin', passwordHash: adminHash, role: 'ADMIN' },
+    data: { email: 'admin@xdaily.vn', name: 'TUANH Admin', passwordHash: adminHash, role: 'ADMIN' },
   });
   const customer = await prisma.user.create({
     data: { email: 'customer@test.com', name: 'Nguyễn Văn A', passwordHash: customerHash, role: 'CUSTOMER', phone: '0912345678' },
@@ -322,60 +322,60 @@ async function main() {
     image: string;
     homeStripLabel?: string;
   }[] = [
-    {
-      slug: 'ghe-an',
-      homeStripPosition: 0,
-      image:
-        'https://file.hstatic.net/1000400963/file/ghe-an-xdaily-valle-chair-01__3__compact.jpg',
-    },
-    {
-      slug: 'ghe-bar',
-      homeStripPosition: 1,
-      image: 'https://file.hstatic.net/1000400963/file/xdaily-kink-bar_compact.jpg',
-    },
-    {
-      slug: 'ghe-chan-xoay',
-      homeStripPosition: 2,
-      image:
-        'https://file.hstatic.net/1000400963/file/ghe-van-phong-xdaily-gx882__2__compact.jpg',
-    },
-    {
-      slug: 'ghe-thu-gian',
-      homeStripPosition: 3,
-      image:
-        'https://file.hstatic.net/1000400963/file/mat-truoc-ghe-shell-chair_compact.jpg',
-    },
-    {
-      slug: 'sofa',
-      homeStripPosition: 4,
-      image: 'https://file.hstatic.net/1000400963/file/sofa-xdaily-fly-01_compact.jpg',
-    },
-    {
-      slug: 'giuong-ngu',
-      homeStripPosition: 5,
-      image:
-        'https://file.hstatic.net/1000400963/file/giuong-ngu-xdaily-bed-italia__1__compact.jpg',
-    },
-    {
-      slug: 'ban-an',
-      homeStripPosition: 6,
-      image:
-        'https://file.hstatic.net/1000400963/file/24062_n_wedge-dining-01-scont_compact.jpg',
-    },
-    {
-      slug: 'noi-that-cafe',
-      homeStripPosition: 7,
-      image:
-        'https://file.hstatic.net/1000400963/file/ban-cafe-nhua-duc-xdaily-bl1__2__compact.jpg',
-      homeStripLabel: 'Bộ sưu tập chân bàn cafe',
-    },
-    {
-      slug: 'bo-ban-ghe',
-      homeStripPosition: 8,
-      image:
-        'https://file.hstatic.net/1000400963/file/ghe-an-xdaily-valle-chair__8__compact.jpg',
-    },
-  ];
+      {
+        slug: 'ghe-an',
+        homeStripPosition: 0,
+        image:
+          'https://file.hstatic.net/1000400963/file/ghe-an-xdaily-valle-chair-01__3__compact.jpg',
+      },
+      {
+        slug: 'ghe-bar',
+        homeStripPosition: 1,
+        image: 'https://file.hstatic.net/1000400963/file/xdaily-kink-bar_compact.jpg',
+      },
+      {
+        slug: 'ghe-chan-xoay',
+        homeStripPosition: 2,
+        image:
+          'https://file.hstatic.net/1000400963/file/ghe-van-phong-xdaily-gx882__2__compact.jpg',
+      },
+      {
+        slug: 'ghe-thu-gian',
+        homeStripPosition: 3,
+        image:
+          'https://file.hstatic.net/1000400963/file/mat-truoc-ghe-shell-chair_compact.jpg',
+      },
+      {
+        slug: 'sofa',
+        homeStripPosition: 4,
+        image: 'https://file.hstatic.net/1000400963/file/sofa-xdaily-fly-01_compact.jpg',
+      },
+      {
+        slug: 'giuong-ngu',
+        homeStripPosition: 5,
+        image:
+          'https://file.hstatic.net/1000400963/file/giuong-ngu-xdaily-bed-italia__1__compact.jpg',
+      },
+      {
+        slug: 'ban-an',
+        homeStripPosition: 6,
+        image:
+          'https://file.hstatic.net/1000400963/file/24062_n_wedge-dining-01-scont_compact.jpg',
+      },
+      {
+        slug: 'noi-that-cafe',
+        homeStripPosition: 7,
+        image:
+          'https://file.hstatic.net/1000400963/file/ban-cafe-nhua-duc-xdaily-bl1__2__compact.jpg',
+        homeStripLabel: 'Bộ sưu tập chân bàn cafe',
+      },
+      {
+        slug: 'bo-ban-ghe',
+        homeStripPosition: 8,
+        image:
+          'https://file.hstatic.net/1000400963/file/ghe-an-xdaily-valle-chair__8__compact.jpg',
+      },
+    ];
   for (const row of homeCategoryStripSeed) {
     await prisma.collection.updateMany({
       where: { slug: row.slug },
@@ -486,7 +486,7 @@ async function main() {
     const product = await prisma.product.create({
       data: {
         ...productData,
-        description: `<p>${productData.shortDescription}</p><p>Sản phẩm ${productData.name} được thiết kế và sản xuất tại nhà máy TuAnh với tiêu chuẩn cao nhất. Chất liệu được chọn lọc kỹ lưỡng, đảm bảo độ bền và tính thẩm mỹ lâu dài.</p><h3>Đặc điểm nổi bật</h3><ul><li>Thiết kế hiện đại, phù hợp mọi không gian</li><li>Chất liệu cao cấp, bền bỉ theo thời gian</li><li>Dễ dàng vệ sinh và bảo quản</li><li>Bảo hành 12 tháng tại nhà máy</li></ul>`,
+        description: `<p>${productData.shortDescription}</p><p>Sản phẩm ${productData.name} được thiết kế và sản xuất tại nhà máy TUANH với tiêu chuẩn cao nhất. Chất liệu được chọn lọc kỹ lưỡng, đảm bảo độ bền và tính thẩm mỹ lâu dài.</p><h3>Đặc điểm nổi bật</h3><ul><li>Thiết kế hiện đại, phù hợp mọi không gian</li><li>Chất liệu cao cấp, bền bỉ theo thời gian</li><li>Dễ dàng vệ sinh và bảo quản</li><li>Bảo hành 12 tháng tại nhà máy</li></ul>`,
         specifications: specifications ?? [],
         images: {
           create: [
@@ -595,9 +595,9 @@ async function main() {
     await prisma.blogPost.create({
       data: {
         ...b,
-        content: `<h2>${b.title}</h2><p>${b.excerpt}</p><p>Trong ngành công nghiệp nội thất hiện đại, việc hiểu rõ về các loại vật liệu là vô cùng quan trọng. Điều này giúp người tiêu dùng có thể đưa ra quyết định mua sắm thông minh và phù hợp với nhu cầu sử dụng.</p><h3>Giới thiệu</h3><p>Bài viết này sẽ cung cấp cho bạn những thông tin chi tiết và hữu ích nhất về chủ đề này. Hãy cùng TuAnh tìm hiểu nhé!</p><h3>Kết luận</h3><p>Hy vọng bài viết đã cung cấp cho bạn những kiến thức bổ ích. Đừng quên ghé thăm showroom TuAnh để trải nghiệm trực tiếp các sản phẩm nội thất cao cấp.</p>`,
+        content: `<h2>${b.title}</h2><p>${b.excerpt}</p><p>Trong ngành công nghiệp nội thất hiện đại, việc hiểu rõ về các loại vật liệu là vô cùng quan trọng. Điều này giúp người tiêu dùng có thể đưa ra quyết định mua sắm thông minh và phù hợp với nhu cầu sử dụng.</p><h3>Giới thiệu</h3><p>Bài viết này sẽ cung cấp cho bạn những thông tin chi tiết và hữu ích nhất về chủ đề này. Hãy cùng TUANH tìm hiểu nhé!</p><h3>Kết luận</h3><p>Hy vọng bài viết đã cung cấp cho bạn những kiến thức bổ ích. Đừng quên ghé thăm showroom TUANH để trải nghiệm trực tiếp các sản phẩm nội thất cao cấp.</p>`,
         thumbnail: '/placeholders/cover.svg',
-        author: 'TuAnh',
+        author: 'TUANH',
         isPublished: true,
         publishedAt: new Date(Date.now() - i * 3 * 24 * 60 * 60 * 1000),
         seoTitle: b.title,

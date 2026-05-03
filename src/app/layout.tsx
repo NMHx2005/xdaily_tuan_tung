@@ -22,7 +22,7 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const defaultTitle = `${SITE_NAME} - Nhà máy nội thất cao cấp`;
+const defaultTitle = `${SITE_NAME} `;
 const ogDescription = `Ghế ăn, bàn trà, ghế bar, sofa… cao cấp. Thiết kế hiện đại, giá tốt tại ${SITE_NAME}.`;
 
 export const metadata: Metadata = {

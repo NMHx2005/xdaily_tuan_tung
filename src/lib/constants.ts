@@ -1,5 +1,5 @@
-export const SITE_NAME = "TuAnh";
-export const SITE_DESCRIPTION = "Nhà máy nội thất TuAnh - Ghế, bàn, sofa cao cấp";
+export const SITE_NAME = "TUANH";
+export const SITE_DESCRIPTION = "Nhà máy nội thất TUANH - Ghế, bàn, sofa cao cấp";
 /** Client-friendly base; server SEO should use `getSiteUrl()` from `@/lib/seo`. */
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 

@@ -327,7 +327,7 @@ model BlogPost {
   excerpt     String   @default("")
   content     String   @default("")
   thumbnail   String?
-  author      String   @default("TuAnh")
+  author      String   @default("TUANH")
   tags        String[] @default([])
   isPublished Boolean  @default(false)
 

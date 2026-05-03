@@ -27,7 +27,7 @@ import { HomeFourBannerSection } from "@/components/storefront/home/home-four-ba
 
 export const revalidate = 60;
 
-const homeTitle = `${SITE_NAME} - Nhà máy nội thất cao cấp`;
+const homeTitle = `${SITE_NAME} `;
 const homeDescription = SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
