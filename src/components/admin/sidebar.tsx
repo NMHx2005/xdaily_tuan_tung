@@ -20,6 +20,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { SITE_NAME } from "@/lib/constants";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -40,7 +41,8 @@ function NavContent({ pathname, onNav }: { pathname: string; onNav?: () => void 
     <div className="flex h-full flex-col">
       <div className="border-b px-6 py-5">
         <Link href="/admin" className="text-lg font-bold tracking-tight" onClick={onNav}>
-          XDAILY <span className="text-muted-foreground font-normal text-sm">Admin</span>
+          {SITE_NAME}{" "}
+          <span className="text-muted-foreground font-normal text-sm">Admin</span>
         </Link>
       </div>
 

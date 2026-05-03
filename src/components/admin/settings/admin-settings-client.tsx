@@ -34,6 +34,10 @@ import { toast } from "sonner";
 import type { inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "@/server/trpc";
+import {
+  BannerPlacement,
+  type BannerPlacementValue,
+} from "@/lib/banner-placement";
 import { trpc } from "@/lib/trpc/client";
 import { formatPrice } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -259,15 +263,32 @@ function SiteContentNavCard() {
   );
 }
 
-function BannersBlock() {
+function BannersBlock({
+  title,
+  placement,
+}: {
+  title: string;
+  placement: BannerPlacementValue;
+}) {
   const utils = trpc.useUtils();
-  const { data: bannersData, isLoading } = trpc.admin.getBannersAll.useQuery();
+  const { data: bannersData, isLoading } = trpc.admin.getBannersAll.useQuery({
+    placement,
+  });
   const banners: AdminBanner[] = bannersData ?? [];
+
+  const invalidateList = () => {
+    void utils.admin.getBannersAll.invalidate({ placement });
+    if (placement === BannerPlacement.HERO) {
+      void utils.admin.getBanners.invalidate();
+    } else {
+      void utils.admin.getHomeFourBanners.invalidate();
+    }
+  };
 
   const reorderMut = trpc.admin.reorderBanners.useMutation({
     onSuccess: () => {
       toast.success("Đã lưu thành công");
-      void utils.admin.getBannersAll.invalidate();
+      invalidateList();
     },
     onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
@@ -275,7 +296,7 @@ function BannersBlock() {
   const updateMut = trpc.admin.updateBanner.useMutation({
     onSuccess: () => {
       toast.success("Đã lưu thành công");
-      void utils.admin.getBannersAll.invalidate();
+      invalidateList();
     },
     onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
@@ -283,7 +304,7 @@ function BannersBlock() {
   const createMut = trpc.admin.createBanner.useMutation({
     onSuccess: () => {
       toast.success("Đã lưu thành công");
-      void utils.admin.getBannersAll.invalidate();
+      invalidateList();
     },
     onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
@@ -291,7 +312,7 @@ function BannersBlock() {
   const deleteMut = trpc.admin.deleteBanner.useMutation({
     onSuccess: () => {
       toast.success("Đã xóa thành công");
-      void utils.admin.getBannersAll.invalidate();
+      invalidateList();
     },
     onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
   });
@@ -338,13 +359,16 @@ function BannersBlock() {
     const b = banners.findIndex((x) => x.id === over.id);
     if (a < 0 || b < 0) return;
     const next = arrayMove(banners, a, b);
-    reorderMut.mutate({ orderedIds: next.map((x) => x.id) });
+    reorderMut.mutate({
+      placement,
+      orderedIds: next.map((x) => x.id),
+    });
   };
 
   return (
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
-        <CardTitle>Banner trang chủ</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger
             render={
@@ -375,6 +399,7 @@ function BannersBlock() {
                     link: createForm.link,
                     position: banners.length,
                     isActive: createForm.isActive,
+                    placement,
                   },
                   {
                     onSuccess: () => {
@@ -824,7 +849,14 @@ export function AdminSettingsClient() {
     <div className="space-y-8">
       <SiteContentNavCard />
 
-      <BannersBlock />
+      <BannersBlock
+        title="Banner trang chủ (hero)"
+        placement={BannerPlacement.HERO}
+      />
+      <BannersBlock
+        title="Banner 4 ô (dưới sản phẩm bán chạy)"
+        placement={BannerPlacement.HOME_FOUR}
+      />
       <FlashSaleBlock />
     </div>
   );

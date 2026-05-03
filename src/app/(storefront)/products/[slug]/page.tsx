@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
+import { SITE_NAME } from "@/lib/constants";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { buildCollectionBreadcrumbTrail } from "@/lib/storefront-nav";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
@@ -137,7 +138,7 @@ export default async function ProductPage({ params }: PageProps) {
     name: product.name,
     image: product.images.map((i) => absoluteUrl(i.url)),
     description: product.shortDescription || product.description,
-    brand: { "@type": "Brand", name: "XDAILY" },
+    brand: { "@type": "Brand", name: SITE_NAME },
     sku: product.sku,
     offers: {
       "@type": "Offer",

@@ -41,6 +41,14 @@ export const productCreateSchema = z.object({
     image: z.string().nullable().default(null),
     position: z.number().int().default(0),
   })).default([]),
+  variantOptionGroups: z
+    .array(
+      z.object({
+        name: z.string(),
+        values: z.array(z.string()),
+      })
+    )
+    .default([]),
   collectionIds: z.array(z.string()).default([]),
 });
 

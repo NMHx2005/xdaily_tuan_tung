@@ -7,6 +7,7 @@ import { cn, formatPrice } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 import { useUIStore } from "@/stores/ui-store";
 import { Button } from "@/components/ui/button";
+import { legacySwatchOnlyVariants } from "@/lib/variant-display";
 
 interface Variant {
   id: string;
@@ -56,6 +57,7 @@ export function ProductInfo({
   const isOnSale = activeComparePrice !== null && activeComparePrice > activePrice;
   const isAvailable = selectedVariant ? selectedVariant.inStock : inStock;
   const maxQty = stockQuantity > 0 ? stockQuantity : 99;
+  const legacySwatchOnly = legacySwatchOnlyVariants(variants);
 
   function handleSelectVariant(variant: Variant) {
     const next = selectedVariant?.id === variant.id ? null : variant;
@@ -102,7 +104,7 @@ export function ProductInfo({
       {variants.length > 0 && (
         <div className="mt-5">
           <p className="text-sm font-medium text-neutral-700">
-            Màu sắc:{" "}
+            {legacySwatchOnly ? "Màu sắc" : "Biến thể"}:{" "}
             {selectedVariant && (
               <span className="font-normal text-neutral-500">
                 {selectedVariant.name}
@@ -110,23 +112,51 @@ export function ProductInfo({
             )}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {variants.map((v) => (
-              <button
-                key={v.id}
-                onClick={() => handleSelectVariant(v)}
-                title={v.name}
-                className={cn(
-                  "h-8 w-8 rounded-full border-2 transition-all",
-                  selectedVariant?.id === v.id
-                    ? "border-primary ring-2 ring-primary/30"
-                    : "border-neutral-300 hover:border-neutral-400",
-                  !v.inStock && "opacity-40 cursor-not-allowed"
-                )}
-                style={{ backgroundColor: v.colorHex || "#ccc" }}
-                disabled={!v.inStock}
-                aria-label={v.name}
-              />
-            ))}
+            {variants.map((v) =>
+              legacySwatchOnly ? (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => handleSelectVariant(v)}
+                  title={v.name}
+                  className={cn(
+                    "h-8 w-8 rounded-full border-2 transition-all",
+                    selectedVariant?.id === v.id
+                      ? "border-primary ring-2 ring-primary/30"
+                      : "border-neutral-300 hover:border-neutral-400",
+                    !v.inStock && "cursor-not-allowed opacity-40"
+                  )}
+                  style={{ backgroundColor: v.colorHex || "#ccc" }}
+                  disabled={!v.inStock}
+                  aria-label={v.name}
+                />
+              ) : (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => handleSelectVariant(v)}
+                  title={v.name}
+                  className={cn(
+                    "inline-flex max-w-full items-center gap-2 rounded-full border-2 px-3 py-1.5 text-left text-sm transition-all",
+                    selectedVariant?.id === v.id
+                      ? "border-primary ring-2 ring-primary/30"
+                      : "border-neutral-200 hover:border-neutral-400",
+                    !v.inStock && "cursor-not-allowed opacity-40"
+                  )}
+                  disabled={!v.inStock}
+                  aria-label={v.name}
+                >
+                  {(v.colorHex ?? "").trim() !== "" && (
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-full border border-neutral-200"
+                      style={{ backgroundColor: v.colorHex }}
+                      aria-hidden
+                    />
+                  )}
+                  <span className="line-clamp-2">{v.name}</span>
+                </button>
+              )
+            )}
           </div>
         </div>
       )}

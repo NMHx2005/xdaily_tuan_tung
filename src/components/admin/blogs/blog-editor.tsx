@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BlogThumbnail } from "@/components/admin/blogs/blog-thumbnail";
+import { SITE_NAME } from "@/lib/constants";
 
 const RichTextEditor = dynamic(
   () =>
@@ -115,7 +116,7 @@ export function BlogEditor({
           excerpt: "",
           content: "",
           thumbnail: null,
-          author: "XDAILY",
+          author: SITE_NAME,
           tags: [],
           isPublished: false,
           publishedAtLocal: "",

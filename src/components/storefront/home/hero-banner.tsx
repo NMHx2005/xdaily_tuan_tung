@@ -7,6 +7,9 @@ import useEmblaCarousel from "embla-carousel-react";
 import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { SITE_NAME } from "@/lib/constants";
+
+const catalogWatermark = `${SITE_NAME.toUpperCase()} CATALOG`;
 
 interface BannerData {
   id: string;
@@ -49,7 +52,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
           aria-hidden
         >
           <span className="select-none whitespace-nowrap font-black text-white/[0.08] [font-size:clamp(2.5rem,10vw,6rem)]">
-            XDAILY CATALOG
+            {catalogWatermark}
           </span>
         </div>
         <div className="relative z-10 mx-auto flex max-w-7xl items-center justify-center px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
@@ -73,7 +76,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
         aria-hidden
       >
         <span className="select-none whitespace-nowrap font-black text-white/[0.07] [font-size:clamp(2rem,9vw,5.5rem)]">
-          XDAILY CATALOG
+          {catalogWatermark}
         </span>
       </div>
 
@@ -138,7 +141,7 @@ function SlideContent({ banner }: { banner: BannerData }) {
     <div className="relative h-[280px] sm:h-[380px] lg:h-[352px]">
       <Image
         src={banner.image}
-        alt={banner.title || "XDAILY Banner"}
+        alt={banner.title || `${SITE_NAME} Banner`}
         fill
         priority
         loading="eager"
@@ -149,7 +152,7 @@ function SlideContent({ banner }: { banner: BannerData }) {
       />
       <Image
         src={banner.mobileImage || banner.image}
-        alt={banner.title || "XDAILY Banner"}
+        alt={banner.title || `${SITE_NAME} Banner`}
         fill
         priority
         loading="eager"

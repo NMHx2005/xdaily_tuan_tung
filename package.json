@@ -11,6 +11,7 @@
     "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "eslint",
+    "seed:banners": "tsx prisma/seed-banners-only.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

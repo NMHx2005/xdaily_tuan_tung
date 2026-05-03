@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
+import { TRPCClientError } from "@trpc/client";
 import type { inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "@/server/trpc";
@@ -46,17 +47,38 @@ const RichTextEditor = dynamic(
     ),
   }
 );
+
+/** dnd-kit tạo aria-describedby theo bộ đếm — SSR vs client lệch → hydrate mismatch; chỉ mount client. */
+const VariantManager = dynamic(
+  () =>
+    import("@/components/admin/variant-manager").then((m) => m.VariantManager),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3" aria-hidden>
+        <Skeleton className="h-40 w-full rounded-xl border" />
+        <Skeleton className="h-40 w-full rounded-xl border" />
+      </div>
+    ),
+  }
+);
+
 import {
   ImageUploader,
   type ImageUploadRow,
 } from "@/components/admin/image-uploader";
+import type { VariantFormRow } from "@/components/admin/variant-manager";
+import { VariantOptionGroupsEditor } from "@/components/admin/variant-option-groups-editor";
 import {
-  VariantManager,
-  type VariantFormRow,
-} from "@/components/admin/variant-manager";
+  normalizeOptionGroups,
+  type VariantOptionGroup,
+} from "@/lib/variant-option-groups";
 
 type ScalarForm = z.infer<typeof adminProductScalarSchema>;
-type ProductAdmin = inferRouterOutputs<AppRouter>["product"]["getById"];
+/** Router output + scalar JSON từ DB (infer đôi khi chưa khớp Prisma sau thêm field) */
+type ProductAdmin = inferRouterOutputs<AppRouter>["product"]["getById"] & {
+  variantOptionGroups?: unknown;
+};
 type ProductAdminImage = ProductAdmin["images"][number];
 type ProductAdminVariant = ProductAdmin["variants"][number];
 type ProductAdminCollection = ProductAdmin["collections"][number];
@@ -118,7 +140,7 @@ function productToVariants(p: ProductAdmin): VariantFormRow[] {
   return p.variants.map((v: ProductAdminVariant) => ({
     id: v.id,
     name: v.name,
-    colorHex: v.colorHex || "#888888",
+    colorHex: v.colorHex ?? "",
     price: v.price,
     compareAtPrice: v.compareAtPrice,
     sku: v.sku,
@@ -149,6 +171,9 @@ export function ProductForm({
   const [variants, setVariants] = React.useState<VariantFormRow[]>(() =>
     source ? productToVariants(source) : []
   );
+  const [variantOptionGroups, setVariantOptionGroups] = React.useState<
+    VariantOptionGroup[]
+  >(() => (source ? normalizeOptionGroups(source.variantOptionGroups) : []));
   const [collectionIds, setCollectionIds] = React.useState<string[]>(() =>
     source
       ? source.collections.map((c: ProductAdminCollection) => c.collectionId)
@@ -175,10 +200,26 @@ export function ProductForm({
   }, [mode, nameWatch, form]);
 
   const createMut = trpc.product.create.useMutation({
-    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
+    onError: (e) => {
+      if (e instanceof TRPCClientError) {
+        toast.error(e.message);
+        console.error("[product.create]", e.data, e.message);
+        return;
+      }
+      console.error(e);
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
+    },
   });
   const updateMut = trpc.product.update.useMutation({
-    onError: () => toast.error("Đã xảy ra lỗi, vui lòng thử lại"),
+    onError: (e) => {
+      if (e instanceof TRPCClientError) {
+        toast.error(e.message);
+        console.error("[product.update]", e.data, e.message);
+        return;
+      }
+      console.error(e);
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
+    },
   });
 
   const buildPayload = (scalar: ScalarForm) => {
@@ -207,6 +248,7 @@ export function ProductForm({
       badge,
       images: imagePayload,
       variants: variantPayload,
+      variantOptionGroups: normalizeOptionGroups(variantOptionGroups),
       collectionIds,
     };
 
@@ -239,8 +281,22 @@ export function ProductForm({
         }
         router.refresh();
       }
-    } catch {
-      /* toast trong mutation / parse */
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const msg = err.issues
+          .map((e) => `${e.path.join(".")}: ${e.message}`)
+          .join("; ");
+        toast.error(msg || "Dữ liệu không hợp lệ");
+        console.error("[product-form] zod", err.flatten());
+        return;
+      }
+      if (err instanceof TRPCClientError) {
+        toast.error(err.message || "Đã xảy ra lỗi");
+        console.error("[product-form] trpc", err.data, err.message);
+        return;
+      }
+      console.error("[product-form]", err);
+      toast.error("Đã xảy ra lỗi, vui lòng thử lại");
     }
   };
 
@@ -333,7 +389,16 @@ export function ProductForm({
             <CardHeader>
               <CardTitle>Biến thể</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              <VariantOptionGroupsEditor
+                groups={variantOptionGroups}
+                onGroupsChange={setVariantOptionGroups}
+                variants={variants}
+                onVariantsChange={setVariants}
+                baseSku={form.watch("sku")?.trim() || "SP"}
+                defaultPrice={Math.max(1, Number(form.watch("price")) || 1)}
+                defaultCompareAt={form.watch("compareAtPrice") ?? null}
+              />
               <VariantManager value={variants} onChange={setVariants} />
             </CardContent>
           </Card>

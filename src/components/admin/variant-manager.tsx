@@ -41,7 +41,7 @@ function emptyRow(): VariantFormRow {
   return {
     id: crypto.randomUUID(),
     name: "",
-    colorHex: "#888888",
+    colorHex: "",
     price: 0,
     compareAtPrice: null,
     sku: "",
@@ -113,25 +113,53 @@ function SortableVariantRow({
           />
         </div>
         <div className="space-y-1.5">
-          <Label>Màu</Label>
-          <div className="flex gap-2">
-            <input
-              type="color"
-              value={row.colorHex || "#888888"}
-              onChange={(e) =>
-                onChange({ ...row, colorHex: e.target.value })
-              }
-              className="h-8 w-12 cursor-pointer rounded border"
-            />
-            <Input
-              value={row.colorHex}
-              onChange={(e) =>
-                onChange({ ...row, colorHex: e.target.value })
-              }
-              placeholder="#hex"
-              className="font-mono text-xs"
-            />
-          </div>
+          {row.colorHex.trim() !== "" ? (
+            <>
+              <div className="flex items-center justify-between gap-2">
+                <Label>Màu</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto shrink-0 px-2 py-0 text-xs text-muted-foreground"
+                  onClick={() => onChange({ ...row, colorHex: "" })}
+                >
+                  Bỏ màu
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={row.colorHex || "#888888"}
+                  onChange={(e) =>
+                    onChange({ ...row, colorHex: e.target.value })
+                  }
+                  className="h-8 w-12 cursor-pointer rounded border"
+                />
+                <Input
+                  value={row.colorHex}
+                  onChange={(e) =>
+                    onChange({ ...row, colorHex: e.target.value })
+                  }
+                  placeholder="#hex"
+                  className="font-mono text-xs"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <Label>Màu (tuỳ chọn)</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => onChange({ ...row, colorHex: "#888888" })}
+              >
+                Thêm màu
+              </Button>
+            </>
+          )}
         </div>
         <div className="space-y-1.5">
           <Label>Giá (₫)</Label>

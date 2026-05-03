@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { Prisma } from '@prisma/client';
+import { SITE_NAME } from '@/lib/constants';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 
 const blogInclude = {
@@ -162,7 +163,7 @@ export const blogRouter = router({
         excerpt: z.string().max(300).default(''),
         content: z.string().default(''),
         thumbnail: z.string().nullable().default(null),
-        author: z.string().default('XDAILY'),
+        author: z.string().default(SITE_NAME),
         tags: z.array(z.string()).default([]),
         isPublished: z.boolean().default(false),
         publishedAt: z.coerce.date().nullable().optional(),

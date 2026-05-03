@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
+import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FlashSaleSection } from "@/components/storefront/home/flash-sale-section";
@@ -22,11 +23,12 @@ const HeroBanner = dynamic(
 import { ProductSection } from "@/components/storefront/home/product-section";
 import { BlogPreview } from "@/components/storefront/home/blog-preview";
 import { NewsletterForm } from "@/components/storefront/home/newsletter-form";
+import { HomeFourBannerSection } from "@/components/storefront/home/home-four-banner-section";
 
 export const revalidate = 60;
 
-const homeTitle = "XDAILY - Nhà máy nội thất cao cấp";
-const homeDescription = "Ghế ăn, bàn trà, ghế bar, sofa… cao cấp";
+const homeTitle = `${SITE_NAME} - Nhà máy nội thất cao cấp`;
+const homeDescription = SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
   title: { absolute: homeTitle },
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
     description: homeDescription,
     type: "website",
     url: "/",
-    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: "XDAILY" }],
+    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: SITE_NAME }],
   },
 };
 
@@ -72,6 +74,7 @@ export default async function HomePage() {
 
   const [
     banners,
+    homeFourBanners,
     homeCategoryStrip,
     flashSale,
     newArrivals,
@@ -82,6 +85,7 @@ export default async function HomePage() {
     recentBlogs,
   ] = await Promise.all([
     trpc.admin.getBanners(),
+    trpc.admin.getHomeFourBanners(),
     trpc.collection.getHomeCategoryStrip(),
     trpc.product.getFlashSale(),
     trpc.product.getNewArrivals(),
@@ -102,15 +106,15 @@ export default async function HomePage() {
   const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "XDAILY",
+    name: SITE_NAME,
     url: base,
     logo: absoluteUrl("/logo.png"),
-    description: "Nhà máy nội thất XDAILY",
+    description: `Nhà máy nội thất ${SITE_NAME}`,
   };
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "XDAILY",
+    name: SITE_NAME,
     url: base,
     potentialAction: {
       "@type": "SearchAction",
@@ -157,6 +161,8 @@ export default async function HomePage() {
         viewAllLink="/collections/ban-chay"
         products={bestsellerCards}
       />
+
+      <HomeFourBannerSection banners={homeFourBanners} />
 
       {chairCards.length > 0 && (
         <ProductSection

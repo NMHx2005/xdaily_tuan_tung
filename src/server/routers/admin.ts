@@ -1,6 +1,7 @@
 import type { Context } from '@/server/trpc/context';
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { BannerPlacement } from '@/lib/banner-placement';
 import { router, publicProcedure, adminProcedure } from '@/server/trpc/trpc';
 
 type Db = Context['db'];
@@ -22,17 +23,31 @@ type ProductWithThumb = Awaited<ReturnType<Db['product']['findMany']>>[number];
 export const adminRouter = router({
   getBanners: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.banner.findMany({
-      where: { isActive: true },
+      where: { isActive: true, placement: BannerPlacement.HERO },
       orderBy: { position: 'asc' },
     });
   }),
 
-  /** Admin settings: mọi banner (kể cả tắt) */
-  getBannersAll: adminProcedure.query(async ({ ctx }) => {
+  getHomeFourBanners: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.banner.findMany({
+      where: { isActive: true, placement: BannerPlacement.HOME_FOUR },
       orderBy: { position: 'asc' },
     });
   }),
+
+  /** Admin settings: banner theo vị trí (hero / 4 ô dưới bán chạy) */
+  getBannersAll: adminProcedure
+    .input(
+      z.object({
+        placement: z.nativeEnum(BannerPlacement).default(BannerPlacement.HERO),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db.banner.findMany({
+        where: { placement: input.placement },
+        orderBy: { position: 'asc' },
+      });
+    }),
 
   createBanner: adminProcedure
     .input(
@@ -44,6 +59,7 @@ export const adminRouter = router({
         link: z.string().default(''),
         position: z.number().int().default(0),
         isActive: z.boolean().default(true),
+        placement: z.nativeEnum(BannerPlacement).default(BannerPlacement.HERO),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -61,6 +77,7 @@ export const adminRouter = router({
         link: z.string().optional(),
         position: z.number().int().optional(),
         isActive: z.boolean().optional(),
+        placement: z.nativeEnum(BannerPlacement).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -204,8 +221,26 @@ export const adminRouter = router({
     }),
 
   reorderBanners: adminProcedure
-    .input(z.object({ orderedIds: z.array(z.string()) }))
+    .input(
+      z.object({
+        placement: z.nativeEnum(BannerPlacement),
+        orderedIds: z.array(z.string()),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
+      const rows = await ctx.db.banner.findMany({
+        where: { placement: input.placement },
+        select: { id: true },
+      });
+      const allowed = new Set(rows.map((r) => r.id));
+      for (const id of input.orderedIds) {
+        if (!allowed.has(id)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Danh sách sắp xếp không khớp nhóm banner',
+          });
+        }
+      }
       await ctx.db.$transaction(
         input.orderedIds.map((id, index) =>
           ctx.db.banner.update({

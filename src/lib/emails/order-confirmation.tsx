@@ -13,6 +13,7 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 import { formatShippingAddressLine } from "@/lib/format-shipping-address";
+import { SITE_NAME } from "@/lib/constants";
 
 export type OrderConfirmationItem = {
   name: string;
@@ -53,7 +54,7 @@ const PAYMENT_LABEL: Record<OrderConfirmationPayload["paymentMethod"], string> =
 };
 
 export function OrderConfirmationEmail({ order }: { order: OrderConfirmationPayload }) {
-  const preview = `Đơn hàng #${order.orderNumber} — XDAILY`;
+  const preview = `Đơn hàng #${order.orderNumber} — ${SITE_NAME}`;
 
   return (
     <Html lang="vi">
@@ -67,14 +68,14 @@ export function OrderConfirmationEmail({ order }: { order: OrderConfirmationPayl
                 src={order.logoUrl}
                 width={160}
                 height={48}
-                alt="XDAILY"
+                alt={SITE_NAME}
                 style={logoImg}
               />
             </Link>
           </Section>
 
           <Heading style={h1}>Xác nhận đơn hàng #{order.orderNumber}</Heading>
-          <Text style={paragraph}>Cảm ơn bạn đã đặt hàng tại XDAILY!</Text>
+          <Text style={paragraph}>Cảm ơn bạn đã đặt hàng tại {SITE_NAME}!</Text>
           <Text style={muted}>
             Thời gian đặt: {order.createdAt}
           </Text>
@@ -173,7 +174,7 @@ export function OrderConfirmationEmail({ order }: { order: OrderConfirmationPayl
             </Link>
             .
           </Text>
-          <Text style={footerMuted}>© {new Date().getFullYear()} XDAILY</Text>
+          <Text style={footerMuted}>© {new Date().getFullYear()} {SITE_NAME}</Text>
         </Container>
       </Body>
     </Html>

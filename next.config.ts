@@ -8,11 +8,15 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "xdaily.vn" },
+      { protocol: "https", hostname: "www.xdaily.vn" },
       { protocol: "https", hostname: "**.supabase.co" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "via.placeholder.com" },
       { protocol: "https", hostname: "file.hstatic.net" },
       { protocol: "https", hostname: "theme.hstatic.net" },
+      { protocol: "https", hostname: "app.hstatic.net" },
+      { protocol: "https", hostname: "stats.hstatic.net" },
       { protocol: "https", hostname: "cdn.hstatic.net" },
       { protocol: "https", hostname: "product.hstatic.net" },
       { protocol: "https", hostname: "erado.vn" },

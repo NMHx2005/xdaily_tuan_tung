@@ -1,5 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
+import { SITE_NAME } from "@/lib/constants";
 
 /**
  * Resend client — only constructed when `RESEND_API_KEY` is set.
@@ -21,7 +22,7 @@ export function isOrderConfirmationEmailEnabled(): boolean {
 export function getResendFromAddress(): string {
   return (
     process.env.RESEND_FROM?.trim() ||
-    "XDAILY <orders@xdaily.vn>"
+    `${SITE_NAME} <orders@xdaily.vn>`
   );
 }
 

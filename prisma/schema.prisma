@@ -37,6 +37,11 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum BannerPlacement {
+  HERO
+  HOME_FOUR
+}
+
 // ──────────────────────────────────
 // 1. USER & AUTH
 // ──────────────────────────────────
@@ -103,6 +108,8 @@ model Product {
 
   seoTitle       String @default("")
   seoDescription String @default("")
+  /** Thuộc tính biến thể (admin): [{ name, values: string[] }] — dùng để sinh tổ hợp SKU */
+  variantOptionGroups Json @default("[]")
 
   images         ProductImage[]
   variants       ProductVariant[]
@@ -320,7 +327,7 @@ model BlogPost {
   excerpt     String   @default("")
   content     String   @default("")
   thumbnail   String?
-  author      String   @default("XDAILY")
+  author      String   @default("TuAnh")
   tags        String[] @default([])
   isPublished Boolean  @default(false)
 
@@ -340,17 +347,20 @@ model BlogPost {
 // ──────────────────────────────────
 
 model Banner {
-  id          String  @id @default(cuid())
+  id          String          @id @default(cuid())
   image       String
   mobileImage String?
-  title       String  @default("")
-  subtitle    String  @default("")
-  link        String  @default("")
-  position    Int     @default(0)
-  isActive    Boolean @default(true)
+  title       String          @default("")
+  subtitle    String          @default("")
+  link        String          @default("")
+  position    Int             @default(0)
+  isActive    Boolean         @default(true)
+  placement   BannerPlacement @default(HERO)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([placement, position])
 }
 
 // ──────────────────────────────────

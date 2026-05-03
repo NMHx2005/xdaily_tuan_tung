@@ -1,4 +1,5 @@
 import { PrismaClient, type Prisma } from '@prisma/client';
+import { BannerPlacement } from '../src/lib/banner-placement';
 import { siteContentSchema } from '../src/lib/site-content-schema';
 import { defaultSiteContent } from '../src/content/site-defaults';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -8,9 +9,134 @@ import { getPrismaPgPoolConfig } from '../src/lib/prisma-pg-pool-config';
 const adapter = new PrismaPg(getPrismaPgPoolConfig());
 const prisma = new PrismaClient({ adapter });
 
-/** Ảnh tĩnh trong /public — tránh Next Image phải fetch ra ngoài (dễ lỗi TLS/mạng với via.placeholder.com). */
-function img(_name: string, _idx = 1) {
-  return '/placeholders/product.svg';
+const XDAILY_BASE_URL = 'https://xdaily.vn';
+const XDAILY_COLLECTION_FEEDS = [
+  'ghe-an',
+  'ghe-bar',
+  'ban-tra',
+  'sofa',
+  'ban-an',
+  'giuong-ngu',
+  'bo-ban-ghe',
+] as const;
+
+type XdailyProductJson = {
+  handle?: string;
+  image?: { src?: string | null } | null;
+  images?: { src?: string | null }[] | null;
+};
+
+type XdailyImagePools = {
+  byHandle: Map<string, string[]>;
+  byCollection: Map<string, string[]>;
+};
+
+type SeedProductImagePickInput = {
+  slug: string;
+  collectionSlug: string;
+  position: number;
+};
+
+function normalizeRemoteImageUrl(raw: string | null | undefined): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+  const withProtocol = value.startsWith('//')
+    ? `https:${value}`
+    : value.startsWith('/')
+      ? `${XDAILY_BASE_URL}${value}`
+      : value;
+  const httpsValue = withProtocol.replace(/^http:\/\//i, 'https://');
+  try {
+    const url = new URL(httpsValue);
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function dedupeNonEmpty(items: Array<string | null | undefined>): string[] {
+  return [...new Set(items.filter((item): item is string => Boolean(item && item.trim())))];
+}
+
+async function fetchXdailyCollectionProducts(
+  collectionSlug: string,
+): Promise<XdailyProductJson[]> {
+  const endpoint = `${XDAILY_BASE_URL}/collections/${collectionSlug}/products.json?limit=250`;
+  try {
+    const res = await fetch(endpoint, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; xdaily-clone-seed/1.0)',
+      },
+    });
+    if (!res.ok) {
+      console.warn(`⚠️  Không lấy được feed ảnh ${collectionSlug}: HTTP ${res.status}`);
+      return [];
+    }
+    const json = (await res.json()) as { products?: XdailyProductJson[] };
+    return json.products ?? [];
+  } catch (error) {
+    console.warn(`⚠️  Không lấy được feed ảnh ${collectionSlug}:`, error);
+    return [];
+  }
+}
+
+async function loadXdailyImagePools(): Promise<XdailyImagePools> {
+  const byHandle = new Map<string, string[]>();
+  const byCollection = new Map<string, string[]>();
+
+  for (const collectionSlug of XDAILY_COLLECTION_FEEDS) {
+    const products = await fetchXdailyCollectionProducts(collectionSlug);
+    const pool: string[] = [];
+
+    for (const p of products) {
+      const productImages = dedupeNonEmpty([
+        p.image?.src ? normalizeRemoteImageUrl(p.image.src) : null,
+        ...(p.images ?? []).map((img) => normalizeRemoteImageUrl(img.src ?? null)),
+      ]);
+      if (productImages.length > 0) {
+        pool.push(...productImages);
+      }
+      const handle = p.handle?.trim().toLowerCase();
+      if (handle && productImages.length > 0) {
+        byHandle.set(handle, productImages.slice(0, 6));
+      }
+    }
+
+    byCollection.set(collectionSlug, dedupeNonEmpty(pool));
+  }
+
+  return { byHandle, byCollection };
+}
+
+function pickSeedProductImages(
+  input: SeedProductImagePickInput,
+  pools: XdailyImagePools,
+): [string, string, string] {
+  const fallback: [string, string, string] = [
+    '/placeholders/product.svg',
+    '/placeholders/product.svg',
+    '/placeholders/product.svg',
+  ];
+
+  // Ưu tiên khớp trực tiếp theo handle nếu slug trong seed trùng website.
+  const exact = pools.byHandle.get(input.slug.trim().toLowerCase());
+  if (exact && exact.length > 0) {
+    const safe = exact.slice(0, 3);
+    while (safe.length < 3) safe.push(safe[0]!);
+    return [safe[0]!, safe[1]!, safe[2]!];
+  }
+
+  // Nếu không match được, lấy ảnh thật theo pool của collection để tránh ảnh fake/ảnh vỡ.
+  const pool = pools.byCollection.get(input.collectionSlug) ?? [];
+  if (pool.length === 0) return fallback;
+
+  const base = Math.max(0, input.position - 1) % pool.length;
+  return [
+    pool[base]!,
+    pool[(base + 1) % pool.length]!,
+    pool[(base + 2) % pool.length]!,
+  ];
 }
 
 async function main() {
@@ -28,7 +154,7 @@ async function main() {
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
   await prisma.collection.deleteMany();
-  await prisma.banner.deleteMany();
+  /** Không xóa Banner — giữ / chỉ bổ sung mặc định ở khối BANNERS bên dưới */
   await prisma.blogPost.deleteMany();
   await prisma.newsletter.deleteMany();
   await prisma.allowedImageHost.deleteMany();
@@ -42,7 +168,7 @@ async function main() {
   const customerHash = await bcrypt.hash('test123', 10);
 
   await prisma.user.create({
-    data: { email: 'admin@xdaily.vn', name: 'XDAILY Admin', passwordHash: adminHash, role: 'ADMIN' },
+    data: { email: 'admin@xdaily.vn', name: 'TuAnh Admin', passwordHash: adminHash, role: 'ADMIN' },
   });
   const customer = await prisma.user.create({
     data: { email: 'customer@test.com', name: 'Nguyễn Văn A', passwordHash: customerHash, role: 'CUSTOMER', phone: '0912345678' },
@@ -264,6 +390,11 @@ async function main() {
 
   // ── PRODUCTS ──
   console.log('📦 Creating products...');
+  console.log('🛰️  Syncing real product images from xdaily.vn feeds...');
+  const xdailyImagePools = await loadXdailyImagePools();
+  const totalFetchedImages = Array.from(xdailyImagePools.byCollection.values())
+    .reduce((sum, list) => sum + list.length, 0);
+  console.log(`🖼️  Loaded ${totalFetchedImages} remote images from collections.`);
 
   interface ProductSeed {
     slug: string; name: string; price: number; compareAtPrice?: number;
@@ -344,16 +475,24 @@ async function main() {
 
   for (const p of products) {
     const { collectionSlug, variants, specifications, ...productData } = p;
+    const [img1, img2, img3] = pickSeedProductImages(
+      {
+        slug: productData.slug,
+        collectionSlug,
+        position: productData.position,
+      },
+      xdailyImagePools,
+    );
     const product = await prisma.product.create({
       data: {
         ...productData,
-        description: `<p>${productData.shortDescription}</p><p>Sản phẩm ${productData.name} được thiết kế và sản xuất tại nhà máy XDAILY với tiêu chuẩn cao nhất. Chất liệu được chọn lọc kỹ lưỡng, đảm bảo độ bền và tính thẩm mỹ lâu dài.</p><h3>Đặc điểm nổi bật</h3><ul><li>Thiết kế hiện đại, phù hợp mọi không gian</li><li>Chất liệu cao cấp, bền bỉ theo thời gian</li><li>Dễ dàng vệ sinh và bảo quản</li><li>Bảo hành 12 tháng tại nhà máy</li></ul>`,
+        description: `<p>${productData.shortDescription}</p><p>Sản phẩm ${productData.name} được thiết kế và sản xuất tại nhà máy TuAnh với tiêu chuẩn cao nhất. Chất liệu được chọn lọc kỹ lưỡng, đảm bảo độ bền và tính thẩm mỹ lâu dài.</p><h3>Đặc điểm nổi bật</h3><ul><li>Thiết kế hiện đại, phù hợp mọi không gian</li><li>Chất liệu cao cấp, bền bỉ theo thời gian</li><li>Dễ dàng vệ sinh và bảo quản</li><li>Bảo hành 12 tháng tại nhà máy</li></ul>`,
         specifications: specifications ?? [],
         images: {
           create: [
-            { url: img(productData.name, 1), alt: productData.name, position: 0 },
-            { url: img(productData.name, 2), alt: `${productData.name} - Góc 2`, position: 1 },
-            { url: img(productData.name, 3), alt: `${productData.name} - Chi tiết`, position: 2 },
+            { url: img1, alt: productData.name, position: 0 },
+            { url: img2, alt: `${productData.name} - Góc 2`, position: 1 },
+            { url: img3, alt: `${productData.name} - Chi tiết`, position: 2 },
           ],
         },
         variants: variants ? { create: variants.map((v, i) => ({ ...v, position: i })) } : undefined,
@@ -363,15 +502,63 @@ async function main() {
     createdProductIds.push(product.id);
   }
 
-  // ── BANNERS ──
-  console.log('🖼️  Creating banners...');
-  await prisma.banner.createMany({
-    data: [
-      { image: '/placeholders/cover.svg', title: 'Bộ sưu tập ghế ăn', subtitle: 'Đa dạng kiểu dáng, chất lượng cao cấp', link: '/collections/ghe-an', position: 0 },
-      { image: '/placeholders/cover.svg', title: 'Ghế bar phong cách', subtitle: 'Điểm nhấn hoàn hảo cho quầy bar', link: '/collections/ghe-bar', position: 1 },
-      { image: '/placeholders/cover.svg', title: 'Bàn trà hiện đại', subtitle: 'Bộ sưu tập bàn trà cao cấp', link: '/collections/ban-tra', position: 2 },
-    ],
+  // ── BANNERS ── (chỉ bổ sung nếu chưa có — không ghi đè/xóa banner đang có trên DB)
+  const heroBannerCount = await prisma.banner.count({
+    where: { placement: BannerPlacement.HERO },
   });
+  if (heroBannerCount === 0) {
+    console.log('🖼️  Bổ sung banner hero mặc định (DB chưa có banner HERO)...');
+    await prisma.banner.createMany({
+      data: [
+        { image: '/placeholders/cover.svg', title: 'Bộ sưu tập ghế ăn', subtitle: 'Đa dạng kiểu dáng, chất lượng cao cấp', link: '/collections/ghe-an', position: 0, placement: BannerPlacement.HERO },
+        { image: '/placeholders/cover.svg', title: 'Ghế bar phong cách', subtitle: 'Điểm nhấn hoàn hảo cho quầy bar', link: '/collections/ghe-bar', position: 1, placement: BannerPlacement.HERO },
+        { image: '/placeholders/cover.svg', title: 'Bàn trà hiện đại', subtitle: 'Bộ sưu tập bàn trà cao cấp', link: '/collections/ban-tra', position: 2, placement: BannerPlacement.HERO },
+      ],
+    });
+  } else {
+    console.log('🖼️  Giữ nguyên banner HERO hiện có — bỏ qua tạo mặc định.');
+  }
+
+  const homeFourCount = await prisma.banner.count({
+    where: { placement: BannerPlacement.HOME_FOUR },
+  });
+  if (homeFourCount === 0) {
+    console.log('🖼️  Bổ sung 4 banner HOME_FOUR mặc định (chưa có nhóm này)...');
+    await prisma.banner.createMany({
+      data: [
+        {
+          image: 'https://file.hstatic.net/1000400963/file/xdaily-105-den-mat-trang_large.jpg',
+          title: 'Đèn mặt trăng',
+          link: '/products/den-treo-mat-trang-xdaily',
+          position: 0,
+          placement: BannerPlacement.HOME_FOUR,
+        },
+        {
+          image: 'https://file.hstatic.net/1000400963/file/xdaily-104-shell-chair_large.jpg',
+          title: 'Shell chair',
+          link: '/products/ghe-thu-gian-ghe-shell-tg1',
+          position: 1,
+          placement: BannerPlacement.HOME_FOUR,
+        },
+        {
+          image: 'https://file.hstatic.net/1000400963/file/xdaily-tu-ke_large.jpg',
+          title: 'Tủ trang trí',
+          link: '/products/tu-tap-go-trang-tri-xdaily',
+          position: 2,
+          placement: BannerPlacement.HOME_FOUR,
+        },
+        {
+          image: 'https://file.hstatic.net/1000400963/file/xdaily-106-rattan-coffe-table_large.jpg',
+          title: 'Bàn trà Rattan',
+          link: '/products/ban-tra-may-kinh-song-rattan-xdaily',
+          position: 3,
+          placement: BannerPlacement.HOME_FOUR,
+        },
+      ],
+    });
+  } else {
+    console.log('🖼️  Giữ nguyên banner HOME_FOUR hiện có — bỏ qua tạo mặc định.');
+  }
 
   // ── FLASH SALE ──
   console.log('⚡ Creating flash sale...');
@@ -408,9 +595,9 @@ async function main() {
     await prisma.blogPost.create({
       data: {
         ...b,
-        content: `<h2>${b.title}</h2><p>${b.excerpt}</p><p>Trong ngành công nghiệp nội thất hiện đại, việc hiểu rõ về các loại vật liệu là vô cùng quan trọng. Điều này giúp người tiêu dùng có thể đưa ra quyết định mua sắm thông minh và phù hợp với nhu cầu sử dụng.</p><h3>Giới thiệu</h3><p>Bài viết này sẽ cung cấp cho bạn những thông tin chi tiết và hữu ích nhất về chủ đề này. Hãy cùng XDAILY tìm hiểu nhé!</p><h3>Kết luận</h3><p>Hy vọng bài viết đã cung cấp cho bạn những kiến thức bổ ích. Đừng quên ghé thăm showroom XDAILY để trải nghiệm trực tiếp các sản phẩm nội thất cao cấp.</p>`,
+        content: `<h2>${b.title}</h2><p>${b.excerpt}</p><p>Trong ngành công nghiệp nội thất hiện đại, việc hiểu rõ về các loại vật liệu là vô cùng quan trọng. Điều này giúp người tiêu dùng có thể đưa ra quyết định mua sắm thông minh và phù hợp với nhu cầu sử dụng.</p><h3>Giới thiệu</h3><p>Bài viết này sẽ cung cấp cho bạn những thông tin chi tiết và hữu ích nhất về chủ đề này. Hãy cùng TuAnh tìm hiểu nhé!</p><h3>Kết luận</h3><p>Hy vọng bài viết đã cung cấp cho bạn những kiến thức bổ ích. Đừng quên ghé thăm showroom TuAnh để trải nghiệm trực tiếp các sản phẩm nội thất cao cấp.</p>`,
         thumbnail: '/placeholders/cover.svg',
-        author: 'XDAILY',
+        author: 'TuAnh',
         isPublished: true,
         publishedAt: new Date(Date.now() - i * 3 * 24 * 60 * 60 * 1000),
         seoTitle: b.title,
@@ -460,7 +647,7 @@ async function main() {
   console.log('✅ Seed completed!');
   console.log(`   ${products.length} products`);
   console.log(`   ${collectionsData.length} collections`);
-  console.log(`   3 banners`);
+  console.log(`   Banner: chỉ bổ sung hero / HOME_FOUR mặc định nếu nhóm đó đang trống`);
   console.log(`   1 flash sale (${flashSaleProductIndices.length} items)`);
   console.log(`   ${blogs.length} blog posts`);
   console.log(`   ${reviewData.length} reviews`);

@@ -13,10 +13,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useUIStore } from "@/stores/ui-store";
-import { COLLECTIONS } from "@/lib/constants";
+import { COLLECTIONS, SITE_NAME } from "@/lib/constants";
 
 export function MobileMenu({
-  brandName = "XDAILY",
+  brandName = SITE_NAME,
   logoUrl,
 }: {
   brandName?: string;

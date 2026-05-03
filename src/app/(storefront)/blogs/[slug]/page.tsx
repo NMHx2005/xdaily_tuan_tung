@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createCaller } from "@/lib/trpc/server";
 import { formatDate } from "@/lib/utils";
+import { SITE_NAME } from "@/lib/constants";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
 import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
@@ -69,7 +70,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
     description: post.excerpt,
     image: post.thumbnail ? absoluteUrl(post.thumbnail) : undefined,
     author: { "@type": "Person", name: post.author },
-    publisher: { "@type": "Organization", name: "XDAILY", url: getSiteUrl() },
+    publisher: { "@type": "Organization", name: SITE_NAME, url: getSiteUrl() },
     datePublished: post.publishedAt?.toISOString(),
     dateModified: post.updatedAt.toISOString(),
     mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },

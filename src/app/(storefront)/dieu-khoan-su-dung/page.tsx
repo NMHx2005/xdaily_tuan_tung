@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PolicyShell } from "@/components/storefront/policy/policy-shell";
+import { SITE_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Điều khoản sử dụng",
-  description: "Điều kiện sử dụng website và dịch vụ của XDAILY.",
+  description: `Điều kiện sử dụng website và dịch vụ của ${SITE_NAME}.`,
   alternates: { canonical: "/dieu-khoan-su-dung" },
 };
 

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PolicyShell } from "@/components/storefront/policy/policy-shell";
+import { SITE_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Chính sách bảo mật",
-  description:
-    "Cách XDAILY thu thập, sử dụng và bảo vệ dữ liệu cá nhân của khách hàng.",
+  description: `Cách ${SITE_NAME} thu thập, sử dụng và bảo vệ dữ liệu cá nhân của khách hàng.`,
   alternates: { canonical: "/chinh-sach-bao-mat" },
 };
 

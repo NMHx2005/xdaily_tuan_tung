@@ -6,14 +6,15 @@ import { formatShippingAddressLine } from "@/lib/format-shipping-address";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { SITE_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Đặt hàng thành công",
-  description: "Xác nhận đơn hàng tại XDAILY.",
+  description: `Xác nhận đơn hàng tại ${SITE_NAME}.`,
   robots: { index: false, follow: true },
   openGraph: {
-    title: "Đặt hàng thành công | XDAILY",
-    description: "Xác nhận đơn hàng tại XDAILY.",
+    title: `Đặt hàng thành công | ${SITE_NAME}`,
+    description: `Xác nhận đơn hàng tại ${SITE_NAME}.`,
   },
 };
 

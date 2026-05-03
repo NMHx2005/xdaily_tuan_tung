@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
+import { SITE_NAME } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 
 interface BlogPost {
@@ -56,7 +57,7 @@ export function BlogPreview({ posts }: BlogPreviewProps) {
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-neutral-400">
-                    XDAILY
+                    {SITE_NAME}
                   </div>
                 )}
               </div>

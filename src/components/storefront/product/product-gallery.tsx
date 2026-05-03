@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
-
-const ProductMainZoomImage = dynamic(() => import("./product-main-zoom-image"), {
-  ssr: false,
-  loading: () => (
-    <div className="aspect-square animate-pulse rounded-lg bg-neutral-100" aria-hidden />
-  ),
-});
+import ProductMainImage from "./product-main-image";
 
 interface ProductImage {
   id: string;
@@ -37,6 +31,15 @@ function ProductGalleryInner({
     : images;
 
   const mainImage = allImages[selectedIndex] ?? allImages[0];
+  const n = allImages.length;
+
+  function goPrev() {
+    setSelectedIndex((i) => (i - 1 + n) % n);
+  }
+
+  function goNext() {
+    setSelectedIndex((i) => (i + 1) % n);
+  }
 
   if (!mainImage) {
     return (
@@ -48,14 +51,36 @@ function ProductGalleryInner({
 
   return (
     <div>
-      <ProductMainZoomImage
-        url={mainImage.url}
-        alt={mainImage.alt || productName}
-        productName={productName}
-        priority
-      />
+      <div className="relative">
+        <ProductMainImage
+          url={mainImage.url}
+          alt={mainImage.alt || productName}
+          productName={productName}
+          priority
+        />
+        {n > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={goPrev}
+              className="absolute left-2 top-1/2 z-[1] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white/95 shadow-sm transition-colors hover:bg-white"
+              aria-label="Ảnh trước"
+            >
+              <ChevronLeft className="h-5 w-5 text-neutral-800" />
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              className="absolute right-2 top-1/2 z-[1] flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white/95 shadow-sm transition-colors hover:bg-white"
+              aria-label="Ảnh sau"
+            >
+              <ChevronRight className="h-5 w-5 text-neutral-800" />
+            </button>
+          </>
+        )}
+      </div>
 
-      {allImages.length > 1 && (
+      {n > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {allImages.map((img, i) => (
             <button

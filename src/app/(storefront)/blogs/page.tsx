@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_NAME } from "@/lib/constants";
 import { DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import { createCaller } from "@/lib/trpc/server";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
@@ -11,16 +12,14 @@ export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Tin tức",
-  description:
-    "Tin tức, kiến thức nội thất — xu hướng thiết kế, mẹo trang trí và cập nhật từ XDAILY.",
+  description: `Tin tức, kiến thức nội thất — xu hướng thiết kế, mẹo trang trí và cập nhật từ ${SITE_NAME}.`,
   alternates: { canonical: "/blogs" },
   openGraph: {
-    title: "Tin tức | XDAILY",
-    description:
-      "Tin tức, kiến thức nội thất — xu hướng thiết kế, mẹo trang trí và cập nhật từ XDAILY.",
+    title: `Tin tức | ${SITE_NAME}`,
+    description: `Tin tức, kiến thức nội thất — xu hướng thiết kế, mẹo trang trí và cập nhật từ ${SITE_NAME}.`,
     type: "website",
     url: "/blogs",
-    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: "XDAILY Tin tức" }],
+    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: `${SITE_NAME} Tin tức` }],
   },
 };
 

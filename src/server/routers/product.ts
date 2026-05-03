@@ -15,6 +15,31 @@ type ProductUpdateData = NonNullable<NonNullable<Parameters<Db['product']['updat
 
 const specificationsSchema = z.array(z.object({ key: z.string(), value: z.string() }));
 
+const variantOptionGroupsSchema = z.array(
+  z.object({ name: z.string(), values: z.array(z.string()) })
+);
+
+function logProductMutationError(op: string, err: unknown) {
+  if (err instanceof PrismaClientKnownRequestError) {
+    console.error(`[product.${op}]`, {
+      code: err.code,
+      meta: err.meta,
+      message: err.message,
+    });
+  } else {
+    console.error(`[product.${op}]`, err);
+  }
+}
+
+function prismaUniqueConflictMessage(err: PrismaClientKnownRequestError): string {
+  if (err.code !== 'P2002') return err.message;
+  const meta = err.meta as { target?: string[] } | undefined;
+  const fields = meta?.target?.length ? meta.target.join(', ') : '';
+  return fields
+    ? `Trùng dữ liệu duy nhất (${fields}). Kiểm tra slug sản phẩm, SKU chính hoặc SKU từng biến thể.`
+    : 'Slug hoặc SKU đã tồn tại.';
+}
+
 function buildOrderBy(sort: z.infer<typeof sortSchema>) {
   switch (sort) {
     case 'price-asc':
@@ -283,6 +308,7 @@ export const productRouter = router({
           })
         ).default([]),
         collectionIds: z.array(z.string()).default([]),
+        variantOptionGroups: variantOptionGroupsSchema.default([]),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -306,10 +332,11 @@ export const productRouter = router({
           });
         });
       } catch (e) {
+        logProductMutationError('create', e);
         if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
           throw new TRPCError({
             code: 'CONFLICT',
-            message: 'Slug hoặc SKU đã tồn tại',
+            message: prismaUniqueConflictMessage(e),
           });
         }
         throw e;
@@ -359,6 +386,7 @@ export const productRouter = router({
           )
           .optional(),
         collectionIds: z.array(z.string()).optional(),
+        variantOptionGroups: variantOptionGroupsSchema.optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -385,6 +413,9 @@ export const productRouter = router({
         ...(scalar.specifications !== undefined && { specifications: scalar.specifications }),
         ...(scalar.seoTitle !== undefined && { seoTitle: scalar.seoTitle }),
         ...(scalar.seoDescription !== undefined && { seoDescription: scalar.seoDescription }),
+        ...(scalar.variantOptionGroups !== undefined && {
+          variantOptionGroups: scalar.variantOptionGroups,
+        }),
       };
 
       try {
@@ -445,10 +476,11 @@ export const productRouter = router({
           });
         });
       } catch (e) {
+        logProductMutationError('update', e);
         if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
           throw new TRPCError({
             code: 'CONFLICT',
-            message: 'Slug hoặc SKU đã tồn tại',
+            message: prismaUniqueConflictMessage(e),
           });
         }
         throw e;

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
-import { PRODUCTS_PER_PAGE } from "@/lib/constants";
+import { PRODUCTS_PER_PAGE, SITE_NAME } from "@/lib/constants";
 import { DEFAULT_OG_IMAGE_PATH, getSiteUrl } from "@/lib/seo";
 import { Breadcrumbs } from "@/components/storefront/collection/breadcrumbs";
 import { CollectionHeader } from "@/components/storefront/collection/collection-header";
@@ -33,18 +33,17 @@ const validSorts = new Set<string>([
 ]);
 
 const PAGE_TITLE = "Tất cả sản phẩm";
-const PAGE_DESCRIPTION =
-  "Xem toàn bộ sản phẩm nội thất XDAILY — ghế ăn, bàn trà, ghế bar, sofa và hơn thế nữa.";
+const PAGE_DESCRIPTION = `Xem toàn bộ sản phẩm nội thất ${SITE_NAME} — ghế ăn, bàn trà, ghế bar, sofa và hơn thế nữa.`;
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
   openGraph: {
-    title: `${PAGE_TITLE} | XDAILY`,
+    title: `${PAGE_TITLE} | ${SITE_NAME}`,
     description: PAGE_DESCRIPTION,
     type: "website",
     url: "/collections",
-    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: "XDAILY" }],
+    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: SITE_NAME }],
   },
   alternates: {
     canonical: "/collections",
@@ -111,7 +110,7 @@ export default async function AllProductsCollectionPage({
     name: PAGE_TITLE,
     description: PAGE_DESCRIPTION,
     url: pageUrl,
-    isPartOf: { "@type": "WebSite", name: "XDAILY", url: base },
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: base },
   };
 
   return (

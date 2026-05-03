@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import type { ProductCardData } from "@/types";
 import { createCaller } from "@/lib/trpc/server";
 import { db } from "@/server/db";
-import { PRODUCTS_PER_PAGE } from "@/lib/constants";
+import { PRODUCTS_PER_PAGE, SITE_NAME } from "@/lib/constants";
 import {
   absoluteUrl,
   DEFAULT_OG_IMAGE_PATH,
@@ -40,13 +40,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const collection = await trpc.collection.getBySlug({ slug });
     const title = collection.seoTitle || `${collection.name}`;
     const description =
-      collection.seoDescription || `Bộ sưu tập ${collection.name} tại XDAILY — nội thất cao cấp.`;
+      collection.seoDescription || `Bộ sưu tập ${collection.name} tại ${SITE_NAME} — nội thất cao cấp.`;
     const ogImage = collection.image ? absoluteUrl(collection.image) : absoluteUrl(DEFAULT_OG_IMAGE_PATH);
     return {
       title,
       description,
       openGraph: {
-        title: `${collection.name} | XDAILY`,
+        title: `${collection.name} | ${SITE_NAME}`,
         description,
         type: "website",
         url: `/collections/${collection.slug}`,
@@ -132,7 +132,7 @@ export default async function CollectionPage({ params, searchParams }: PageProps
     name: collection.name,
     ...(collection.description ? { description: collection.description } : {}),
     url: collectionUrl,
-    isPartOf: { "@type": "WebSite", name: "XDAILY", url: base },
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: base },
   };
   const navTrail = buildCollectionBreadcrumbTrail(navTree, slug);
   const breadcrumbItems = navTrail

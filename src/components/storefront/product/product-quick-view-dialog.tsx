@@ -21,6 +21,7 @@ import { trpc } from "@/lib/trpc/client";
 import { TINY_BLUR_DATA_URL } from "@/lib/blur-placeholder";
 import { cn, formatPrice } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
+import { legacySwatchOnlyVariants } from "@/lib/variant-display";
 import { useUIStore } from "@/stores/ui-store";
 
 type VariantRow = {
@@ -110,6 +111,8 @@ export function ProductQuickViewDialog({
       image: v.image,
     }));
   }, [product]);
+
+  const legacySwatchOnly = legacySwatchOnlyVariants(variants);
 
   React.useEffect(() => {
     if (!open) {
@@ -340,7 +343,7 @@ export function ProductQuickViewDialog({
               {variants.length > 0 && (
                 <div className="select-swatch">
                   <div className="header text-sm font-medium text-neutral-800">
-                    Tiêu đề:{" "}
+                    {legacySwatchOnly ? "Màu sắc" : "Biến thể"}:{" "}
                     <span className="color-text font-normal text-neutral-600">
                       {selected?.name ?? "—"}
                     </span>
