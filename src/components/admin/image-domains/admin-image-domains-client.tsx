@@ -111,9 +111,9 @@ export function AdminImageDomainsClient() {
             <strong>Để trống danh sách = không chặn domain nào.</strong>
           </CardDescription>
           <p className="mt-2 text-xs text-muted-foreground">
-            Upload ảnh qua admin (Supabase) thường dùng host{" "}
-            <code className="rounded bg-muted px-1">*.supabase.co</code> — thêm dòng{" "}
-            <code className="rounded bg-muted px-1">*.supabase.co</code> nếu bạn bật chế độ chặn.
+            Upload ảnh mới qua admin dùng host R2, ví dụ{" "}
+            <code className="rounded bg-muted px-1">images.tenmiencuaban.vn</code>. Giữ thêm{" "}
+            <code className="rounded bg-muted px-1">*.supabase.co</code> nếu ảnh cũ vẫn ở Supabase.
           </p>
         </div>
         <Button type="button" size="sm" onClick={openCreate}>
@@ -207,12 +207,12 @@ export function AdminImageDomainsClient() {
               <Input
                 id="im-host"
                 className="mt-1 font-mono text-sm"
-                placeholder="file.hstatic.net hoặc *.supabase.co"
+                placeholder="images.tenmiencuaban.vn hoặc *.supabase.co"
                 value={form.hostname}
                 onChange={(e) => setForm((f) => ({ ...f, hostname: e.target.value }))}
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                Ví dụ: <code className="rounded bg-muted px-1">cdn.shop.com</code> hoặc{" "}
+                Ví dụ: <code className="rounded bg-muted px-1">images.shop.com</code> hoặc{" "}
                 <code className="rounded bg-muted px-1">*.hstatic.net</code> (mọi subdomain).
               </p>
             </div>

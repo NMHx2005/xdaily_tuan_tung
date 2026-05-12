@@ -5,12 +5,36 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+type RemotePattern = NonNullable<
+  NonNullable<NextConfig["images"]>["remotePatterns"]
+>[number];
+
+function getR2RemotePattern(): RemotePattern | null {
+  const publicBaseUrl = process.env.R2_PUBLIC_BASE_URL?.trim();
+  if (!publicBaseUrl) {
+    return null;
+  }
+
+  try {
+    const url = new URL(publicBaseUrl);
+    return {
+      protocol: url.protocol.replace(":", "") as "http" | "https",
+      hostname: url.hostname,
+    };
+  } catch {
+    return null;
+  }
+}
+
+const r2RemotePattern = getR2RemotePattern();
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "xdaily.vn" },
       { protocol: "https", hostname: "www.xdaily.vn" },
       { protocol: "https", hostname: "**.supabase.co" },
+      ...(r2RemotePattern ? [r2RemotePattern] : []),
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "via.placeholder.com" },
       { protocol: "https", hostname: "file.hstatic.net" },

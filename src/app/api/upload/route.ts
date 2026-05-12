@@ -1,8 +1,9 @@
 import { randomBytes } from "crypto";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/server/auth";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getR2BucketName, getR2Client, getR2PublicUrl } from "@/lib/r2";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -48,48 +49,31 @@ export async function POST(request: Request) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const randomString = randomBytes(8).toString("hex");
-  const objectPath = `${Date.now()}-${randomString}.${ext}`;
+  const objectKey = `${bucket}/${Date.now()}-${randomString}.${ext}`;
 
-  let supabaseAdmin;
   try {
-    supabaseAdmin = getSupabaseAdmin();
-  } catch (e) {
-    return NextResponse.json(
-      {
-        error:
-          e instanceof Error ? e.message : "Thiếu biến môi trường Supabase",
-      },
-      { status: 500 }
+    await getR2Client().send(
+      new PutObjectCommand({
+        Bucket: getR2BucketName(),
+        Key: objectKey,
+        Body: buffer,
+        ContentType: file.type,
+        CacheControl: "public, max-age=31536000, immutable",
+      })
     );
-  }
-
-  const { error } = await supabaseAdmin.storage
-    .from(bucket)
-    .upload(objectPath, buffer, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (error) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Upload thất bại";
     if (process.env.NODE_ENV === "development") {
-      console.error("[api/upload]", { bucket, message: error.message, error });
+      console.error("[api/upload:r2]", { objectKey, message, error });
     }
     return NextResponse.json(
       {
-        error: error.message || "Upload thất bại",
-        hint:
-          error.message?.includes("Bucket not found") ||
-          error.message?.toLowerCase().includes("not found")
-            ? "Tạo bucket trong Supabase → Storage (tên: products | blogs | banners | collections) và thử lại."
-            : undefined,
+        error: message,
+        hint: "Kiểm tra R2_ACCOUNT_ID, R2_BUCKET_NAME, access key và R2_PUBLIC_BASE_URL trong biến môi trường.",
       },
       { status: 500 }
     );
   }
 
-  const { data: pub } = supabaseAdmin.storage
-    .from(bucket)
-    .getPublicUrl(objectPath);
-
-  return NextResponse.json({ url: pub.publicUrl });
+  return NextResponse.json({ url: getR2PublicUrl(objectKey) });
 }
